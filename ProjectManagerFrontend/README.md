@@ -1,73 +1,114 @@
-# React + TypeScript + Vite
+# Project Manager Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web frontend for consuming Project Manager Backend using React + TypeScript.
 
-Currently, two official plugins are available:
+The current base is ready to start the MVP with an incremental approach: authentication first, then projects, tasks, and comments.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Project Goal
 
-## React Compiler
+- Build a functional and stable frontend for the main project management flow.
+- Keep the architecture simple, scalable, and feature-oriented.
+- Avoid over-engineering in the first stage.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## MVP Scope
 
-## Expanding the ESLint configuration
+- Login and registration.
+- Session persistence with JWT in localStorage (MVP).
+- Project CRUD.
+- Task CRUD by project.
+- Comment listing and creation by task.
+- Consistent error handling for `application/problem+json`.
+- Session-based private routes.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Base Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- React + TypeScript + Vite
+- ESLint + TypeScript strict
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Notes:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- The structure is already prepared to integrate React Router, TanStack Query, Axios, Zod, and React Hook Form.
+- At this stage, a skeleton was created without coupling all business logic.
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Folder Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+src/
+  app/
+    App.tsx
+    providers.tsx
+    router.tsx
+  shared/
+    api/
+      httpClient.ts
+      problemDetails.ts
+    config/
+      env.ts
+    ui/
+      Button.tsx
+      Input.tsx
+      Card.tsx
+      EmptyState.tsx
+      ErrorState.tsx
+    utils/
+      date.ts
+      string.ts
+    types/
+      common.ts
+  features/
+    auth/
+      api/
+      hooks/
+      store/
+      pages/
+      components/
+      schemas/
+      types/
+    projects/
+      api/
+      hooks/
+      pages/
+      components/
+      schemas/
+      types/
+    tasks/
+      api/
+      hooks/
+      components/
+      schemas/
+      types/
+    comments/
+      api/
+      hooks/
+      components/
+      schemas/
+      types/
+  layouts/
+    AppLayout.tsx
+    AuthLayout.tsx
+  styles/
+    globals.css
+  tests/
+    auth.test.tsx
+    projects.test.tsx
 ```
+
+## Current Status
+
+- Clean and minimal Vite startup.
+- Feature-based structure created.
+- Skeleton base files ready to begin real phased integration.
+
+## Recommended Next Step
+
+- Integrate `app/providers.tsx` and `app/router.tsx` into the entrypoint.
+- Implement the auth feature (API + store + pages) as the first functional phase.
