@@ -107,8 +107,3 @@ src/
 - Clean and minimal Vite startup.
 - Feature-based structure created.
 - Skeleton base files ready to begin real phased integration.
-
-## Recommended Next Step
-
-- Integrate `app/providers.tsx` and `app/router.tsx` into the entrypoint.
-- Implement the auth feature (API + store + pages) as the first functional phase.
