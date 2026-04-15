@@ -1,0 +1,7 @@
+node_modules
+/dist
+/dist-ssr
+/coverage
+.vite
+*.local
+package-lock.json
