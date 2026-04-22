@@ -1,3 +1,1 @@
-export function useAuth() {
-  return { isAuthenticated: false }
-}
+export { useAuth } from '../store/authStore'
