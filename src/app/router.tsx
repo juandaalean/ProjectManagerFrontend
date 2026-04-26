@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Routes, Route } from 'react-router-dom'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { ProjectsPage } from '../features/projects/pages/ProjectsPage'
@@ -11,17 +11,11 @@ export function AppRouter() {
   return (
     <Routes>
       {/* Public routes */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
       <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
 
       {/* Protected routes */}
-      <Route path="/" element={
-        <PrivateRoute>
-          <AppLayout>
-            <ProjectsPage />
-          </AppLayout>
-        </PrivateRoute>
-      } />
       <Route path="/projects" element={
         <PrivateRoute>
           <AppLayout>
@@ -38,7 +32,7 @@ export function AppRouter() {
       } />
 
       {/* Redirect unknown routes to home */}
-      <Route path="*" element={<PrivateRoute><AppLayout><ProjectsPage /></AppLayout></PrivateRoute>} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }

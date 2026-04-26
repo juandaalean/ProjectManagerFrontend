@@ -1,14 +1,14 @@
 import { httpClient } from '../../../shared/api/httpClient'
-import type { AuthToken, LoginRequest, RegisterRequest } from '../types/auth.types'
+import type { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth.types'
 
 export const authApi = {
-  async login(credentials: LoginRequest): Promise<AuthToken> {
-    const response = await httpClient.post<AuthToken>('/auth/login', credentials)
+  async login(credentials: LoginRequest): Promise<AuthResponse> {
+    const response = await httpClient.post<AuthResponse>('/auth/login', credentials)
     return response.data
   },
 
-  async register(userData: RegisterRequest): Promise<AuthToken> {
-    const response = await httpClient.post<AuthToken>('/auth/register', userData)
+  async register(userData: RegisterRequest): Promise<AuthResponse> {
+    const response = await httpClient.post<AuthResponse>('/auth/register', userData)
     return response.data
   },
 }
