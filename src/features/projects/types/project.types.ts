@@ -9,7 +9,7 @@ export type Project = {
 
 export type CreateProjectRequest = {
   name: string
-  description: string
+  description?: string
   startDate: string
   endDate: string
 }
