@@ -1,10 +1,12 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useProjectQuery } from '../hooks/useProjectsQuery'
 import { Card } from '../../../shared/ui/Card'
 import { ErrorState } from '../../../shared/ui/ErrorState'
+import { Button } from '../../../shared/ui/Button'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>()
+  const navigate = useNavigate()
   const { data: project, isLoading, error } = useProjectQuery(projectId!)
 
   if (isLoading) {
@@ -33,9 +35,21 @@ export function ProjectDetailPage() {
           </div>
         </div>
 
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Tasks</h2>
-          <p className="text-gray-500">Tasks will be displayed here (Phase C)</p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Tasks</h2>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`/projects/${project.projectId}/tasks`)}
+            >
+              View Tasks
+            </Button>
+            <Button
+              onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}
+            >
+              Add Task
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
