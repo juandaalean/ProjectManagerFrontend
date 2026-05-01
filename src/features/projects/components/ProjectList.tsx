@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useProjectsQuery } from '../hooks/useProjectsQuery'
 import { useDeleteProjectMutation } from '../hooks/useProjectMutations'
 import { Button } from '../../../shared/ui/Button'
@@ -14,6 +15,7 @@ interface ProjectListProps {
 export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
   const { data: projects, isLoading, error } = useProjectsQuery()
   const deleteMutation = useDeleteProjectMutation()
+  const navigate = useNavigate()
 
   if (isLoading) {
     return <div className="text-center py-8">Loading projects...</div>
@@ -56,6 +58,13 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
             <p>End: {new Date(project.endDate).toLocaleDateString()}</p>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate(`/projects/${project.projectId}/tasks`)}
+            >
+              View Tasks
+            </Button>
             {onEdit && (
               <Button
                 variant="secondary"
