@@ -39,6 +39,11 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
       assignedUserId: user?.userId || '',
     },
   });
+  const editErrors = errors as typeof errors & {
+    state?: {
+      message?: string;
+    }
+  };
 
   const onSubmit = (data: CreateTaskFormData | UpdateTaskFormData) => {
     if (isEditing && task) {
@@ -74,11 +79,15 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
   const isSubmitDisabled = (!isEditing && (!projectId || !user?.userId)) || createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
-        <h2 className="text-xl font-bold mb-4">
+    <div className="modal modal-open">
+      <Card className="modal-box w-full max-w-2xl border border-base-300 bg-base-100 p-0 shadow-xl">
+        <div className="p-6">
+        <h2 className="text-xl font-bold">
           {isEditing ? 'Edit Task' : 'Create Task'}
         </h2>
+        <p className="mb-4 text-sm text-base-content/70">
+          Fill in the task details and assign the right priority.
+        </p>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {!isEditing && (
             <input type="hidden" {...register('assignedUserId')} />
@@ -89,21 +98,25 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
             error={errors.title?.message}
           />
           <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
+            <label className="label">
+              <span className="label-text font-semibold">Description</span>
+            </label>
             <textarea
               {...register('description')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="textarea textarea-bordered w-full"
               rows={3}
             />
             {errors.description && (
-              <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
+              <p className="mt-1 text-sm text-error">{errors.description.message}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Priority</label>
+            <label className="label">
+              <span className="label-text font-semibold">Priority</span>
+            </label>
             <select
               {...register('priority')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="select select-bordered w-full"
             >
               {TaskPriorityValues.map((priority) => (
                 <option key={priority} value={priority}>
@@ -112,15 +125,17 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
               ))}
             </select>
             {errors.priority && (
-              <p className="text-red-500 text-sm mt-1">{errors.priority.message}</p>
+              <p className="mt-1 text-sm text-error">{errors.priority.message}</p>
             )}
           </div>
           {isEditing && (
             <div>
-              <label className="block text-sm font-medium mb-1">State</label>
+              <label className="label">
+                <span className="label-text font-semibold">State</span>
+              </label>
               <select
                 {...register('state')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="select select-bordered w-full"
               >
                 {TaskStateValues.map((state) => (
                   <option key={state} value={state}>
@@ -128,12 +143,12 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
                   </option>
                 ))}
               </select>
-              {(errors as any).state && (
-                <p className="text-red-500 text-sm mt-1">{(errors as any).state.message}</p>
+              {editErrors.state && (
+                <p className="mt-1 text-sm text-error">{editErrors.state.message}</p>
               )}
             </div>
           )}
-          <div className="flex gap-2 justify-end">
+          <div className="modal-action">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
@@ -142,6 +157,7 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
             </Button>
           </div>
         </form>
+        </div>
       </Card>
     </div>
   );

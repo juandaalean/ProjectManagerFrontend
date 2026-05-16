@@ -40,22 +40,23 @@ export function AuthForm() {
   }
 
   return (
-    <div className="w-full max-w-md rounded-3xl border border-white/60 bg-white/90 p-6 shadow-[0_20px_60px_-20px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-8">
-      <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-600">
-          {mode === 'login' ? 'Welcome back' : 'Create your account'}
-        </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-          {mode === 'login' ? 'Login' : 'Register'}
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          {mode === 'login'
-            ? 'Accede a tus proyectos, tareas y comentarios desde un panel limpio y rápido.'
-            : 'Crea tu acceso para empezar a organizar el trabajo del equipo.'}
-        </p>
-      </div>
+    <div className="card w-full max-w-md bg-base-100 shadow-lg">
+      <div className="card-body">
+        <div className="mb-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+            {mode === 'login' ? 'Welcome back' : 'Create your account'}
+          </p>
+          <h2 className="mt-1 text-2xl font-semibold">
+            {mode === 'login' ? 'Login' : 'Register'}
+          </h2>
+          <p className="mt-1 text-sm text-base-content/70">
+            {mode === 'login'
+              ? 'Accede a tus proyectos, tareas y comentarios desde un panel limpio y rápido.'
+              : 'Crea tu acceso para empezar a organizar el trabajo del equipo.'}
+          </p>
+        </div>
 
-      <form onSubmit={currentForm.handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={currentForm.handleSubmit(onSubmit)} className="space-y-4">
         {mode === 'register' && (
           <Input
             id="name"
@@ -109,17 +110,11 @@ export function AuthForm() {
           />
         )}
 
-        <Button
-          type="submit"
-          disabled={currentMutation.isPending}
-          className="w-full rounded-2xl py-3"
-        >
-          {currentMutation.isPending
-            ? 'Loading...'
-            : mode === 'login'
-            ? 'Login'
-            : 'Register'}
-        </Button>
+          <div className="mt-3">
+            <Button type="submit" disabled={currentMutation.isPending} className="w-full">
+              {currentMutation.isPending ? 'Loading...' : mode === 'login' ? 'Login' : 'Register'}
+            </Button>
+          </div>
 
         {currentMutation.isError && (
           <p className="text-red-500 text-sm text-center">
@@ -139,5 +134,6 @@ export function AuthForm() {
         </button>
       </p>
     </div>
+  </div>
   )
 }

@@ -18,25 +18,16 @@ export function ProjectDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="p-6">
-        <h1 className="text-2xl font-bold mb-4">{project.name}</h1>
-        {project.description && (
-          <p className="text-gray-600 mb-4">{project.description}</p>
-        )}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+    <div className="space-y-6">
+      <div className="rounded-box bg-base-100 p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h3 className="font-semibold">Start Date</h3>
-            <p>{new Date(project.startDate).toLocaleDateString()}</p>
+            <div className="badge badge-primary badge-outline mb-3">Project detail</div>
+            <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+            {project.description && (
+              <p className="mt-2 max-w-2xl text-base-content/70">{project.description}</p>
+            )}
           </div>
-          <div>
-            <h3 className="font-semibold">End Date</h3>
-            <p>{new Date(project.endDate).toLocaleDateString()}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Tasks</h2>
           <div className="flex gap-2">
             <Button
               variant="secondary"
@@ -49,6 +40,19 @@ export function ProjectDetailPage() {
             >
               Add Task
             </Button>
+          </div>
+        </div>
+      </div>
+
+      <Card className="border border-base-300 bg-base-100">
+        <div className="card-body grid gap-4 md:grid-cols-2 p-6">
+          <div className="rounded-box bg-base-200 p-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide">Start Date</h3>
+            <p className="mt-2 text-base">{new Date(project.startDate).toLocaleDateString()}</p>
+          </div>
+          <div className="rounded-box bg-base-200 p-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide">End Date</h3>
+            <p className="mt-2 text-base">{new Date(project.endDate).toLocaleDateString()}</p>
           </div>
         </div>
       </Card>

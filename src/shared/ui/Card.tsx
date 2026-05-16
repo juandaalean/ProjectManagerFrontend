@@ -6,7 +6,7 @@ interface CardProps extends PropsWithChildren {
 
 export function Card({ children, className = '' }: CardProps) {
   return (
-    <div className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`}>
+    <div className={`card bg-base-100 shadow-sm ${className}`}>
       {children}
     </div>
   )
