@@ -46,42 +46,57 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {projects.map((project) => (
-        <Card key={project.projectId} className="p-4">
-          <h3 className="font-semibold text-lg mb-2">{project.name}</h3>
-          {project.description && (
-            <p className="text-gray-600 mb-3">{project.description}</p>
-          )}
-          <div className="text-sm text-gray-500 mb-4">
-            <p>Start: {new Date(project.startDate).toLocaleDateString()}</p>
-            <p>End: {new Date(project.endDate).toLocaleDateString()}</p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate(`/projects/${project.projectId}/tasks`)}
-            >
-              View Tasks
-            </Button>
-            {onEdit && (
+        <Card key={project.projectId} className="border border-base-300 bg-base-100">
+          <div className="card-body gap-4 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="card-title text-lg">{project.name}</h3>
+                {project.description && (
+                  <p className="mt-2 text-sm text-base-content/70">{project.description}</p>
+                )}
+              </div>
+              <div className="badge badge-ghost">Project</div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-box bg-base-200 p-3">
+                <p className="text-xs uppercase tracking-wide text-base-content/60">Start</p>
+                <p className="mt-1 font-medium">{new Date(project.startDate).toLocaleDateString()}</p>
+              </div>
+              <div className="rounded-box bg-base-200 p-3">
+                <p className="text-xs uppercase tracking-wide text-base-content/60">End</p>
+                <p className="mt-1 font-medium">{new Date(project.endDate).toLocaleDateString()}</p>
+              </div>
+            </div>
+
+            <div className="card-actions justify-end">
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => onEdit(project)}
+                onClick={() => navigate(`/projects/${project.projectId}/tasks`)}
               >
-                Edit
+                View Project
               </Button>
-            )}
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => handleDelete(project.projectId)}
-              disabled={deleteMutation.isPending}
-            >
-              Delete
-            </Button>
+              {onEdit && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onEdit(project)}
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDelete(project.projectId)}
+                disabled={deleteMutation.isPending}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         </Card>
       ))}

@@ -4,10 +4,8 @@ interface ErrorStateProps {
 
 export function ErrorState({ message }: ErrorStateProps) {
   return (
-    <div className="text-center py-12">
-      <p className="text-red-600 font-medium" role="alert">
-        {message}
-      </p>
+    <div className="alert alert-error">
+      <span role="alert">{message}</span>
     </div>
   )
 }

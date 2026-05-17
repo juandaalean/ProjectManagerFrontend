@@ -24,9 +24,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <AuthForm />
+    <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <div className="w-full max-w-lg px-4">
+        <div className="hero min-h-[60vh] bg-transparent">
+          <div className="hero-content w-full">
+            <AuthForm />
+          </div>
+        </div>
       </div>
     </div>
   )

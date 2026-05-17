@@ -8,10 +8,12 @@ interface EmptyStateProps {
 
 export function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
-    <div className="text-center py-12">
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
-      {description && <p className="text-gray-600 mb-4">{description}</p>}
-      {action}
+    <div className="card bg-base-100 shadow-sm">
+      <div className="card-body items-center text-center py-12">
+        <h2 className="card-title text-2xl">{title}</h2>
+        {description && <p className="max-w-md text-base-content/70">{description}</p>}
+        {action}
+      </div>
     </div>
   )
 }
