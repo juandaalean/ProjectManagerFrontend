@@ -77,7 +77,7 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
                 size="sm"
                 onClick={() => navigate(`/projects/${project.projectId}/tasks`)}
               >
-                View Tasks
+                View Project
               </Button>
               {onEdit && (
                 <Button

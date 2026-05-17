@@ -2,13 +2,11 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../features/auth/hooks/useAuth'
 
 type Props = {
-  collapsed?: boolean
-  onToggleCollapse?: () => void
   theme?: 'light' | 'dark'
   onToggleTheme?: () => void
 }
 
-export function AppNavbar({ collapsed, onToggleCollapse, theme, onToggleTheme }: Props) {
+export function AppNavbar({ theme, onToggleTheme }: Props) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -30,23 +28,7 @@ export function AppNavbar({ collapsed, onToggleCollapse, theme, onToggleTheme }:
           Project Manager
         </button>
 
-        <button
-          type="button"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="ml-2 hidden btn btn-ghost btn-square lg:inline-flex"
-          onClick={onToggleCollapse}
-        >
-          {collapsed ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          )}
-        </button>
+        {/* Collapse control moved into the sidebar for better UX */}
       </div>
 
       <div className="navbar-center hidden lg:flex">

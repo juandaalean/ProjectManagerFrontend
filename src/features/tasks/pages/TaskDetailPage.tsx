@@ -3,6 +3,7 @@ import { Button } from '../../../shared/ui/Button';
 import { Card } from '../../../shared/ui/Card';
 import { useTaskQuery } from '../hooks/useTasksQuery';
 import { ErrorState } from '../../../shared/ui/ErrorState';
+import { CommentsList } from '../../comments/components/CommentsList';
 
 export function TaskDetailPage() {
   const { projectId, taskItemId } = useParams<{ projectId: string; taskItemId: string }>();
@@ -53,6 +54,7 @@ export function TaskDetailPage() {
           </div>
         </div>
       </Card>
+      <CommentsList projectId={projectId!} taskItemId={taskItemId!} />
     </div>
   );
 }

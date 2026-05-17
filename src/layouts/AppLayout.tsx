@@ -23,8 +23,6 @@ export function AppLayout({ children }: PropsWithChildren) {
 
       <div className="drawer-content flex min-h-screen flex-col">
         <AppNavbar
-          collapsed={collapsed}
-          onToggleCollapse={() => setCollapsed((c) => !c)}
           theme={theme}
           onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
         />
@@ -36,7 +34,7 @@ export function AppLayout({ children }: PropsWithChildren) {
         <AppFooter />
       </div>
 
-      <AppSidebar collapsed={collapsed} />
+      <AppSidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed((c) => !c)} />
     </div>
   )
 }

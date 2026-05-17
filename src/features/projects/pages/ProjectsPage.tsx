@@ -31,7 +31,7 @@ export function ProjectsPage() {
             <div className="badge badge-primary badge-outline mb-3">Projects</div>
             <h1 className="text-3xl font-bold tracking-tight">Project board</h1>
             <p className="max-w-2xl text-base-content/70">
-              Create, edit and manage projects from a dashboard layout built with DaisyUI.
+              Create, edit and manage projects from a dashboard layout.
             </p>
           </div>
           <Button onClick={handleCreate}>Create Project</Button>

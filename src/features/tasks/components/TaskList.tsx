@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../../../shared/ui/Card';
 import { Button } from '../../../shared/ui/Button';
 import type { TaskItem } from '../types/task.types';
@@ -12,6 +13,7 @@ interface TaskListProps {
 
 export function TaskList({ tasks, projectId }: TaskListProps) {
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
+  const navigate = useNavigate();
   const deleteMutation = useDeleteTaskMutation();
   const updateMutation = useUpdateTaskMutation();
 
@@ -57,6 +59,13 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
                 )}
               </div>
               <div className="flex flex-wrap gap-2 lg:justify-end">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
+                >
+                  View
+                </Button>
                 <Button
                   variant="secondary"
                   size="sm"
