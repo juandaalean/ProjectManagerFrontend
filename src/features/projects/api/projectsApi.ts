@@ -8,8 +8,14 @@ export const projectsApi = {
   },
 
   async getProject(id: string): Promise<Project> {
-    const response = await httpClient.get<Project>(`/projects/${id}`)
-    return response.data
+    const projects = await projectsApi.getProjects()
+    const project = projects.find((item) => item.projectId === id)
+
+    if (!project) {
+      throw new Error('Project not found')
+    }
+
+    return project
   },
 
   async createProject(project: CreateProjectRequest): Promise<Project> {

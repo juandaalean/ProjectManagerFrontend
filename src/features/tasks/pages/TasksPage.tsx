@@ -44,9 +44,17 @@ export function TasksPage() {
               Track work items by priority and state in a cleaner dashboard surface.
             </p>
           </div>
-          <Button onClick={() => navigate(`/projects/${projectId}/tasks?create=1`)}>
-            Create Task
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`/projects/${projectId}?view=calendar`)}
+            >
+              View Calendar
+            </Button>
+            <Button onClick={() => navigate(`/projects/${projectId}/tasks?create=1`)}>
+              Create Task
+            </Button>
+          </div>
         </div>
       </div>
       <TaskList tasks={tasks || []} projectId={projectId} />
