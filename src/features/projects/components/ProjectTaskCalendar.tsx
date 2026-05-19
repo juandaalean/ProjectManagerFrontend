@@ -36,14 +36,11 @@ const addDays = (date: Date, days: number) => {
 
 const addMonths = (date: Date, months: number) => new Date(date.getFullYear(), date.getMonth() + months, 1)
 
-const normalizeRange = (task: TaskItem) => {
-  const start = toLocalDate(task.createdAt)
-  const end = task.completedAt ? toLocalDate(task.completedAt) : start
+const normalizeEventDate = (task: TaskItem) => {
+  const rawDate = task.completedAt ?? task.createdAt
+  const date = toLocalDate(rawDate)
 
-  return {
-    start: Number.isNaN(start.getTime()) ? null : start,
-    end: Number.isNaN(end.getTime()) ? null : end,
-  }
+  return Number.isNaN(date.getTime()) ? null : date
 }
 
 const formatMonth = (date: Date) =>
@@ -71,17 +68,15 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
     const map = new Map<string, TaskItem[]>()
 
     for (const task of tasks) {
-      const range = normalizeRange(task)
-      if (!range.start || !range.end) {
+      const eventDate = normalizeEventDate(task)
+      if (!eventDate) {
         continue
       }
 
-      for (let cursor = new Date(range.start); cursor <= range.end; cursor = addDays(cursor, 1)) {
-        const key = toDayKey(cursor)
-        const existing = map.get(key) ?? []
-        existing.push(task)
-        map.set(key, existing)
-      }
+      const key = toDayKey(eventDate)
+      const existing = map.get(key) ?? []
+      existing.push(task)
+      map.set(key, existing)
     }
 
     return map
@@ -98,7 +93,7 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
         <div>
           <div className="badge badge-secondary badge-outline mb-2">Project calendar</div>
           <h2 className="text-2xl font-bold tracking-tight">{formatMonth(selectedMonth)}</h2>
-          <p className="text-sm text-base-content/70">Tasks are placed using created and completed dates.</p>
+          <p className="text-sm text-base-content/70">Tasks are placed on the completion day when available.</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -134,7 +129,6 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
 
               <div className="mt-2 space-y-2">
                 {dayTasks.slice(0, 3).map((task) => {
-                  const isRange = task.completedAt && toDayKey(toLocalDate(task.completedAt)) !== dayKey
                   const stateClass = task.state === 'Finished'
                     ? 'border-success/30 bg-success/10 text-success-content'
                     : task.state === 'Canceled'
@@ -151,7 +145,6 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate">{task.title}</span>
-                        {isRange && <span className="text-[10px] uppercase opacity-70">range</span>}
                       </div>
                     </button>
                   )

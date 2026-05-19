@@ -18,6 +18,12 @@ export type TaskItem = {
   completedAt: string | null;
 };
 
+export type ProjectTaskItemsGroup = {
+  projectId: string;
+  projectName?: string;
+  tasks: TaskItem[];
+};
+
 export type CreateTaskRequest = {
   assignedUserId: string;
   title: string;

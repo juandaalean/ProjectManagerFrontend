@@ -1,5 +1,10 @@
 import { httpClient } from '../../../shared/api/httpClient';
-import type { TaskItem, CreateTaskRequest, UpdateTaskRequest } from '../types/task.types';
+import type {
+  TaskItem,
+  ProjectTaskItemsGroup,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+} from '../types/task.types';
 
 type ApiTask = {
   taskId: string;
@@ -11,6 +16,13 @@ type ApiTask = {
   assignedUserId: string;
   createdAt?: string;
   completedAt?: string | null;
+};
+
+type ApiProjectTaskItemsGroup = {
+  projectId: string;
+  projectName?: string;
+  taskItems?: ApiTask[];
+  tasks?: ApiTask[];
 };
 
 const taskStateMap = ['Active', 'Finished', 'Canceled'] as const;
@@ -26,6 +38,12 @@ const mapTask = (task: ApiTask): TaskItem => ({
   assignedUserId: task.assignedUserId,
   createdAt: task.createdAt ?? '',
   completedAt: task.completedAt ?? null,
+});
+
+const mapProjectTaskItemsGroup = (group: ApiProjectTaskItemsGroup): ProjectTaskItemsGroup => ({
+  projectId: group.projectId,
+  projectName: group.projectName,
+  tasks: (group.taskItems ?? group.tasks ?? []).map(mapTask),
 });
 
 const mapCreateTaskRequest = (task: CreateTaskRequest) => ({
@@ -49,16 +67,28 @@ const mapUpdateTaskRequest = (task: UpdateTaskRequest) => ({
 
 export const tasksApi = {
   getTasks: async (projectId: string): Promise<TaskItem[]> => {
-  const response = await httpClient.get<ApiTask[]>(`/projects/${projectId}/tasks`);
-  return response.data.map(mapTask);
-},
+    const response = await httpClient.get<ApiTask[]>(`/projects/${projectId}/tasks`);
+    return response.data.map(mapTask);
+  },
 
-getTask: async (projectId: string, taskItemId: string): Promise<TaskItem> => {
-  const response = await httpClient.get<ApiTask>(
-    `/projects/${projectId}/tasks/${taskItemId}`
-  );
-  return mapTask(response.data);
-},
+  getTasksByProjects: async (projectIds: string[]): Promise<ProjectTaskItemsGroup[]> => {
+    const params = new URLSearchParams();
+
+    projectIds.forEach((projectId) => {
+      params.append('projectIds', projectId);
+    });
+
+    const response = await httpClient.get<ApiProjectTaskItemsGroup[]>(
+      `/task-items/by-projects?${params.toString()}`
+    );
+
+    return response.data.map(mapProjectTaskItemsGroup);
+  },
+
+  getTask: async (projectId: string, taskItemId: string): Promise<TaskItem> => {
+    const response = await httpClient.get<ApiTask>(`/projects/${projectId}/tasks/${taskItemId}`);
+    return mapTask(response.data);
+  },
 
   createTask: async (projectId: string, task: CreateTaskRequest): Promise<TaskItem> => {
     const response = await httpClient.post<ApiTask>(
