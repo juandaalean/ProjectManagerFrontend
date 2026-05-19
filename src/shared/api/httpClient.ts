@@ -14,9 +14,14 @@ export const httpClient: AxiosInstance = axios.create({
 httpClient.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    const authData = localStorage.getItem('authResponse')
+    if (authData) {
+      try {
+        const auth = JSON.parse(authData)
+        config.headers.Authorization = `${auth.tokenType} ${auth.accessToken}`
+      } catch {
+        // Invalid auth data, skip
+      }
     }
     return config
   },

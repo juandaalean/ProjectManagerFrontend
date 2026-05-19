@@ -1,13 +1,66 @@
+@import "tailwindcss";
+/* stylelint-disable at-rule-no-unknown */
+@plugin "daisyui";
+
 :root {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color-scheme: light;
+  --color-base-100: #ffffff;
+  --color-base-200: #f4ecff;
+  --color-base-300: #e1d1f1;
+  --color-base-content: #24102f;
+  --color-primary: #820ad1;
+  --color-primary-content: #ffffff;
+  --color-secondary: #a855f7;
+  --color-secondary-content: #ffffff;
+  --color-accent: #6d28d9;
+  --color-accent-content: #ffffff;
+  --color-neutral: #2e203f;
+  --color-neutral-content: #f7f2ff;
+  --color-info: #2563eb;
+  --color-info-content: #ffffff;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #1f1300;
+  --color-error: #dc2626;
+  --color-error-content: #ffffff;
+  --app-page-start: #f9f5ff;
+  --app-page-end: #eef2ff;
+  font-family: Inter, 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #111827;
-  background-color: #f8fafc;
+  color: var(--color-base-content);
+  background-color: var(--color-base-200);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-base-100: #12061f;
+  --color-base-200: #1b0e2e;
+  --color-base-300: #2b1842;
+  --color-base-content: #f4ecff;
+  --color-primary: #a855f7;
+  --color-primary-content: #14071f;
+  --color-secondary: #c084fc;
+  --color-secondary-content: #14071f;
+  --color-accent: #d946ef;
+  --color-accent-content: #14071f;
+  --color-neutral: #2a1b3d;
+  --color-neutral-content: #f8f4ff;
+  --color-info: #60a5fa;
+  --color-info-content: #08111f;
+  --color-success: #4ade80;
+  --color-success-content: #08140d;
+  --color-warning: #fbbf24;
+  --color-warning-content: #1f1300;
+  --color-error: #fb7185;
+  --color-error-content: #1f0a0e;
+  --app-page-start: #11071d;
+  --app-page-end: #190b29;
 }
 
 * {
@@ -16,6 +69,11 @@
 
 body {
   margin: 0;
+  min-width: 320px;
+  color: var(--color-base-content);
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent 32%),
+    linear-gradient(180deg, var(--app-page-start) 0%, var(--app-page-end) 100%);
 }
 
 #root {

@@ -40,14 +40,26 @@ export function AuthForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-6 text-center">
-        {mode === 'login' ? 'Login' : 'Register'}
-      </h2>
+    <div className="card w-full max-w-md bg-base-100 shadow-lg">
+      <div className="card-body">
+        <div className="mb-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+            {mode === 'login' ? 'Welcome back' : 'Create your account'}
+          </p>
+          <h2 className="mt-1 text-2xl font-semibold">
+            {mode === 'login' ? 'Login' : 'Register'}
+          </h2>
+          <p className="mt-1 text-sm text-base-content/70">
+            {mode === 'login'
+              ? 'Accede a tus proyectos, tareas y comentarios desde un panel limpio y rápido.'
+              : 'Crea tu acceso para empezar a organizar el trabajo del equipo.'}
+          </p>
+        </div>
 
-      <form onSubmit={currentForm.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={currentForm.handleSubmit(onSubmit)} className="space-y-4">
         {mode === 'register' && (
           <Input
+            id="name"
             label="Name"
             type="text"
             {...registerForm.register('name')}
@@ -57,12 +69,31 @@ export function AuthForm() {
 
         <Input
           label="Email"
+          id="email"
           type="email"
+          icon={(
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25"
+              />
+            </svg>
+          )}
           {...(mode === 'login' ? loginForm.register('email') : registerForm.register('email'))}
           error={(mode === 'login' ? loginForm.formState.errors.email?.message : registerForm.formState.errors.email?.message)}
         />
 
         <Input
+          id="password"
           label="Password"
           type="password"
           {...(mode === 'login' ? loginForm.register('password') : registerForm.register('password'))}
@@ -71,6 +102,7 @@ export function AuthForm() {
 
         {mode === 'register' && (
           <Input
+            id="confirmPassword"
             label="Confirm Password"
             type="password"
             {...registerForm.register('confirmPassword')}
@@ -78,17 +110,11 @@ export function AuthForm() {
           />
         )}
 
-        <Button
-          type="submit"
-          disabled={currentMutation.isPending}
-          className="w-full"
-        >
-          {currentMutation.isPending
-            ? 'Loading...'
-            : mode === 'login'
-            ? 'Login'
-            : 'Register'}
-        </Button>
+          <div className="mt-3">
+            <Button type="submit" disabled={currentMutation.isPending} className="w-full">
+              {currentMutation.isPending ? 'Loading...' : mode === 'login' ? 'Login' : 'Register'}
+            </Button>
+          </div>
 
         {currentMutation.isError && (
           <p className="text-red-500 text-sm text-center">
@@ -97,16 +123,17 @@ export function AuthForm() {
         )}
       </form>
 
-      <p className="text-center mt-4">
+      <p className="mt-6 text-center text-sm text-slate-500">
         {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}
         <button
           type="button"
           onClick={toggleMode}
-          className="text-blue-500 hover:text-blue-700 ml-1"
+          className="ml-1 font-semibold text-sky-600 transition hover:text-sky-700"
         >
           {mode === 'login' ? 'Register' : 'Login'}
         </button>
       </p>
     </div>
+  </div>
   )
 }

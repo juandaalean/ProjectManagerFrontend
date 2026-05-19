@@ -8,14 +8,8 @@ export function useLoginMutation() {
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => authApi.login(credentials),
-    onSuccess: (data, variables) => {
-      // TODO: Update when API provides user data
-      const mockUser = {
-        id: '1',
-        name: 'User',
-        email: variables.email,
-      }
-      login(data.accessToken, mockUser)
+    onSuccess: (data) => {
+      login(data)
     },
   })
 }
