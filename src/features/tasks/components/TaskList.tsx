@@ -17,21 +17,25 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
   const deleteMutation = useDeleteTaskMutation();
   const updateMutation = useUpdateTaskMutation();
 
-  const handleDelete = (id: string) => {
-    if (!projectId) {
+  const handleDelete = (task: TaskItem) => {
+    const resolvedProjectId = task.projectId || projectId;
+
+    if (!resolvedProjectId) {
       return;
     }
     if (confirm('Are you sure you want to delete this task?')) {
-      deleteMutation.mutate({ projectId, taskItemId: id });
+      deleteMutation.mutate({ projectId: resolvedProjectId, taskItemId: task.id });
     }
   };
 
   const handleToggleState = (task: TaskItem) => {
-    if (!projectId) {
+    const resolvedProjectId = task.projectId || projectId;
+
+    if (!resolvedProjectId) {
       return;
     }
     const newState = task.state === 'Active' ? 'Finished' : 'Active';
-    updateMutation.mutate({ projectId, taskItemId: task.id, task: { state: newState } });
+    updateMutation.mutate({ projectId: resolvedProjectId, taskItemId: task.id, task: { state: newState } });
   };
 
   if (tasks.length === 0) {
@@ -62,7 +66,7 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => navigate(`/projects/${projectId}/tasks/${task.id}`)}
+                  onClick={() => navigate(`/projects/${task.projectId}/tasks/${task.id}`)}
                 >
                   View
                 </Button>
@@ -83,7 +87,7 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={() => handleDelete(task.id)}
+                  onClick={() => handleDelete(task)}
                 >
                   Delete
                 </Button>
@@ -95,7 +99,7 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
       {editingTask && (
         <TaskFormModal
           task={editingTask}
-          projectId={projectId}
+          projectId={editingTask.projectId || projectId}
           onClose={() => setEditingTask(null)}
         />
       )}

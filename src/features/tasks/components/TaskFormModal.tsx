@@ -31,12 +31,14 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
     resolver: zodResolver(isEditing ? updateTaskSchema : createTaskSchema),
     defaultValues: task ? {
       title: task.title,
-      description: task.description,
+      description: task.description ?? '',
       priority: task.priority,
       state: task.state,
+      completedAt: task.completedAt ? task.completedAt.split('T')[0] : '',
     } : {
       priority: 'Medium',
       assignedUserId: user?.userId || '',
+      completedAt: '',
     },
   });
   const editErrors = errors as typeof errors & {
@@ -47,8 +49,18 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
 
   const onSubmit = (data: CreateTaskFormData | UpdateTaskFormData) => {
     if (isEditing && task) {
+      const updateData = data as UpdateTaskFormData;
       updateMutation.mutate(
-        { projectId: task.projectId, taskItemId: task.id, task: data as UpdateTaskRequest },
+        {
+          projectId: task.projectId,
+          taskItemId: task.id,
+          task: {
+            ...updateData,
+            completedAt: updateData.completedAt
+              ? new Date(`${updateData.completedAt}T00:00:00.000Z`).toISOString()
+              : undefined,
+          } as UpdateTaskRequest,
+        },
         {
           onSuccess: () => {
             reset();
@@ -64,8 +76,18 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
         return;
       }
       const createData = data as CreateTaskFormData;
+      const completedAt = createData.completedAt
+        ? new Date(`${createData.completedAt}T00:00:00.000Z`).toISOString()
+        : undefined;
       createMutation.mutate(
-        { projectId, task: { ...createData, assignedUserId: user.userId } as CreateTaskRequest },
+        {
+          projectId,
+          task: {
+            ...createData,
+            assignedUserId: user.userId,
+            completedAt,
+          } as CreateTaskRequest,
+        },
         {
           onSuccess: () => {
             reset();
@@ -128,6 +150,12 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
               <p className="mt-1 text-sm text-error">{errors.priority.message}</p>
             )}
           </div>
+          <Input
+            label="Completed At"
+            type="date"
+            {...register('completedAt')}
+            error={errors.completedAt?.message}
+          />
           {isEditing && (
             <div>
               <label className="label">

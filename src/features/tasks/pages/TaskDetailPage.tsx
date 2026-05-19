@@ -48,8 +48,8 @@ export function TaskDetailPage() {
           </div>
           <div className="text-sm text-base-content/60">
             Created: {new Date(task.createdAt).toLocaleDateString()}
-            {task.updatedAt !== task.createdAt && (
-              <> | Updated: {new Date(task.updatedAt).toLocaleDateString()}</>
+            {task.completedAt && (
+              <> | Completed: {new Date(task.completedAt).toLocaleDateString()}</>
             )}
           </div>
         </div>

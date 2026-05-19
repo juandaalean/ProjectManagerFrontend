@@ -67,8 +67,8 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-base-100 text-base-content rounded-2xl shadow-xl p-6 w-full max-w-md">
         <h2 className="text-xl font-semibold mb-4">
           {isEditing ? 'Edit Project' : 'Create Project'}
         </h2>
@@ -80,17 +80,26 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
             error={form.formState.errors.name?.message}
           />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+          <div className="form-control w-full">
+            <label className="label">
+              <span className="label-text font-semibold">
+                Description
+              </span>
             </label>
+
             <textarea
               {...form.register('description')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="
+              textarea textarea-bordered
+              bg-base-100
+              text-base-content
+              w-full
+            "
               rows={3}
             />
+
             {form.formState.errors.description && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="mt-1 text-sm text-error">
                 {form.formState.errors.description.message}
               </p>
             )}
@@ -111,7 +120,7 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
           />
 
           {mutation.isError && (
-            <p className="text-red-500 text-sm">
+            <p className="text-sm text-error">
               {mutation.error?.message || 'An error occurred'}
             </p>
           )}
@@ -125,6 +134,7 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
             >
               Cancel
             </Button>
+
             <Button
               type="submit"
               disabled={mutation.isPending}
@@ -132,8 +142,8 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
               {mutation.isPending
                 ? 'Saving...'
                 : isEditing
-                ? 'Update'
-                : 'Create'}
+                  ? 'Update'
+                  : 'Create'}
             </Button>
           </div>
         </form>

@@ -9,24 +9,36 @@ export const TaskPriorityValues: readonly TaskPriority[] = ['Low', 'Medium', 'Hi
 export type TaskItem = {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   state: TaskState;
   priority: TaskPriority;
   projectId: string;
+  assignedUserId: string;
   createdAt: string;
-  updatedAt: string;
+  completedAt: string | null;
+};
+
+export type ProjectTaskItemsGroup = {
+  projectId: string;
+  projectName?: string;
+  tasks: TaskItem[];
 };
 
 export type CreateTaskRequest = {
-  title: string;
-  description: string;
-  priority: TaskPriority;
   assignedUserId: string;
+  title: string;
+  description?: string;
+  priority: TaskPriority;
+  state?: TaskState;
+  completedAt?: string | null;
 };
 
 export type UpdateTaskRequest = {
+  assignedUserId?: string;
   title?: string;
   description?: string;
   state?: TaskState;
   priority?: TaskPriority;
+  createdAt?: string;
+  completedAt?: string | null;
 };

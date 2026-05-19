@@ -1,16 +1,28 @@
 import { httpClient } from '../../../shared/api/httpClient';
-import type { TaskItem, CreateTaskRequest, UpdateTaskRequest } from '../types/task.types';
+import type {
+  TaskItem,
+  ProjectTaskItemsGroup,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+} from '../types/task.types';
 
 type ApiTask = {
   taskId: string;
   title: string;
-  description: string;
+  description: string | null;
   taskState: number;
   taskPriority: number;
   projectId: string;
   assignedUserId: string;
   createdAt?: string;
-  updatedAt?: string;
+  completedAt?: string | null;
+};
+
+type ApiProjectTaskItemsGroup = {
+  projectId: string;
+  projectName?: string;
+  taskItems?: ApiTask[];
+  tasks?: ApiTask[];
 };
 
 const taskStateMap = ['Active', 'Finished', 'Canceled'] as const;
@@ -23,43 +35,67 @@ const mapTask = (task: ApiTask): TaskItem => ({
   state: taskStateMap[task.taskState] ?? 'Active',
   priority: taskPriorityMap[task.taskPriority] ?? 'Low',
   projectId: task.projectId,
+  assignedUserId: task.assignedUserId,
   createdAt: task.createdAt ?? '',
-  updatedAt: task.updatedAt ?? '',
+  completedAt: task.completedAt ?? null,
+});
+
+const mapProjectTaskItemsGroup = (group: ApiProjectTaskItemsGroup): ProjectTaskItemsGroup => ({
+  projectId: group.projectId,
+  projectName: group.projectName,
+  tasks: (group.taskItems ?? group.tasks ?? []).map(mapTask),
 });
 
 const mapCreateTaskRequest = (task: CreateTaskRequest) => ({
+  assignedUserId: task.assignedUserId,
   title: task.title,
   description: task.description,
   taskPriority: taskPriorityMap.indexOf(task.priority),
-  assignedUserId: task.assignedUserId,
+  taskState: task.state !== undefined ? taskStateMap.indexOf(task.state) : taskStateMap.indexOf('Active'),
+  completedAt: task.completedAt ?? null,
 });
 
 const mapUpdateTaskRequest = (task: UpdateTaskRequest) => ({
+  ...(task.assignedUserId !== undefined && { assignedUserId: task.assignedUserId }),
   ...(task.title !== undefined && { title: task.title }),
   ...(task.description !== undefined && { description: task.description }),
   ...(task.state !== undefined && { taskState: taskStateMap.indexOf(task.state) }),
   ...(task.priority !== undefined && { taskPriority: taskPriorityMap.indexOf(task.priority) }),
+  ...(task.createdAt !== undefined && { createdAt: task.createdAt }),
+  ...(task.completedAt !== undefined && { completedAt: task.completedAt }),
 });
 
 export const tasksApi = {
   getTasks: async (projectId: string): Promise<TaskItem[]> => {
-  const response = await httpClient.get<ApiTask[]>(`/projects/${projectId}/tasks`);
-  return response.data.map(mapTask);
-},
+    const response = await httpClient.get<ApiTask[]>(`/projects/${projectId}/tasks`);
+    return response.data.map(mapTask);
+  },
 
-getTask: async (projectId: string, taskItemId: string): Promise<TaskItem> => {
-  const response = await httpClient.get<ApiTask>(
-    `/projects/${projectId}/tasks/${taskItemId}`
-  );
-  return mapTask(response.data);
-},
+  getTasksByProjects: async (projectIds: string[]): Promise<ProjectTaskItemsGroup[]> => {
+    const params = new URLSearchParams();
+
+    projectIds.forEach((projectId) => {
+      params.append('projectIds', projectId);
+    });
+
+    const response = await httpClient.get<ApiProjectTaskItemsGroup[]>(
+      `/task-items/by-projects?${params.toString()}`
+    );
+
+    return response.data.map(mapProjectTaskItemsGroup);
+  },
+
+  getTask: async (projectId: string, taskItemId: string): Promise<TaskItem> => {
+    const response = await httpClient.get<ApiTask>(`/projects/${projectId}/tasks/${taskItemId}`);
+    return mapTask(response.data);
+  },
 
   createTask: async (projectId: string, task: CreateTaskRequest): Promise<TaskItem> => {
-    const response = await httpClient.post<TaskItem>(
+    const response = await httpClient.post<ApiTask>(
       `/projects/${projectId}/tasks`,
       mapCreateTaskRequest(task)
     );
-    return response.data;
+    return mapTask(response.data);
   },
 
   updateTask: async (
@@ -67,11 +103,11 @@ getTask: async (projectId: string, taskItemId: string): Promise<TaskItem> => {
     taskItemId: string,
     task: UpdateTaskRequest
   ): Promise<TaskItem> => {
-    const response = await httpClient.put<TaskItem>(
+    const response = await httpClient.put<ApiTask>(
       `/projects/${projectId}/tasks/${taskItemId}`,
       mapUpdateTaskRequest(task)
     );
-    return response.data;
+    return mapTask(response.data);
   },
 
   deleteTask: async (projectId: string, taskItemId: string): Promise<void> => {
