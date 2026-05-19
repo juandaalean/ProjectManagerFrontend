@@ -22,8 +22,25 @@ export function useUpdateTaskMutation() {
     Error,
     { projectId: string; taskItemId: string; task: UpdateTaskRequest }
   >({
-    mutationFn: ({ projectId, taskItemId, task }) =>
-      tasksApi.updateTask(projectId, taskItemId, task),
+    mutationFn: async ({ projectId, taskItemId, task }) => {
+      const { assignedUserId, ...updateTask } = task;
+
+      let updatedTask: TaskItem | null = null;
+
+      if (Object.keys(updateTask).length > 0) {
+        updatedTask = await tasksApi.updateTask(projectId, taskItemId, updateTask);
+      }
+
+      if (assignedUserId !== undefined) {
+        updatedTask = await tasksApi.assignTaskAssignee(projectId, taskItemId, { assignedUserId });
+      }
+
+      if (!updatedTask) {
+        throw new Error('At least one task field must be provided for update');
+      }
+
+      return updatedTask;
+    },
     onSuccess: (updatedTask) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['tasks', updatedTask.projectId, updatedTask.id] });

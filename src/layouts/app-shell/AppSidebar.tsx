@@ -66,7 +66,7 @@ export function AppSidebar({ collapsed, onToggleCollapse }: { collapsed?: boolea
         {!collapsed && (
           <div className="mt-4 rounded-box border border-base-300 bg-base-200 p-4 w-full">
             <p className="text-sm font-semibold">Ready for sections</p>
-            <p className="mt-1 text-sm text-base-content/70">This shell follows the official drawer pattern and is ready for dashboards, filters, and widgets.</p>
+            <p className="mt-1 text-sm text-base-content/70">This shell follows the official drawer pattern and is ready for dashboards, filters, and widgets for next features.</p>
           </div>
         )}
       </div>

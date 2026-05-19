@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '../../../shared/ui/Card';
@@ -9,6 +10,7 @@ import type { CreateTaskFormData, UpdateTaskFormData } from '../schemas/taskSche
 import { createTaskSchema, updateTaskSchema } from '../schemas/taskSchema';
 import { useCreateTaskMutation, useUpdateTaskMutation } from '../hooks/useTaskMutations';
 import { useAuth } from '../../auth/context/AuthContext';
+import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery';
 
 interface TaskFormModalProps {
   task?: TaskItem;
@@ -21,11 +23,17 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
   const createMutation = useCreateTaskMutation();
   const updateMutation = useUpdateTaskMutation();
   const { user } = useAuth();
+  const resolvedProjectId = task?.projectId ?? projectId;
+  const { data: projectMembers = [], isLoading: isMembersLoading, error: projectMembersError } =
+    useProjectMembersQuery(resolvedProjectId);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
+    getValues,
     reset,
   } = useForm<CreateTaskFormData | UpdateTaskFormData>({
     resolver: zodResolver(isEditing ? updateTaskSchema : createTaskSchema),
@@ -34,10 +42,11 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
       description: task.description ?? '',
       priority: task.priority,
       state: task.state,
+      assignedUserId: task.assignedUserId,
       completedAt: task.completedAt ? task.completedAt.split('T')[0] : '',
     } : {
       priority: 'Medium',
-      assignedUserId: user?.userId || '',
+      assignedUserId: '',
       completedAt: '',
     },
   });
@@ -46,6 +55,28 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
       message?: string;
     }
   };
+
+  useEffect(() => {
+    if (isEditing || isMembersLoading || projectMembers.length === 0) {
+      return;
+    }
+
+    if (getValues('assignedUserId')) {
+      return;
+    }
+
+    const currentUserMember = user?.userId
+      ? projectMembers.find((member) => member.userId === user.userId)
+      : undefined;
+
+    setValue('assignedUserId', currentUserMember?.userId ?? projectMembers[0].userId, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: true,
+    });
+  }, [getValues, isEditing, isMembersLoading, projectMembers, setValue, user?.userId]);
+
+  const assignedUserId = watch('assignedUserId');
 
   const onSubmit = (data: CreateTaskFormData | UpdateTaskFormData) => {
     if (isEditing && task) {
@@ -69,10 +100,10 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
         }
       );
     } else {
-      if (!projectId) {
+      if (!resolvedProjectId) {
         return;
       }
-      if (!user?.userId) {
+      if (!data.assignedUserId) {
         return;
       }
       const createData = data as CreateTaskFormData;
@@ -81,10 +112,9 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
         : undefined;
       createMutation.mutate(
         {
-          projectId,
+          projectId: resolvedProjectId,
           task: {
             ...createData,
-            assignedUserId: user.userId,
             completedAt,
           } as CreateTaskRequest,
         },
@@ -98,7 +128,8 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
     }
   };
 
-  const isSubmitDisabled = (!isEditing && (!projectId || !user?.userId)) || createMutation.isPending || updateMutation.isPending;
+  const isSubmitDisabled = !resolvedProjectId || isMembersLoading || projectMembers.length === 0 || createMutation.isPending || updateMutation.isPending;
+  const selectedAssignee = projectMembers.find((member) => member.userId === assignedUserId);
 
   return (
     <div className="modal modal-open">
@@ -111,9 +142,6 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
           Fill in the task details and assign the right priority.
         </p>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {!isEditing && (
-            <input type="hidden" {...register('assignedUserId')} />
-          )}
           <Input
             label="Title"
             {...register('title')}
@@ -150,6 +178,31 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
               <p className="mt-1 text-sm text-error">{errors.priority.message}</p>
             )}
           </div>
+          <div>
+            <label className="label">
+              <span className="label-text font-semibold">Assign to</span>
+            </label>
+            <select
+              {...register('assignedUserId')}
+              className="select select-bordered w-full"
+              disabled={isMembersLoading || projectMembers.length === 0}
+            >
+              <option value="">Select a project member</option>
+              {projectMembers.map((member) => (
+                <option key={member.userId} value={member.userId}>
+                  {member.userName} ({member.userEmail})
+                </option>
+              ))}
+            </select>
+            {errors.assignedUserId && (
+              <p className="mt-1 text-sm text-error">{errors.assignedUserId.message}</p>
+            )}
+            {selectedAssignee ? (
+              <p className="mt-1 text-xs text-base-content/60">
+                Current assignee: {selectedAssignee.userName}
+              </p>
+            ) : null}
+          </div>
           <Input
             label="Completed At"
             type="date"
@@ -175,6 +228,12 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
                 <p className="mt-1 text-sm text-error">{editErrors.state.message}</p>
               )}
             </div>
+          )}
+          {projectMembersError && (
+            <p className="text-sm text-error">{projectMembersError.message}</p>
+          )}
+          {isMembersLoading && (
+            <p className="text-sm text-base-content/60">Loading project members...</p>
           )}
           <div className="modal-action">
             <Button type="button" variant="secondary" onClick={onClose}>

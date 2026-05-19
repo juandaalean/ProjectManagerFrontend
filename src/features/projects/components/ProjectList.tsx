@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useProjectsQuery } from '../hooks/useProjectsQuery'
+import { useAuth } from '../../auth/context/AuthContext'
 import { useDeleteProjectMutation } from '../hooks/useProjectMutations'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
@@ -16,6 +17,7 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
   const { data: projects, isLoading, error } = useProjectsQuery()
   const deleteMutation = useDeleteProjectMutation()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   if (isLoading) {
     return <div className="text-center py-8">Loading projects...</div>
@@ -57,7 +59,13 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
                   <p className="mt-2 text-sm text-base-content/70">{project.description}</p>
                 )}
               </div>
-              <div className="badge badge-ghost">Project</div>
+              <div className="flex items-center gap-2">
+                <div className="badge badge-ghost">Project</div>
+                { /* Owner badge when current user is owner */ }
+                {user && user.userId === project.ownerId && (
+                  <div className="badge badge-accent text-accent-content">Owner</div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -75,9 +83,9 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => navigate(`/projects/${project.projectId}/tasks`)}
+                onClick={() => navigate(`/projects/${project.projectId}`)}
               >
-                View Project
+                Open Project
               </Button>
               {onEdit && (
                 <Button

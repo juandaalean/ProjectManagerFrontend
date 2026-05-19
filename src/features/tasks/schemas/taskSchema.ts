@@ -14,6 +14,7 @@ export const updateTaskSchema = z.object({
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
   state: z.enum(['Active', 'Finished', 'Canceled']).optional(),
   priority: z.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
+  assignedUserId: z.string().uuid('Invalid assigned user ID').optional(),
   completedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
 }).refine(
   (data) => Object.keys(data).length > 0,

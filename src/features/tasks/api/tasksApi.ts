@@ -3,6 +3,7 @@ import type {
   TaskItem,
   ProjectTaskItemsGroup,
   CreateTaskRequest,
+  AssignTaskItemRequest,
   UpdateTaskRequest,
 } from '../types/task.types';
 
@@ -56,13 +57,16 @@ const mapCreateTaskRequest = (task: CreateTaskRequest) => ({
 });
 
 const mapUpdateTaskRequest = (task: UpdateTaskRequest) => ({
-  ...(task.assignedUserId !== undefined && { assignedUserId: task.assignedUserId }),
   ...(task.title !== undefined && { title: task.title }),
   ...(task.description !== undefined && { description: task.description }),
   ...(task.state !== undefined && { taskState: taskStateMap.indexOf(task.state) }),
   ...(task.priority !== undefined && { taskPriority: taskPriorityMap.indexOf(task.priority) }),
   ...(task.createdAt !== undefined && { createdAt: task.createdAt }),
   ...(task.completedAt !== undefined && { completedAt: task.completedAt }),
+});
+
+const mapAssignTaskItemRequest = (payload: AssignTaskItemRequest) => ({
+  assignedUserId: payload.assignedUserId,
 });
 
 export const tasksApi = {
@@ -106,6 +110,18 @@ export const tasksApi = {
     const response = await httpClient.put<ApiTask>(
       `/projects/${projectId}/tasks/${taskItemId}`,
       mapUpdateTaskRequest(task)
+    );
+    return mapTask(response.data);
+  },
+
+  assignTaskAssignee: async (
+    projectId: string,
+    taskItemId: string,
+    payload: AssignTaskItemRequest
+  ): Promise<TaskItem> => {
+    const response = await httpClient.put<ApiTask>(
+      `/projects/${projectId}/tasks/${taskItemId}/assignee`,
+      mapAssignTaskItemRequest(payload)
     );
     return mapTask(response.data);
   },

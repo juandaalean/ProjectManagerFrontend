@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createTaskSchema } from '../features/tasks/schemas/taskSchema';
+import { createTaskSchema, updateTaskSchema } from '../features/tasks/schemas/taskSchema';
 
 describe('tasks', () => {
   describe('createTaskSchema', () => {
@@ -23,6 +23,18 @@ describe('tasks', () => {
       const result = createTaskSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].path).toContain('title');
+    });
+  });
+
+  describe('updateTaskSchema', () => {
+    it('allows assigning a task to another project member', () => {
+      const validData = {
+        assignedUserId: '123e4567-e89b-12d3-a456-426614174000',
+      };
+
+      const result = updateTaskSchema.safeParse(validData);
+
+      expect(result.success).toBe(true);
     });
   });
 });
