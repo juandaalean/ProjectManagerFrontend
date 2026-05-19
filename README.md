@@ -1,124 +1,217 @@
 # Project Manager Frontend
 
-## Project Overview
+Frontend client for the Project Manager ecosystem, built to practice modern React architecture against a real .NET 8 API.
 
-This is the frontend client for the Project Manager ecosystem.
+This is not meant to be a closed enterprise application. It is an evolving technical portfolio where authentication, protected routes, server state, typed forms, and domain-based backend integration are implemented feature by feature.
 
-It is a portfolio and learning project built to practice modern React architecture against a real backend API, not a production-grade enterprise product.
+## Current State
 
-The backend companion repository is `ProjectManagerBackend` (.NET 8 + Clean Architecture), and this frontend is where UI, UX, state management, and API integration are implemented feature by feature.
+This branch leaves the frontend in a functional state for the main product domains:
 
-## Purpose
-
-The goal is to move beyond basic static CRUD screens and practice:
-
-- Feature-based frontend architecture.
-- Authentication flows with protected routes.
-- Server state and caching patterns.
-- Typed forms and validation.
-- Real integration with an external backend that has authorization rules.
+- Authentication with login, register, session persistence, and protected routes.
+- Projects dashboard with list, create, edit, delete, and detail views.
+- Task management with project-scoped and global views.
+- Comments attached to tasks from the task detail screen.
+- Application shell with navigation, sidebar, and theme switcher.
 
 ## Tech Stack
 
-- Framework: React 19
-- Language: TypeScript
-- Build Tool: Vite
-- Routing: React Router
-- Server State: TanStack Query (React Query)
-- HTTP Client: Axios
-- Forms: React Hook Form
-- Validation: Zod
-- Styling: Tailwind CSS
-- Testing: Vitest
-- Code Quality: ESLint + Prettier
+- React 19
+- TypeScript
+- Vite
+- React Router
+- TanStack Query
+- Axios
+- React Hook Form
+- Zod
+- Tailwind CSS + DaisyUI
+- Vitest
+- ESLint + Prettier
 
-## Frontend-Backend Relationship
+## Architecture
 
-This frontend consumes the backend API exposed by `ProjectManagerBackend`.
+The codebase is organized by functional domains, not by generic file type. The goal is for each feature to grow in isolation without turning the project into a shared-components dumping ground.
 
-Current environment setup points to:
+```text
+src/
+  app/                 # router, providers, and guards
+  features/
+    auth/              # login, register, context, and session persistence
+    projects/          # dashboard, detail, hooks, and forms
+    tasks/             # global list, detail, and mutations
+    comments/          # list and composer for task comments
+  layouts/             # auth shell and main application shell
+  shared/              # HTTP client, reusable UI, config, and utilities
+  styles/              # global styles
+  tests/               # Vitest tests
+```
 
-- `VITE_API_URL=http://localhost:5081/api`
+### Navigation Flow
 
-Integration flow:
+- Public routes go to login and register.
+- Protected routes are guarded by `PrivateRoute`.
+- The main shell groups the navbar, sidebar, footer, and page content.
 
-1. User logs in or registers from the frontend.
-2. Backend returns auth payload with token and expiration.
-3. Frontend stores auth response in localStorage.
-4. Axios request interceptor injects `Authorization` header automatically.
-5. Feature modules call backend endpoints by domain (auth, projects, later tasks/comments).
+## Local API Integration
 
-Error handling integration:
+The frontend connects to the local backend API through this environment variable:
 
-- Backend returns problem details payloads.
-- Frontend response interceptor maps those errors into readable UI-safe messages.
+```env
+VITE_API_URL=http://localhost:5081/api
+```
 
-## Core Features
+That URL is consumed from `src/shared/config/env.ts`, where the environment is validated with Zod before the app boots. If the variable is missing or not a valid URL, the app fails fast.
 
-### Authentication (Implemented)
+### Production API URL
 
-- Login and register screens.
-- Auth context and session persistence.
-- Token expiration check on app startup.
-- Protected routes via `PrivateRoute`.
+For Vercel, set `VITE_API_URL` to your deployed backend URL, for example:
 
-Related backend domain:
+```env
+VITE_API_URL=https://projectmanagerbackend-f8df.onrender.com/api
+```
 
-- `POST /api/auth/register`
+This is the only value the frontend needs in order to talk to your deployed API. The same Axios client will keep attaching the JWT automatically after login.
+
+### HTTP Client
+
+All backend communication goes through a centralized Axios client in `src/shared/api/httpClient.ts`.
+
+That client applies three important decisions:
+
+1. It uses `baseURL` from `VITE_API_URL`.
+2. It sends `Content-Type: application/json` by default.
+3. It automatically injects the `Authorization` header when a session is available.
+
+In practice, features do not make one-off requests with random config. They use a uniform client that already knows how to authenticate and how to surface errors consistently.
+
+## Local Persistence and Cache
+
+It is important to distinguish between authenticated session data and server cache data:
+
+### JWT Session in localStorage
+
+The session is stored in `localStorage` under the `authResponse` key.
+
+That object includes:
+
+- `accessToken`
+- `tokenType`
+- `expiresAtUtc`
+- `user`
+
+When the app starts, `AuthProvider` reads that value, checks whether the token is still valid, and clears it if the session has expired. On login, the new auth response is saved again; on logout, it is removed.
+
+This gives us:
+
+- Session persistence after refresh.
+- Auth state rehydration without logging in again.
+- Automatic JWT attachment on authenticated requests.
+
+### Server Cache with TanStack Query
+
+The server cache is not persisted to `localStorage` in this branch. It lives in memory through TanStack Query with the following defaults:
+
+- `staleTime` of 5 minutes.
+- 1 retry for failed queries.
+- Selective invalidation after project, task, and comment mutations.
+
+That means the cache improves navigation speed and reduces redundant requests during the current session, but it is rebuilt on page reload. If persistent query cache is needed later, an explicit persistence layer for React Query should be added.
+
+### Other Local Keys
+
+- The visual theme is also stored in `localStorage` under `theme`.
+
+## Technical Decisions
+
+### 1. Auth context plus localStorage
+
+Authentication lives in a dedicated `AuthProvider` because session state is shared across the app and must survive refreshes. This avoids prop drilling and centralizes login, logout, expiration, and rehydration.
+
+### 2. React Query for server state
+
+Projects, tasks, and comments are remote state, not local state. TanStack Query is used to manage them, with precise invalidation after create, update, and delete operations.
+
+### 3. Domain-based APIs
+
+Each feature owns its own API layer, hooks, types, and forms. That lowers coupling and makes the backend easier to follow by business area.
+
+### 4. Form validation with Zod
+
+Validation is not left to the backend alone. Forms are typed and validated before submit to improve UX and reduce invalid requests.
+
+### 5. Consistent error handling
+
+The API returns Problem Details-style payloads, and the HTTP interceptor converts them into UI-friendly messages. That avoids repeating error parsing across screens.
+
+## Features
+
+### Authentication
+
+- Login and register.
+- Session persistence on refresh.
+- Token expiration checked on startup.
+- Protected private routes.
+
+Related endpoints:
+
 - `POST /api/auth/login`
+- `POST /api/auth/register`
 
-### Projects (Implemented)
+### Projects
 
-- List projects.
-- Create project.
-- Update project.
-- Delete project.
-- Project detail page.
+- Project listing.
+- Create and edit from a modal.
+- Delete projects.
+- Project detail view.
 
-Related backend domain:
+Related endpoints:
 
 - `GET /api/projects`
 - `POST /api/projects`
 - `PUT /api/projects/{id}`
 - `DELETE /api/projects/{id}`
 
-### Tasks (Scaffolded, Not Connected Yet)
+### Tasks
 
-- Feature folder structure exists.
-- API/composition placeholders are present.
-- Full UI + integration is planned next.
+- Global tasks view.
+- Project-scoped tasks view.
+- Detail view with project context.
+- Task creation from the page itself.
 
-Related backend readiness:
+### Task Comments
 
-- Backend already exposes task endpoints, ready for frontend integration.
+- Comment listing by task.
+- Create comment.
+- Edit own comment.
+- Delete own comment.
 
-### Comments (Scaffolded, Not Connected Yet)
+## Backend Connection
 
-- Feature folder structure exists.
-- API/composition placeholders are present.
-- Full UI + integration is planned after tasks.
+The frontend consumes the local `ProjectManagerBackend` companion service. The flow is:
 
-Related backend readiness:
+1. The user logs in or registers.
+2. The backend returns an authentication payload with token, token type, expiration, and user data.
+3. The frontend stores that response in `localStorage`.
+4. The Axios interceptor adds `Authorization: Bearer <token>` to authenticated requests.
+5. Features call their domain API and TanStack Query handles cache and synchronization.
 
-- Backend already exposes task comments endpoints with authorization rules.
+## Quick Start
 
-## Quickstart
+### Requirements
 
-### Prerequisites
-
-- Node.js 20+
+- Node.js 20 or newer
 - npm
-- Backend API running locally (`ProjectManagerBackend`)
+- `ProjectManagerBackend` running locally
 
-### Setup
-
-1. Install dependencies:
+### Install
 
 ```bash
 npm install
 ```
 
-2. Configure environment variables in `.env`:
+### Environment Variables
+
+Create a `.env` file with the following content:
 
 ```env
 VITE_API_URL=http://localhost:5081/api
@@ -126,108 +219,123 @@ VITE_APP_NAME=Project Manager
 VITE_ENABLE_DEBUG=true
 ```
 
-3. Start development server:
+### Run
 
 ```bash
 npm run dev
 ```
 
-### Scripts
+## Deploying to Vercel
 
-- `npm run dev` - start local development server
-- `npm run build` - type-check and build production bundle
-- `npm run preview` - preview production build locally
-- `npm run test` - run tests with Vitest
-- `npm run lint` - run ESLint
-- `npm run lint:fix` - auto-fix lint issues
-- `npm run typecheck` - run TypeScript checks
-- `npm run format` - format files with Prettier
-- `npm run format:check` - validate formatting
+This project is ready to be deployed as a Vite SPA on Vercel.
 
-## API Coverage Matrix
+### Build settings
 
-| Domain | Backend Status | Frontend Status |
+- Framework preset: `Vite`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Root directory: leave empty unless the app lives inside a subfolder
+
+### Environment variables
+
+Add these in the Vercel project settings:
+
+```env
+VITE_API_URL=https://projectmanagerbackend-f8df.onrender.com/api
+VITE_APP_NAME=Project Manager
+VITE_ENABLE_DEBUG=false
+```
+
+### SPA routing
+
+The repository includes `vercel.json` with a rewrite so React Router routes like `/login`, `/projects`, or `/projects/:id` resolve correctly on refresh.
+
+### Deployment flow
+
+1. Import the repository into Vercel.
+2. Keep the root directory at the repository root.
+3. Set the environment variables above.
+4. Deploy.
+5. Verify login, protected routes, and API calls against the Render backend.
+
+## Scripts
+
+- `npm run dev` - starts the development server.
+- `npm run build` - type-checks and builds the production bundle.
+- `npm run preview` - serves the local production build.
+- `npm run test` - runs the Vitest suite.
+- `npm run lint` - runs ESLint.
+- `npm run lint:fix` - automatically fixes lint issues.
+- `npm run typecheck` - runs TypeScript checks.
+- `npm run format` - formats files with Prettier.
+- `npm run format:check` - verifies formatting.
+
+## Status Matrix
+
+| Domain | Backend | Frontend |
 |---|---|---|
 | Auth | Implemented | Implemented |
 | Projects | Implemented | Implemented |
-| Tasks | Implemented | Planned (scaffolded) |
-| Task Comments | Implemented | Planned (scaffolded) |
+| Tasks | Implemented | Implemented |
+| Task comments | Implemented | Implemented |
 
-## Project Structure
-
-```text
-src/
-	app/                 # app router, providers, and route guards
-	features/
-		auth/              # auth API, forms, context, hooks, pages, schema, types
-		projects/          # project API, UI, hooks, pages, schema, types
-		tasks/             # scaffolded feature for upcoming implementation
-		comments/          # scaffolded feature for upcoming implementation
-	layouts/             # app and auth layouts
-	shared/              # reusable API client, config, UI kit, utils, common types
-	styles/              # global styling layer
-	tests/               # vitest test files
-```
-
-## System Diagram (Current)
+## Diagram
 
 ```mermaid
 flowchart TD
-	User[User Browser]
+  User[User Browser]
 
-	subgraph FE[ProjectManagerFrontend]
-		Router[React Router\nPublic + Private Routes]
-		Auth[Auth Context\nlocalStorage Session]
-		Query[React Query\nServer State Cache]
-		Http[Axios Client\nInterceptors]
-		Features[Feature Modules\nAuth / Projects / Tasks / Comments]
+  subgraph FE[ProjectManagerFrontend]
+    Router[React Router\nPublic + Private Routes]
+    Auth[Auth Context\nlocalStorage Session]
+    Query[TanStack Query\nIn-memory server cache]
+    Http[Axios Client\nInterceptors]
+    Features[Feature Modules\nAuth / Projects / Tasks / Comments]
 
-		Router --> Features
-		Features --> Query
-		Query --> Http
-		Auth --> Http
-	end
+    Router --> Features
+    Features --> Query
+    Query --> Http
+    Auth --> Http
+  end
 
-	subgraph BE[ProjectManagerBackend]
-		Api[ASP.NET Core API]
-		Jwt[JWT Auth + Authorization Rules]
-		Services[Application Services]
-		Db[(PostgreSQL)]
+  subgraph BE[ProjectManagerBackend]
+    Api[ASP.NET Core API]
+    Jwt[JWT Auth + Authorization Rules]
+    Services[Application Services]
+    Db[(PostgreSQL)]
 
-		Api --> Jwt
-		Api --> Services
-		Services --> Db
-	end
+    Api --> Jwt
+    Api --> Services
+    Services --> Db
+  end
 
-	User --> Router
-	Http -->|HTTP + Bearer Token| Api
+  User --> Router
+  Http -->|HTTP + Bearer Token| Api
 ```
 
-## Current Development Notes
+## Development Notes
 
-- This project intentionally prioritizes learning and architecture practice.
-- Backend capabilities are ahead of frontend in tasks/comments, by design.
-- The frontend roadmap follows backend domains to keep both repositories aligned.
+- The project is intentionally optimized for learning and incremental growth.
+- React Query cache is not persisted to localStorage in this branch.
+- JWT session data is persisted and validated on app startup.
+- Data synchronization relies on selective invalidation after mutations.
+- In production, the frontend should point `VITE_API_URL` to the Render backend, not to localhost.
 
-## Roadmap
+## Natural Next Steps
 
-- Implement full Tasks feature (list/detail/create/update/delete and UX states).
-- Implement full Task Comments feature (list/create/update/delete).
-- Improve loading, error, and empty-state UX consistency.
-- Increase test coverage by feature (components, hooks, integration behavior).
-- Prepare deployment-ready frontend environment configuration.
+- Persist the React Query cache if offline behavior or reload restoration is needed.
+- Polish loading, empty, and error states.
+- Expand feature-level and integration test coverage.
 
-## Key Learnings Targeted
+## Spanish Summary
 
-- Building a scalable React app by domain-driven feature folders.
-- Integrating JWT auth from a separate backend repository.
-- Handling real API errors and async UI state transitions.
-- Growing a project iteratively while keeping architecture clean.
+Este README esta en ingles como idioma principal y deja un resumen breve en espanol para referencia rapida.
 
-## Project Status
-
-Active development, portfolio-learning focus.
+- La sesion JWT se guarda en `localStorage` como `authResponse`.
+- El cache de datos de TanStack Query vive en memoria y no se persiste en esta rama.
+- La API local se configura con `VITE_API_URL=http://localhost:5081/api`.
+- La app ya cubre autenticacion, proyectos, tareas y comentarios.
 
 ## License
 
-Personal project for learning and portfolio showcase.
+Personal project for learning and portfolio purposes.

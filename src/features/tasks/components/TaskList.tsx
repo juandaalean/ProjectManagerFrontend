@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../../shared/ui/Card';
 import { Button } from '../../../shared/ui/Button';
 import type { TaskItem } from '../types/task.types';
 import { useDeleteTaskMutation, useUpdateTaskMutation } from '../hooks/useTaskMutations';
 import { TaskFormModal } from './TaskFormModal';
+import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery';
+import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge';
 
 interface TaskListProps {
   tasks: TaskItem[];
@@ -16,6 +18,12 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
   const navigate = useNavigate();
   const deleteMutation = useDeleteTaskMutation();
   const updateMutation = useUpdateTaskMutation();
+  const { data: projectMembers = [] } = useProjectMembersQuery(projectId);
+
+  const memberById = useMemo(
+    () => new Map(projectMembers.map((member) => [member.userId, member])),
+    [projectMembers]
+  );
 
   const handleDelete = (task: TaskItem) => {
     const resolvedProjectId = task.projectId || projectId;
@@ -55,8 +63,14 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="card-title text-lg">{task.title}</h3>
-                  <span className="badge badge-outline">{task.state}</span>
-                  <span className="badge badge-outline">{task.priority}</span>
+                  <span className={getTaskStateBadgeClassName(task.state)}>{task.state}</span>
+                  <span className={getTaskPriorityBadgeClassName(task.priority)}>{task.priority}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-base-content/70">
+                  <span className="font-medium text-base-content">Assigned to:</span>
+                  <span className="badge badge-secondary text-secondary-content">
+                    {memberById.get(task.assignedUserId)?.userName ?? task.assignedUserId}
+                  </span>
                 </div>
                 {task.description && (
                   <p className="mt-2 text-sm text-base-content/70">{task.description}</p>

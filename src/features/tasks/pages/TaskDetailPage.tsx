@@ -4,10 +4,22 @@ import { Card } from '../../../shared/ui/Card';
 import { useTaskQuery } from '../hooks/useTasksQuery';
 import { ErrorState } from '../../../shared/ui/ErrorState';
 import { CommentsList } from '../../comments/components/CommentsList';
+import { useMemo } from 'react';
+import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery';
+import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge';
 
 export function TaskDetailPage() {
   const { projectId, taskItemId } = useParams<{ projectId: string; taskItemId: string }>();
   const { data: task, isLoading, error } = useTaskQuery(projectId!, taskItemId!);
+  const { data: projectMembers = [] } = useProjectMembersQuery(projectId!);
+
+  const assigneeName = useMemo(() => {
+    if (!task) {
+      return '';
+    }
+
+    return projectMembers.find((member) => member.userId === task.assignedUserId)?.userName ?? task.assignedUserId;
+  }, [projectMembers, task]);
 
   if (isLoading) {
     return <div className="text-center py-8">Loading task...</div>;
@@ -39,12 +51,11 @@ export function TaskDetailPage() {
             <p className="text-base-content/70">{task.description || 'No description provided.'}</p>
           </div>
           <div className="flex gap-4">
-            <span className={`badge ${task.priority === 'Critical' ? 'badge-error' : task.priority === 'High' ? 'badge-warning' : 'badge-outline'}`}>
-              Priority: {task.priority}
-            </span>
-            <span className={`badge ${task.state === 'Finished' ? 'badge-success' : task.state === 'Canceled' ? 'badge-error' : 'badge-info'}`}>
-              State: {task.state}
-            </span>
+            <span className={getTaskPriorityBadgeClassName(task.priority)}>Priority: {task.priority}</span>
+            <span className={getTaskStateBadgeClassName(task.state)}>State: {task.state}</span>
+          </div>
+          <div className="text-sm text-base-content/70">
+            Assigned to: <span className="font-semibold text-base-content">{assigneeName}</span>
           </div>
           <div className="text-sm text-base-content/60">
             Created: {new Date(task.createdAt).toLocaleDateString()}

@@ -33,6 +33,10 @@ export type CreateTaskRequest = {
   completedAt?: string | null;
 };
 
+export type AssignTaskItemRequest = {
+  assignedUserId: string;
+};
+
 export type UpdateTaskRequest = {
   assignedUserId?: string;
   title?: string;

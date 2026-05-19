@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useProjectQuery } from '../hooks/useProjectsQuery'
+import { useAuth } from '../../auth/context/AuthContext'
 import type { TaskItem } from '../../tasks/types/task.types'
+import { useProjectMembersQuery } from '../hooks/useProjectMembersQuery'
 
 interface ProjectTaskCalendarProps {
   projectId: string
@@ -49,6 +52,7 @@ const formatMonth = (date: Date) =>
 export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarProps) {
   const navigate = useNavigate()
   const [viewDate, setViewDate] = useState(() => new Date())
+  const { data: projectMembers = [] } = useProjectMembersQuery(projectId)
 
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(viewDate)
@@ -83,15 +87,26 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   }, [tasks])
 
   const selectedMonth = useMemo(() => startOfMonth(viewDate), [viewDate])
+  const memberById = useMemo(
+    () => new Map(projectMembers.map((member) => [member.userId, member])),
+    [projectMembers]
+  )
   const previousMonth = () => setViewDate((current) => addMonths(current, -1))
   const nextMonth = () => setViewDate((current) => addMonths(current, 1))
   const goToToday = () => setViewDate(new Date())
+
+  const { data: project } = useProjectQuery(projectId)
+  const { user } = useAuth()
+  const isOwner = !!project && !!user && project.ownerId === user.userId
 
   return (
     <section className="space-y-4 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="badge badge-secondary badge-outline mb-2">Project calendar</div>
+          <div className="flex items-center gap-2">
+            <div className="badge badge-secondary text-secondary-content mb-2">Project calendar</div>
+            {isOwner && <div className="badge badge-accent text-accent-content mb-2">Owner</div>}
+          </div>
           <h2 className="text-2xl font-bold tracking-tight">{formatMonth(selectedMonth)}</h2>
           <p className="text-sm text-base-content/70">Tasks are placed on the completion day when available.</p>
         </div>
@@ -130,9 +145,9 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
               <div className="mt-2 space-y-2">
                 {dayTasks.slice(0, 3).map((task) => {
                   const stateClass = task.state === 'Finished'
-                    ? 'border-success/30 bg-success/10 text-success-content'
+                    ? 'border-success/30 bg-success/10 text-success'
                     : task.state === 'Canceled'
-                      ? 'border-error/30 bg-error/10 text-error-content'
+                      ? 'border-error/30 bg-error/10 text-error'
                       : 'border-primary/30 bg-primary/10 text-base-content'
 
                   return (
@@ -143,8 +158,11 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
                       className={`block w-full rounded-xl border px-2 py-1 text-left text-xs font-medium transition hover:scale-[1.01] ${stateClass}`}
                       title={task.title}
                     >
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-col gap-1">
                         <span className="truncate">{task.title}</span>
+                        <span className="truncate text-[10px] opacity-80">
+                          Assigned to: {memberById.get(task.assignedUserId)?.userName ?? task.assignedUserId}
+                        </span>
                       </div>
                     </button>
                   )

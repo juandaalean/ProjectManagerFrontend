@@ -75,7 +75,7 @@ export function TasksPage() {
         <div className="hero rounded-box bg-base-100 shadow-sm">
           <div className="hero-content flex-col items-start gap-4 p-6 lg:flex-row lg:justify-between">
             <div>
-              <div className="badge badge-secondary badge-outline mb-3">Tasks</div>
+              <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
               <h1 className="text-3xl font-bold tracking-tight">All tasks</h1>
               <p className="max-w-2xl text-base-content/70">
                 Review the tasks available across all projects you can access.
@@ -97,14 +97,14 @@ export function TasksPage() {
                 <div className="card-body gap-4 p-6">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                      <div className="badge badge-primary badge-outline mb-2">Project</div>
+                      <div className="badge badge-secondary text-secondary-content mb-2">Project</div>
                       <h2 className="text-2xl font-bold tracking-tight">{projectName}</h2>
                     </div>
-                    <div className="badge badge-secondary badge-outline">
+                    <div className="badge badge-accent text-accent-content">
                       {group.tasks.length} tasks
                     </div>
                   </div>
-                  <TaskList tasks={group.tasks} />
+                  <TaskList tasks={group.tasks} projectId={group.projectId} />
                 </div>
               </Card>
             )
@@ -127,7 +127,7 @@ export function TasksPage() {
       <div className="hero rounded-box bg-base-100 shadow-sm">
         <div className="hero-content flex-col items-start gap-4 p-6 lg:flex-row lg:justify-between">
           <div>
-            <div className="badge badge-secondary badge-outline mb-3">Tasks</div>
+            <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
             <h1 className="text-3xl font-bold tracking-tight">Task board</h1>
             <p className="max-w-2xl text-base-content/70">
               Track work items by priority and state in a cleaner dashboard surface.
