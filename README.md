@@ -107,3 +107,5 @@ src/
 - Clean and minimal Vite startup.
 - Feature-based structure created.
 - Skeleton base files ready to begin real phased integration.
+
+
