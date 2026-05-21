@@ -1,59 +1,61 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import type { AuthUser } from '../types/auth.types'
+import type { AuthUser, AuthResponse } from '../types/auth.types'
 
 type AuthContextType = {
   user: AuthUser | null
   isAuthenticated: boolean
-  login: (token: string, user: AuthUser) => void
+  login: (authResponse: AuthResponse) => void
   logout: () => void
   isLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const TOKEN_KEY = 'accessToken'
-const USER_KEY = 'user'
+const AUTH_KEY = 'authResponse'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
+  const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for stored token and user on mount
-    const token = localStorage.getItem(TOKEN_KEY)
-    const storedUser = localStorage.getItem(USER_KEY)
+    // Check for stored auth response on mount
+    const storedAuth = localStorage.getItem(AUTH_KEY)
 
-    if (token && storedUser) {
+    if (storedAuth) {
       try {
-        const parsedUser = JSON.parse(storedUser)
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setUser(parsedUser)
+        const parsedAuth: AuthResponse = JSON.parse(storedAuth)
+        const now = new Date()
+        const expiresAt = new Date(parsedAuth.expiresAtUtc)
+        if (expiresAt > now) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setAuthResponse(parsedAuth)
+        } else {
+          // Token expired, clear storage
+          localStorage.removeItem(AUTH_KEY)
+        }
       } catch {
-        // Invalid stored user, clear storage
-        localStorage.removeItem(TOKEN_KEY)
-        localStorage.removeItem(USER_KEY)
+        // Invalid stored data, clear storage
+        localStorage.removeItem(AUTH_KEY)
       }
     }
 
     setIsLoading(false)
   }, [])
 
-  const login = (token: string, userData: AuthUser) => {
-    localStorage.setItem(TOKEN_KEY, token)
-    localStorage.setItem(USER_KEY, JSON.stringify(userData))
-    setUser(userData)
+  const login = (authData: AuthResponse) => {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(authData))
+    setAuthResponse(authData)
   }
 
   const logout = () => {
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
-    setUser(null)
+    localStorage.removeItem(AUTH_KEY)
+    setAuthResponse(null)
   }
 
   const value: AuthContextType = {
-    user,
-    isAuthenticated: !!user,
+    user: authResponse?.user || null,
+    isAuthenticated: !!authResponse,
     login,
     logout,
     isLoading,
