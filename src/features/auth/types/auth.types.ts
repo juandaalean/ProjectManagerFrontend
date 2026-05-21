@@ -14,7 +14,15 @@ export type RegisterRequest = {
 }
 
 export type AuthUser = {
-  id: string
+  userId: string
   name: string
   email: string
+  rol: string
+}
+
+export type AuthResponse = {
+  accessToken: string
+  tokenType: string
+  expiresAtUtc: string
+  user: AuthUser
 }

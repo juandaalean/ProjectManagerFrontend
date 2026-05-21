@@ -1,5 +1,13 @@
 import type { PropsWithChildren } from 'react'
 
-export function Card({ children }: PropsWithChildren) {
-  return <section>{children}</section>
+interface CardProps extends PropsWithChildren {
+  className?: string
+}
+
+export function Card({ children, className = '' }: CardProps) {
+  return (
+    <div className={`card bg-base-100 shadow-sm ${className}`}>
+      {children}
+    </div>
+  )
 }

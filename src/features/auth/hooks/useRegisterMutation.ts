@@ -8,15 +8,8 @@ export function useRegisterMutation() {
 
   return useMutation({
     mutationFn: (userData: RegisterRequest) => authApi.register(userData),
-    onSuccess: (data, variables) => {
-      // Assuming the API returns token and user info, but currently only token
-      // For now, store token and create user from registration data
-      const user = {
-        id: '1', // TODO: Get from API
-        name: variables.name,
-        email: variables.email,
-      }
-      login(data.accessToken, user)
+    onSuccess: (data) => {
+      login(data)
     },
   })
 }
