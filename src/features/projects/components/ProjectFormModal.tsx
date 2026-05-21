@@ -21,17 +21,19 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
-    defaultValues: project ? {
-      name: project.name,
-      description: project.description || '',
-      startDate: project.startDate.split('T')[0], // Format for date input
-      endDate: project.endDate.split('T')[0],
-    } : {
-      name: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-    },
+    defaultValues: project
+      ? {
+          name: project.name,
+          description: project.description || '',
+          startDate: project.startDate.split('T')[0], // Format for date input
+          endDate: project.endDate.split('T')[0],
+        }
+      : {
+          name: '',
+          description: '',
+          startDate: '',
+          endDate: '',
+        },
   })
 
   const toProjectPayload = (data: ProjectFormData) => ({
@@ -52,7 +54,7 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
             onClose()
             form.reset()
           },
-        }
+        },
       )
     } else {
       createMutation.mutate(payload, {
@@ -82,9 +84,7 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
 
           <div className="form-control w-full">
             <label className="label">
-              <span className="label-text font-semibold">
-                Description
-              </span>
+              <span className="label-text font-semibold">Description</span>
             </label>
 
             <textarea
@@ -99,9 +99,7 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
             />
 
             {form.formState.errors.description && (
-              <p className="mt-1 text-sm text-error">
-                {form.formState.errors.description.message}
-              </p>
+              <p className="mt-1 text-sm text-error">{form.formState.errors.description.message}</p>
             )}
           </div>
 
@@ -120,9 +118,7 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
           />
 
           {mutation.isError && (
-            <p className="text-sm text-error">
-              {mutation.error?.message || 'An error occurred'}
-            </p>
+            <p className="text-sm text-error">{mutation.error?.message || 'An error occurred'}</p>
           )}
 
           <div className="flex gap-2 justify-end">
@@ -135,15 +131,8 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
               Cancel
             </Button>
 
-            <Button
-              type="submit"
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending
-                ? 'Saving...'
-                : isEditing
-                  ? 'Update'
-                  : 'Create'}
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? 'Saving...' : isEditing ? 'Update' : 'Create'}
             </Button>
           </div>
         </form>

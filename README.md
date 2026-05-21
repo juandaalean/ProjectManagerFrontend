@@ -272,11 +272,11 @@ The repository includes `vercel.json` with a rewrite so React Router routes like
 
 ## Status Matrix
 
-| Domain | Backend | Frontend |
-|---|---|---|
-| Auth | Implemented | Implemented |
-| Projects | Implemented | Implemented |
-| Tasks | Implemented | Implemented |
+| Domain        | Backend     | Frontend    |
+| ------------- | ----------- | ----------- |
+| Auth          | Implemented | Implemented |
+| Projects      | Implemented | Implemented |
+| Tasks         | Implemented | Implemented |
 | Task comments | Implemented | Implemented |
 
 ## Diagram

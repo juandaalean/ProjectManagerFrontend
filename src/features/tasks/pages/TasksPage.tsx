@@ -1,47 +1,51 @@
-import { useMemo } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Button } from '../../../shared/ui/Button';
-import { Card } from '../../../shared/ui/Card';
-import { EmptyState } from '../../../shared/ui/EmptyState';
-import { ErrorState } from '../../../shared/ui/ErrorState';
-import { useProjectsQuery } from '../../projects/hooks/useProjectsQuery';
-import { TaskList } from '../components/TaskList';
-import { TaskFormModal } from '../components/TaskFormModal';
-import { useTasksQuery } from '../hooks/useTasksQuery';
-import { useTasksByProjectsQuery } from '../hooks/useTasksQuery';
+import { useMemo } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Button } from '../../../shared/ui/Button'
+import { Card } from '../../../shared/ui/Card'
+import { EmptyState } from '../../../shared/ui/EmptyState'
+import { ErrorState } from '../../../shared/ui/ErrorState'
+import { useProjectsQuery } from '../../projects/hooks/useProjectsQuery'
+import { TaskList } from '../components/TaskList'
+import { TaskFormModal } from '../components/TaskFormModal'
+import { useTasksQuery } from '../hooks/useTasksQuery'
+import { useTasksByProjectsQuery } from '../hooks/useTasksQuery'
 
 export function TasksPage() {
-  const { projectId } = useParams<{ projectId: string }>();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const showCreateModal = searchParams.get('create') === '1';
-  const isGlobalTasksView = !projectId;
+  const { projectId } = useParams<{ projectId: string }>()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const showCreateModal = searchParams.get('create') === '1'
+  const isGlobalTasksView = !projectId
 
-  const { data: projectTasks, isLoading, error } = useTasksQuery(projectId);
-  const { data: projects, isLoading: projectsLoading, error: projectsError } = useProjectsQuery(isGlobalTasksView);
-  const projectIds = useMemo(() => projects?.map((project) => project.projectId) ?? [], [projects]);
+  const { data: projectTasks, isLoading, error } = useTasksQuery(projectId)
+  const {
+    data: projects,
+    isLoading: projectsLoading,
+    error: projectsError,
+  } = useProjectsQuery(isGlobalTasksView)
+  const projectIds = useMemo(() => projects?.map((project) => project.projectId) ?? [], [projects])
   const {
     data: tasksByProjects,
     isLoading: groupedTasksLoading,
     error: groupedTasksError,
-  } = useTasksByProjectsQuery(projectIds);
+  } = useTasksByProjectsQuery(projectIds)
 
   const projectById = useMemo(
     () => new Map((projects ?? []).map((project) => [project.projectId, project])),
-    [projects]
-  );
+    [projects],
+  )
 
   if (isGlobalTasksView) {
     if (projectsLoading || groupedTasksLoading) {
-      return <div className="text-center py-8">Loading tasks...</div>;
+      return <div className="text-center py-8">Loading tasks...</div>
     }
 
     if (projectsError) {
-      return <ErrorState message={projectsError.message} />;
+      return <ErrorState message={projectsError.message} />
     }
 
     if (groupedTasksError) {
-      return <ErrorState message={groupedTasksError.message} />;
+      return <ErrorState message={groupedTasksError.message} />
     }
 
     if (!projects || projects.length === 0) {
@@ -49,9 +53,7 @@ export function TasksPage() {
         <EmptyState
           title="No projects yet"
           description="Create a project first to start seeing tasks here"
-          action={
-            <Button onClick={() => navigate('/projects')}>Go to Projects</Button>
-          }
+          action={<Button onClick={() => navigate('/projects')}>Go to Projects</Button>}
         />
       )
     }
@@ -63,9 +65,7 @@ export function TasksPage() {
         <EmptyState
           title="No tasks yet"
           description="Your projects do not have tasks assigned yet"
-          action={
-            <Button onClick={() => navigate('/projects')}>Go to Projects</Button>
-          }
+          action={<Button onClick={() => navigate('/projects')}>Go to Projects</Button>}
         />
       )
     }
@@ -97,7 +97,9 @@ export function TasksPage() {
                 <div className="card-body gap-4 p-6">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                      <div className="badge badge-secondary text-secondary-content mb-2">Project</div>
+                      <div className="badge badge-secondary text-secondary-content mb-2">
+                        Project
+                      </div>
                       <h2 className="text-2xl font-bold tracking-tight">{projectName}</h2>
                     </div>
                     <div className="badge badge-accent text-accent-content">
@@ -115,11 +117,11 @@ export function TasksPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading tasks...</div>;
+    return <div className="text-center py-8">Loading tasks...</div>
   }
 
   if (error) {
-    return <ErrorState message={error.message} />;
+    return <ErrorState message={error.message} />
   }
 
   return (
@@ -154,5 +156,5 @@ export function TasksPage() {
         />
       )}
     </div>
-  );
+  )
 }

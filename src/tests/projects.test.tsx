@@ -30,6 +30,7 @@ describe('projects', () => {
     it('validates end date after start date', () => {
       const invalidData = {
         name: 'Test Project',
+        description: 'A test project',
         startDate: '2024-12-31',
         endDate: '2024-01-01',
       }

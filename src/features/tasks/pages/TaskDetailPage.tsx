@@ -1,36 +1,39 @@
-import { useParams } from 'react-router-dom';
-import { Button } from '../../../shared/ui/Button';
-import { Card } from '../../../shared/ui/Card';
-import { useTaskQuery } from '../hooks/useTasksQuery';
-import { ErrorState } from '../../../shared/ui/ErrorState';
-import { CommentsList } from '../../comments/components/CommentsList';
-import { useMemo } from 'react';
-import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery';
-import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge';
+import { useParams } from 'react-router-dom'
+import { Button } from '../../../shared/ui/Button'
+import { Card } from '../../../shared/ui/Card'
+import { useTaskQuery } from '../hooks/useTasksQuery'
+import { ErrorState } from '../../../shared/ui/ErrorState'
+import { CommentsList } from '../../comments/components/CommentsList'
+import { useMemo } from 'react'
+import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
+import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge'
 
 export function TaskDetailPage() {
-  const { projectId, taskItemId } = useParams<{ projectId: string; taskItemId: string }>();
-  const { data: task, isLoading, error } = useTaskQuery(projectId!, taskItemId!);
-  const { data: projectMembers = [] } = useProjectMembersQuery(projectId!);
+  const { projectId, taskItemId } = useParams<{ projectId: string; taskItemId: string }>()
+  const { data: task, isLoading, error } = useTaskQuery(projectId!, taskItemId!)
+  const { data: projectMembers = [] } = useProjectMembersQuery(projectId!)
 
   const assigneeName = useMemo(() => {
     if (!task) {
-      return '';
+      return ''
     }
 
-    return projectMembers.find((member) => member.userId === task.assignedUserId)?.userName ?? task.assignedUserId;
-  }, [projectMembers, task]);
+    return (
+      projectMembers.find((member) => member.userId === task.assignedUserId)?.userName ??
+      task.assignedUserId
+    )
+  }, [projectMembers, task])
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading task...</div>;
+    return <div className="text-center py-8">Loading task...</div>
   }
 
   if (error) {
-    return <ErrorState message={error.message} />;
+    return <ErrorState message={error.message} />
   }
 
   if (!task) {
-    return <div className="text-center py-8">Task not found.</div>;
+    return <div className="text-center py-8">Task not found.</div>
   }
 
   return (
@@ -51,7 +54,9 @@ export function TaskDetailPage() {
             <p className="text-base-content/70">{task.description || 'No description provided.'}</p>
           </div>
           <div className="flex gap-4">
-            <span className={getTaskPriorityBadgeClassName(task.priority)}>Priority: {task.priority}</span>
+            <span className={getTaskPriorityBadgeClassName(task.priority)}>
+              Priority: {task.priority}
+            </span>
             <span className={getTaskStateBadgeClassName(task.state)}>State: {task.state}</span>
           </div>
           <div className="text-sm text-base-content/70">
@@ -67,5 +72,5 @@ export function TaskDetailPage() {
       </Card>
       <CommentsList projectId={projectId!} taskItemId={taskItemId!} />
     </div>
-  );
+  )
 }

@@ -40,11 +40,7 @@ export function ProjectsPage() {
 
       <ProjectList onEdit={handleEdit} onCreate={handleCreate} />
 
-      <ProjectFormModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        project={editingProject}
-      />
+      <ProjectFormModal isOpen={isModalOpen} onClose={handleCloseModal} project={editingProject} />
     </div>
   )
 }

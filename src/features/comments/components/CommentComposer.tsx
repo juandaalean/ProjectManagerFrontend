@@ -53,7 +53,7 @@ export function CommentComposer({
             form.reset({ content: '' })
             onCompleted?.()
           },
-        }
+        },
       )
       return
     }
@@ -69,7 +69,7 @@ export function CommentComposer({
           form.reset({ content: '' })
           onCompleted?.()
         },
-      }
+      },
     )
   }
 
@@ -104,7 +104,12 @@ export function CommentComposer({
 
           <div className="flex flex-wrap justify-end gap-2">
             {isEditing && onCancel && (
-              <Button type="button" variant="secondary" onClick={onCancel} disabled={mutation.isPending}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onCancel}
+                disabled={mutation.isPending}
+              >
                 Cancel
               </Button>
             )}

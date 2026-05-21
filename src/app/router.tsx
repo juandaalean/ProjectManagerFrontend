@@ -14,45 +14,74 @@ export function AppRouter() {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-      <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
+      <Route
+        path="/login"
+        element={
+          <AuthLayout>
+            <LoginPage />
+          </AuthLayout>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <AuthLayout>
+            <RegisterPage />
+          </AuthLayout>
+        }
+      />
 
       {/* Protected routes */}
-      <Route path="/projects" element={
-        <PrivateRoute>
-          <AppLayout>
-            <ProjectsPage />
-          </AppLayout>
-        </PrivateRoute>
-      } />
-      <Route path="/projects/:projectId" element={
-        <PrivateRoute>
-          <AppLayout>
-            <ProjectDetailPage />
-          </AppLayout>
-        </PrivateRoute>
-      } />
-      <Route path="/tasks" element={
-        <PrivateRoute>
-          <AppLayout>
-            <TasksPage />
-          </AppLayout>
-        </PrivateRoute>
-      } />
-      <Route path="/projects/:projectId/tasks" element={
-        <PrivateRoute>
-          <AppLayout>
-            <TasksPage />
-          </AppLayout>
-        </PrivateRoute>
-      } />
-      <Route path="/projects/:projectId/tasks/:taskItemId" element={
-        <PrivateRoute>
-          <AppLayout>
-            <TaskDetailPage />
-          </AppLayout>
-        </PrivateRoute>
-      } />
+      <Route
+        path="/projects"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <ProjectsPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/projects/:projectId"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <ProjectDetailPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/tasks"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <TasksPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/projects/:projectId/tasks"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <TasksPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/projects/:projectId/tasks/:taskItemId"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <TaskDetailPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
 
       {/* Redirect unknown routes to home */}
       <Route path="*" element={<Navigate to="/login" replace />} />

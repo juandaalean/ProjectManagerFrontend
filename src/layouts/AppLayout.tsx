@@ -6,7 +6,9 @@ import { AppSidebar } from './app-shell/AppSidebar'
 
 export function AppLayout({ children }: PropsWithChildren) {
   const [collapsed, setCollapsed] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'))
+  const [theme, setTheme] = useState<'light' | 'dark'>(() =>
+    localStorage.getItem('theme') === 'dark' ? 'dark' : 'light',
+  )
 
   useEffect(() => {
     try {

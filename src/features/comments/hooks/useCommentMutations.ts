@@ -6,14 +6,22 @@ import type {
   UpdateCommentRequest,
 } from '../types/comment.types'
 
-function invalidateComments(queryClient: ReturnType<typeof useQueryClient>, projectId: string, taskItemId: string) {
+function invalidateComments(
+  queryClient: ReturnType<typeof useQueryClient>,
+  projectId: string,
+  taskItemId: string,
+) {
   queryClient.invalidateQueries({ queryKey: ['comments', projectId, taskItemId] })
 }
 
 export function useCreateCommentMutation() {
   const queryClient = useQueryClient()
 
-  return useMutation<CommentItem, Error, { projectId: string; taskItemId: string; comment: CreateCommentRequest }>({
+  return useMutation<
+    CommentItem,
+    Error,
+    { projectId: string; taskItemId: string; comment: CreateCommentRequest }
+  >({
     mutationFn: ({ projectId, taskItemId, comment }) =>
       commentsApi.createComment(projectId, taskItemId, comment),
     onSuccess: (newComment, variables) => {
@@ -21,7 +29,9 @@ export function useCreateCommentMutation() {
       queryClient.setQueryData<CommentItem[]>(
         ['comments', variables.projectId, variables.taskItemId],
         (currentComments) =>
-          currentComments ? [newComment, ...currentComments.filter((comment) => comment.id !== newComment.id)] : [newComment]
+          currentComments
+            ? [newComment, ...currentComments.filter((comment) => comment.id !== newComment.id)]
+            : [newComment],
       )
     },
   })
@@ -42,7 +52,9 @@ export function useUpdateCommentMutation() {
       queryClient.setQueryData<CommentItem[]>(
         ['comments', variables.projectId, variables.taskItemId],
         (currentComments) =>
-          currentComments?.map((comment) => (comment.id === updatedComment.id ? updatedComment : comment)) ?? []
+          currentComments?.map((comment) =>
+            comment.id === updatedComment.id ? updatedComment : comment,
+          ) ?? [],
       )
     },
   })
@@ -58,7 +70,8 @@ export function useDeleteCommentMutation() {
       invalidateComments(queryClient, variables.projectId, variables.taskItemId)
       queryClient.setQueryData<CommentItem[]>(
         ['comments', variables.projectId, variables.taskItemId],
-        (currentComments) => currentComments?.filter((comment) => comment.id !== variables.commentId) ?? []
+        (currentComments) =>
+          currentComments?.filter((comment) => comment.id !== variables.commentId) ?? [],
       )
     },
   })

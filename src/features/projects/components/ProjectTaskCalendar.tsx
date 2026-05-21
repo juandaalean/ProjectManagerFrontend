@@ -37,7 +37,8 @@ const addDays = (date: Date, days: number) => {
   return result
 }
 
-const addMonths = (date: Date, months: number) => new Date(date.getFullYear(), date.getMonth() + months, 1)
+const addMonths = (date: Date, months: number) =>
+  new Date(date.getFullYear(), date.getMonth() + months, 1)
 
 const normalizeEventDate = (task: TaskItem) => {
   const rawDate = task.completedAt ?? task.createdAt
@@ -89,7 +90,7 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   const selectedMonth = useMemo(() => startOfMonth(viewDate), [viewDate])
   const memberById = useMemo(
     () => new Map(projectMembers.map((member) => [member.userId, member])),
-    [projectMembers]
+    [projectMembers],
   )
   const previousMonth = () => setViewDate((current) => addMonths(current, -1))
   const nextMonth = () => setViewDate((current) => addMonths(current, 1))
@@ -104,23 +105,35 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <div className="badge badge-secondary text-secondary-content mb-2">Project calendar</div>
+            <div className="badge badge-secondary text-secondary-content mb-2">
+              Project calendar
+            </div>
             {isOwner && <div className="badge badge-accent text-accent-content mb-2">Owner</div>}
           </div>
           <h2 className="text-2xl font-bold tracking-tight">{formatMonth(selectedMonth)}</h2>
-          <p className="text-sm text-base-content/70">Tasks are placed on the completion day when available.</p>
+          <p className="text-sm text-base-content/70">
+            Tasks are placed on the completion day when available.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button className="btn btn-ghost btn-sm" onClick={previousMonth} type="button">Previous</button>
-          <button className="btn btn-ghost btn-sm" onClick={goToToday} type="button">Today</button>
-          <button className="btn btn-ghost btn-sm" onClick={nextMonth} type="button">Next</button>
+          <button className="btn btn-ghost btn-sm" onClick={previousMonth} type="button">
+            Previous
+          </button>
+          <button className="btn btn-ghost btn-sm" onClick={goToToday} type="button">
+            Today
+          </button>
+          <button className="btn btn-ghost btn-sm" onClick={nextMonth} type="button">
+            Next
+          </button>
         </div>
       </div>
 
       <div className="grid grid-cols-7 gap-2 text-xs font-semibold uppercase tracking-wide text-base-content/50">
         {weekdayLabels.map((label) => (
-          <div key={label} className="px-2 py-1 text-center">{label}</div>
+          <div key={label} className="px-2 py-1 text-center">
+            {label}
+          </div>
         ))}
       </div>
 
@@ -138,17 +151,20 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
               <div className="flex items-start justify-between gap-2">
                 <span className="text-sm font-semibold">{day.getDate()}</span>
                 {dayTasks.length > 0 && (
-                  <span className="badge badge-primary badge-outline badge-sm">{dayTasks.length}</span>
+                  <span className="badge badge-primary badge-outline badge-sm">
+                    {dayTasks.length}
+                  </span>
                 )}
               </div>
 
               <div className="mt-2 space-y-2">
                 {dayTasks.slice(0, 3).map((task) => {
-                  const stateClass = task.state === 'Finished'
-                    ? 'border-success/30 bg-success/10 text-success'
-                    : task.state === 'Canceled'
-                      ? 'border-error/30 bg-error/10 text-error'
-                      : 'border-primary/30 bg-primary/10 text-base-content'
+                  const stateClass =
+                    task.state === 'Finished'
+                      ? 'border-success/30 bg-success/10 text-success'
+                      : task.state === 'Canceled'
+                        ? 'border-error/30 bg-error/10 text-error'
+                        : 'border-primary/30 bg-primary/10 text-base-content'
 
                   return (
                     <button
@@ -161,14 +177,17 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
                       <div className="flex flex-col gap-1">
                         <span className="truncate">{task.title}</span>
                         <span className="truncate text-[10px] opacity-80">
-                          Assigned to: {memberById.get(task.assignedUserId)?.userName ?? task.assignedUserId}
+                          Assigned to:{' '}
+                          {memberById.get(task.assignedUserId)?.userName ?? task.assignedUserId}
                         </span>
                       </div>
                     </button>
                   )
                 })}
                 {dayTasks.length > 3 && (
-                  <p className="px-1 text-[11px] text-base-content/60">+{dayTasks.length - 3} more</p>
+                  <p className="px-1 text-[11px] text-base-content/60">
+                    +{dayTasks.length - 3} more
+                  </p>
                 )}
               </div>
             </div>

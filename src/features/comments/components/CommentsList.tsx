@@ -70,7 +70,9 @@ export function CommentsList({ projectId, taskItemId }: CommentsListProps) {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-semibold">{comment.userName}</h3>
-                        {isOwnComment && <span className="badge badge-primary badge-outline">You</span>}
+                        {isOwnComment && (
+                          <span className="badge badge-primary badge-outline">You</span>
+                        )}
                       </div>
                       <p className="text-xs uppercase tracking-wide text-base-content/50">
                         {formatDate(comment.createdAt)}
@@ -79,7 +81,11 @@ export function CommentsList({ projectId, taskItemId }: CommentsListProps) {
 
                     {isOwnComment && (
                       <div className="flex gap-2">
-                        <Button variant="secondary" size="sm" onClick={() => setEditingComment(comment)}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setEditingComment(comment)}
+                        >
                           Edit
                         </Button>
                         <Button variant="danger" size="sm" onClick={() => handleDelete(comment)}>

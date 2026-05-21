@@ -46,13 +46,21 @@ export const projectsApi = {
 
   async createProjectMember(
     projectId: string,
-    member: CreateProjectMemberRequest
+    member: CreateProjectMemberRequest,
   ): Promise<ProjectMemberDto> {
     try {
       console.debug('[projectsApi] createProjectMember payload:', member)
       // Send both userEmail and email to be tolerant to backend naming
-      const payload = { userEmail: member.userEmail, email: member.userEmail, Email: member.userEmail, role: member.role }
-      const response = await httpClient.post<ProjectMemberDto>(`/projects/${projectId}/members`, payload)
+      const payload = {
+        userEmail: member.userEmail,
+        email: member.userEmail,
+        Email: member.userEmail,
+        role: member.role,
+      }
+      const response = await httpClient.post<ProjectMemberDto>(
+        `/projects/${projectId}/members`,
+        payload,
+      )
       console.debug('[projectsApi] createProjectMember response:', response.data)
       return response.data
     } catch (error) {
@@ -64,16 +72,22 @@ export const projectsApi = {
   async updateProjectMemberRole(
     projectId: string,
     userId: string,
-    payload: UpdateProjectMemberRoleRequest
+    payload: UpdateProjectMemberRoleRequest,
   ): Promise<ProjectMemberDto> {
     console.debug('[projectsApi] updateProjectMemberRole payload:', { userId, ...payload })
 
     // Prefer the dedicated role endpoint by userId: /projects/{projectId}/members/{userId}/role
     try {
-      const response = await httpClient.put<ProjectMemberDto>(`/projects/${projectId}/members/${encodeURIComponent(userId)}/role`, {
-        Role: payload.role,
-      })
-      console.debug('[projectsApi] updateProjectMemberRole response (put role by id):', response.data)
+      const response = await httpClient.put<ProjectMemberDto>(
+        `/projects/${projectId}/members/${encodeURIComponent(userId)}/role`,
+        {
+          Role: payload.role,
+        },
+      )
+      console.debug(
+        '[projectsApi] updateProjectMemberRole response (put role by id):',
+        response.data,
+      )
       return response.data
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status
@@ -82,10 +96,16 @@ export const projectsApi = {
       // Fallbacks: try the member resource and the collection endpoint
       if (status === 405) {
         try {
-          const resp = await httpClient.put<ProjectMemberDto>(`/projects/${projectId}/members/${encodeURIComponent(userId)}`, {
-            Role: payload.role,
-          })
-          console.debug('[projectsApi] updateProjectMemberRole response (put member fallback):', resp.data)
+          const resp = await httpClient.put<ProjectMemberDto>(
+            `/projects/${projectId}/members/${encodeURIComponent(userId)}`,
+            {
+              Role: payload.role,
+            },
+          )
+          console.debug(
+            '[projectsApi] updateProjectMemberRole response (put member fallback):',
+            resp.data,
+          )
           return resp.data
         } catch (err2: unknown) {
           const status2 = (err2 as { response?: { status?: number } })?.response?.status
@@ -93,14 +113,23 @@ export const projectsApi = {
         }
 
         try {
-          const resp2 = await httpClient.patch<ProjectMemberDto>(`/projects/${projectId}/members/${encodeURIComponent(userId)}/role`, {
-            Role: payload.role,
-          })
-          console.debug('[projectsApi] updateProjectMemberRole response (patch role by id):', resp2.data)
+          const resp2 = await httpClient.patch<ProjectMemberDto>(
+            `/projects/${projectId}/members/${encodeURIComponent(userId)}/role`,
+            {
+              Role: payload.role,
+            },
+          )
+          console.debug(
+            '[projectsApi] updateProjectMemberRole response (patch role by id):',
+            resp2.data,
+          )
           return resp2.data
         } catch (err3: unknown) {
           const status3 = (err3 as { response?: { status?: number } })?.response?.status
-          console.warn('[projectsApi] updateProjectMemberRole patch-role-by-id failed, status:', status3)
+          console.warn(
+            '[projectsApi] updateProjectMemberRole patch-role-by-id failed, status:',
+            status3,
+          )
         }
 
         try {
@@ -108,11 +137,17 @@ export const projectsApi = {
             Role: payload.role,
             Email: userId,
           })
-          console.debug('[projectsApi] updateProjectMemberRole response (put collection fallback):', resp4.data)
+          console.debug(
+            '[projectsApi] updateProjectMemberRole response (put collection fallback):',
+            resp4.data,
+          )
           return resp4.data
         } catch (err4: unknown) {
           const status4 = (err4 as { response?: { status?: number } })?.response?.status
-          console.warn('[projectsApi] updateProjectMemberRole collection put failed, status:', status4)
+          console.warn(
+            '[projectsApi] updateProjectMemberRole collection put failed, status:',
+            status4,
+          )
         }
       }
 
@@ -143,11 +178,16 @@ export const projectsApi = {
           return
         } catch (err2: unknown) {
           const status2 = (err2 as { response?: { status?: number } })?.response?.status
-          console.warn('[projectsApi] deleteProjectMember delete-with-body failed, status:', status2)
+          console.warn(
+            '[projectsApi] deleteProjectMember delete-with-body failed, status:',
+            status2,
+          )
         }
 
         try {
-          await httpClient.delete(`/projects/${projectId}/members?email=${encodeURIComponent(userId)}`)
+          await httpClient.delete(
+            `/projects/${projectId}/members?email=${encodeURIComponent(userId)}`,
+          )
           console.debug('[projectsApi] deleteProjectMember success (query fallback)')
           return
         } catch (err3: unknown) {
