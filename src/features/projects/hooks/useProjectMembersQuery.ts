@@ -33,7 +33,8 @@ export function useUpdateProjectMemberRoleMutation(projectId: string) {
     Error,
     { userId: string; payload: UpdateProjectMemberRoleRequest }
   >({
-    mutationFn: ({ userId, payload }) => projectsApi.updateProjectMemberRole(projectId, userId, payload),
+    mutationFn: ({ userId, payload }) =>
+      projectsApi.updateProjectMemberRole(projectId, userId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project-members', projectId] })
     },

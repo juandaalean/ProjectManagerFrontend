@@ -4,8 +4,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
 import { ErrorState } from '../../../shared/ui/ErrorState'
-import { useCreateProjectMemberMutation, useDeleteProjectMemberMutation, useProjectMembersQuery, useUpdateProjectMemberRoleMutation } from '../hooks/useProjectMembersQuery'
-import { projectMemberSchema, projectRoleOptions, type ProjectMemberFormData } from '../schemas/projectMemberSchema'
+import {
+  useCreateProjectMemberMutation,
+  useDeleteProjectMemberMutation,
+  useProjectMembersQuery,
+  useUpdateProjectMemberRoleMutation,
+} from '../hooks/useProjectMembersQuery'
+import {
+  projectMemberSchema,
+  projectRoleOptions,
+  type ProjectMemberFormData,
+} from '../schemas/projectMemberSchema'
 import type { ProjectMemberDto } from '../types/project.types'
 
 interface ProjectMembersSectionProps {
@@ -50,7 +59,10 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
   const isEditing = !!editingMember
   const mutation = isEditing ? updateMutation : createMutation
 
-  const memberCountLabel = useMemo(() => `${members.length} member${members.length === 1 ? '' : 's'}`, [members.length])
+  const memberCountLabel = useMemo(
+    () => `${members.length} member${members.length === 1 ? '' : 's'}`,
+    [members.length],
+  )
 
   const handleSubmit = (data: ProjectMemberFormData) => {
     if (editingMember) {
@@ -60,7 +72,7 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
           onSuccess: () => {
             setEditingMember(null)
           },
-        }
+        },
       )
       return
     }
@@ -74,7 +86,7 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
         onSuccess: () => {
           form.reset(emptyMemberForm)
         },
-      }
+      },
     )
   }
 
@@ -135,7 +147,9 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
                         <MemberBadge role={member.role} />
                       </div>
                       <p className="text-sm text-base-content/70">{member.userEmail}</p>
-                      <p className="text-xs uppercase tracking-wide text-base-content/50">{member.userId}</p>
+                      <p className="text-xs uppercase tracking-wide text-base-content/50">
+                        {member.userId}
+                      </p>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
@@ -181,7 +195,9 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
                     {...form.register('userEmail')}
                   />
                   {form.formState.errors.userEmail && (
-                    <p className="mt-1 text-sm text-error">{form.formState.errors.userEmail.message}</p>
+                    <p className="mt-1 text-sm text-error">
+                      {form.formState.errors.userEmail.message}
+                    </p>
                   )}
                 </label>
 
@@ -205,12 +221,19 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
                 </label>
 
                 {mutation.isError && (
-                  <p className="text-sm text-error">{mutation.error.message || 'An error occurred'}</p>
+                  <p className="text-sm text-error">
+                    {mutation.error.message || 'An error occurred'}
+                  </p>
                 )}
 
                 <div className="flex flex-wrap justify-end gap-2 pt-2">
                   {isEditing && (
-                    <Button type="button" variant="secondary" onClick={handleCancelEdit} disabled={mutation.isPending}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleCancelEdit}
+                      disabled={mutation.isPending}
+                    >
                       Cancel
                     </Button>
                   )}

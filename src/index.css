@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 /* stylelint-disable at-rule-no-unknown */
 @plugin "daisyui";
 
@@ -26,7 +26,13 @@
   --color-error-content: #ffffff;
   --app-page-start: #f9f5ff;
   --app-page-end: #eef2ff;
-  font-family: Inter, 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    Inter,
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: var(--color-base-content);
@@ -72,7 +78,11 @@ body {
   min-width: 320px;
   color: var(--color-base-content);
   background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent 32%),
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--color-primary) 18%, transparent),
+      transparent 32%
+    ),
     linear-gradient(180deg, var(--app-page-start) 0%, var(--app-page-end) 100%);
 }
 

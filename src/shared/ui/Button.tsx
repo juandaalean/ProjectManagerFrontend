@@ -27,7 +27,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     )
-  }
+  },
 )
 
 Button.displayName = 'Button'

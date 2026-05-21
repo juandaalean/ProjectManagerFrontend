@@ -16,9 +16,7 @@ export function AppProviders({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          {children}
-        </BrowserRouter>
+        <BrowserRouter>{children}</BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
   )

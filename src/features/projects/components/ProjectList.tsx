@@ -32,11 +32,7 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
       <EmptyState
         title="No projects yet"
         description="Create your first project to get started"
-        action={
-          onCreate ? (
-            <Button onClick={onCreate}>Create Project</Button>
-          ) : undefined
-        }
+        action={onCreate ? <Button onClick={onCreate}>Create Project</Button> : undefined}
       />
     )
   }
@@ -61,7 +57,7 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
               </div>
               <div className="flex items-center gap-2">
                 <div className="badge badge-ghost">Project</div>
-                { /* Owner badge when current user is owner */ }
+                {/* Owner badge when current user is owner */}
                 {user && user.userId === project.ownerId && (
                   <div className="badge badge-accent text-accent-content">Owner</div>
                 )}
@@ -71,7 +67,9 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-box bg-base-200 p-3">
                 <p className="text-xs uppercase tracking-wide text-base-content/60">Start</p>
-                <p className="mt-1 font-medium">{new Date(project.startDate).toLocaleDateString()}</p>
+                <p className="mt-1 font-medium">
+                  {new Date(project.startDate).toLocaleDateString()}
+                </p>
               </div>
               <div className="rounded-box bg-base-200 p-3">
                 <p className="text-xs uppercase tracking-wide text-base-content/60">End</p>
@@ -88,11 +86,7 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
                 Open Project
               </Button>
               {onEdit && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => onEdit(project)}
-                >
+                <Button variant="secondary" size="sm" onClick={() => onEdit(project)}>
                   Edit
                 </Button>
               )}

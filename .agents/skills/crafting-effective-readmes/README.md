@@ -38,12 +38,12 @@ The skill follows a three-step process:
 
 The skill determines what README task you are working on:
 
-| Task | When to Use |
-|------|-------------|
-| **Creating** | New project with no README yet |
-| **Adding** | Need to document something new in existing README |
-| **Updating** | Capabilities changed, content is stale |
-| **Reviewing** | Checking if README is still accurate |
+| Task          | When to Use                                       |
+| ------------- | ------------------------------------------------- |
+| **Creating**  | New project with no README yet                    |
+| **Adding**    | Need to document something new in existing README |
+| **Updating**  | Capabilities changed, content is stale            |
+| **Reviewing** | Checking if README is still accurate              |
 
 ### Step 2: Gather Context
 
@@ -62,28 +62,28 @@ The skill uses the appropriate template and follows up with: "Anything else to h
 
 ### Project Type Templates
 
-| Type | Audience | Template |
-|------|----------|----------|
-| **Open Source** | Contributors, users worldwide | `templates/oss.md` |
-| **Personal** | Future you, portfolio viewers | `templates/personal.md` |
-| **Internal** | Teammates, new hires | `templates/internal.md` |
-| **Config** | Future you (confused) | `templates/xdg-config.md` |
+| Type            | Audience                      | Template                  |
+| --------------- | ----------------------------- | ------------------------- |
+| **Open Source** | Contributors, users worldwide | `templates/oss.md`        |
+| **Personal**    | Future you, portfolio viewers | `templates/personal.md`   |
+| **Internal**    | Teammates, new hires          | `templates/internal.md`   |
+| **Config**      | Future you (confused)         | `templates/xdg-config.md` |
 
 ### Section Checklist by Project Type
 
-| Section | OSS | Personal | Internal | Config |
-|---------|-----|----------|----------|--------|
-| Name/Description | Yes | Yes | Yes | Yes |
-| Badges | Yes | Optional | No | No |
-| Installation | Yes | Yes | Yes | No |
-| Usage/Examples | Yes | Yes | Yes | Brief |
-| What's Here | No | No | No | Yes |
-| How to Extend | No | No | Optional | Yes |
-| Contributing | Yes | Optional | Yes | No |
-| License | Yes | Optional | No | No |
-| Architecture | Optional | No | Yes | No |
-| Gotchas/Notes | Optional | Optional | Yes | Yes |
-| Last Reviewed | No | No | Optional | Yes |
+| Section          | OSS      | Personal | Internal | Config |
+| ---------------- | -------- | -------- | -------- | ------ |
+| Name/Description | Yes      | Yes      | Yes      | Yes    |
+| Badges           | Yes      | Optional | No       | No     |
+| Installation     | Yes      | Yes      | Yes      | No     |
+| Usage/Examples   | Yes      | Yes      | Yes      | Brief  |
+| What's Here      | No       | No       | No       | Yes    |
+| How to Extend    | No       | No       | Optional | Yes    |
+| Contributing     | Yes      | Optional | Yes      | No     |
+| License          | Yes      | Optional | No       | No     |
+| Architecture     | Optional | No       | Yes      | No     |
+| Gotchas/Notes    | Optional | Optional | Yes      | Yes    |
+| Last Reviewed    | No       | No       | Optional | Yes    |
 
 ### Reference Materials
 

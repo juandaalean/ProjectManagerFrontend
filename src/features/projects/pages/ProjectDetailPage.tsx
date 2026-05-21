@@ -52,9 +52,7 @@ export function ProjectDetailPage() {
             >
               View Tasks
             </Button>
-            <Button
-              onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}
-            >
+            <Button onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}>
               Add Task
             </Button>
           </div>

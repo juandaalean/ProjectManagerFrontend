@@ -18,17 +18,22 @@ export function AuthLayout({ children }: PropsWithChildren) {
               Organiza proyectos, tareas y comentarios sin perder contexto.
             </h1>
             <p className="mt-5 max-w-lg text-base leading-7 text-slate-300 sm:text-lg">
-              Una interfaz más clara para entrar rápido, revisar el estado del trabajo y concentrarte en lo importante.
+              Una interfaz más clara para entrar rápido, revisar el estado del trabajo y
+              concentrarte en lo importante.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                 <p className="text-sm font-medium text-white">Proyectos</p>
-                <p className="mt-1 text-sm text-slate-300">Vista limpia de prioridades y progreso.</p>
+                <p className="mt-1 text-sm text-slate-300">
+                  Vista limpia de prioridades y progreso.
+                </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                 <p className="text-sm font-medium text-white">Tareas</p>
-                <p className="mt-1 text-sm text-slate-300">Seguimiento claro por estado y detalle.</p>
+                <p className="mt-1 text-sm text-slate-300">
+                  Seguimiento claro por estado y detalle.
+                </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
                 <p className="text-sm font-medium text-white">Comentarios</p>
