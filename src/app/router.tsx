@@ -13,6 +13,7 @@ export function AppRouter() {
   return (
     <Routes>
       {/* Public routes */}
+<<<<<<< HEAD
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
       <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
@@ -56,6 +57,68 @@ export function AppRouter() {
 
       {/* Redirect unknown routes to home */}
       <Route path="*" element={<Navigate to="/login" replace />} />
+=======
+      <Route
+        path="/login"
+        element={
+          <AuthLayout>
+            <LoginPage />
+          </AuthLayout>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <AuthLayout>
+            <RegisterPage />
+          </AuthLayout>
+        }
+      />
+
+      {/* Protected routes */}
+      <Route
+        path="/"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <ProjectsPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/projects"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <ProjectsPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/projects/:id"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <ProjectDetailPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+
+      {/* Redirect unknown routes to home */}
+      <Route
+        path="*"
+        element={
+          <PrivateRoute>
+            <AppLayout>
+              <ProjectsPage />
+            </AppLayout>
+          </PrivateRoute>
+        }
+      />
+>>>>>>> 0f34275 (Refactor code for improved readability and consistency across various components)
     </Routes>
   )
 }

@@ -89,15 +89,25 @@ export function AuthForm() {
             </svg>
           )}
           {...(mode === 'login' ? loginForm.register('email') : registerForm.register('email'))}
-          error={(mode === 'login' ? loginForm.formState.errors.email?.message : registerForm.formState.errors.email?.message)}
+          error={
+            mode === 'login'
+              ? loginForm.formState.errors.email?.message
+              : registerForm.formState.errors.email?.message
+          }
         />
 
         <Input
           id="password"
           label="Password"
           type="password"
-          {...(mode === 'login' ? loginForm.register('password') : registerForm.register('password'))}
-          error={(mode === 'login' ? loginForm.formState.errors.password?.message : registerForm.formState.errors.password?.message)}
+          {...(mode === 'login'
+            ? loginForm.register('password')
+            : registerForm.register('password'))}
+          error={
+            mode === 'login'
+              ? loginForm.formState.errors.password?.message
+              : registerForm.formState.errors.password?.message
+          }
         />
 
         {mode === 'register' && (
@@ -110,11 +120,17 @@ export function AuthForm() {
           />
         )}
 
+<<<<<<< HEAD
           <div className="mt-3">
             <Button type="submit" disabled={currentMutation.isPending} className="w-full">
               {currentMutation.isPending ? 'Loading...' : mode === 'login' ? 'Login' : 'Register'}
             </Button>
           </div>
+=======
+        <Button type="submit" disabled={currentMutation.isPending} className="w-full">
+          {currentMutation.isPending ? 'Loading...' : mode === 'login' ? 'Login' : 'Register'}
+        </Button>
+>>>>>>> 0f34275 (Refactor code for improved readability and consistency across various components)
 
         {currentMutation.isError && (
           <p className="text-red-500 text-sm text-center">

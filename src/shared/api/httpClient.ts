@@ -27,7 +27,7 @@ httpClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error)
-  }
+  },
 )
 
 // Response interceptor
@@ -43,5 +43,5 @@ httpClient.interceptors.response.use(
       throw new Error(problemDetails.detail || problemDetails.title || 'An error occurred')
     }
     throw error
-  }
+  },
 )
