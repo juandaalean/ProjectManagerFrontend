@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 export const projectRoleOptions = [
   { value: 0, label: 'Admin' },
-  { value: 1, label: 'Coordinador' },
-  { value: 2, label: 'Usuario' },
+  { value: 1, label: 'Coordinator' },
+  { value: 2, label: 'User' },
 ] as const
 
 export const projectMemberSchema = z.object({

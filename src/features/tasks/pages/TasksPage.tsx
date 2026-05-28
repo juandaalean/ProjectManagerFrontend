@@ -9,6 +9,10 @@ import { TaskList } from '../components/TaskList'
 import { TaskFormModal } from '../components/TaskFormModal'
 import { useTasksQuery } from '../hooks/useTasksQuery'
 import { useTasksByProjectsQuery } from '../hooks/useTasksQuery'
+import { useAuth } from '../../auth/context/AuthContext'
+import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
+import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
+import { canCreateTask, canManageProject, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
 
 export function TasksPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -16,6 +20,7 @@ export function TasksPage() {
   const navigate = useNavigate()
   const showCreateModal = searchParams.get('create') === '1'
   const isGlobalTasksView = !projectId
+  const { user } = useAuth()
 
   const { data: projectTasks, isLoading, error } = useTasksQuery(projectId)
   const {
@@ -34,6 +39,15 @@ export function TasksPage() {
     () => new Map((projects ?? []).map((project) => [project.projectId, project])),
     [projects],
   )
+
+  const { data: project } = useProjectQuery(projectId || '')
+  const { data: projectMembers = [] } = useProjectMembersQuery(projectId)
+  const canManage = canManageProject({
+    currentUserId: user?.userId,
+    ownerId: project?.ownerId,
+    memberRole: getMemberRoleForUser(projectMembers, user?.userId),
+  })
+  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(projectMembers, user?.userId) })
 
   if (isGlobalTasksView) {
     if (projectsLoading || groupedTasksLoading) {
@@ -142,14 +156,16 @@ export function TasksPage() {
             >
               View Calendar
             </Button>
-            <Button onClick={() => navigate(`/projects/${projectId}/tasks?create=1`)}>
-              Create Task
-            </Button>
+            {canCreate && (
+              <Button onClick={() => navigate(`/projects/${projectId}/tasks?create=1`)}>
+                Create Task
+              </Button>
+            )}
           </div>
         </div>
       </div>
       <TaskList tasks={projectTasks || []} projectId={projectId} />
-      {showCreateModal && (
+      {showCreateModal && canCreate && (
         <TaskFormModal
           projectId={projectId}
           onClose={() => navigate(`/projects/${projectId}/tasks`, { replace: true })}

@@ -72,6 +72,19 @@ VITE_API_URL=https://projectmanagerbackend-f8df.onrender.com/api
 
 This is the only value the frontend needs in order to talk to your deployed API. The same Axios client will keep attaching the JWT automatically after login.
 
+### Demo Access
+
+The login screen can show an "Entrar como demo" button that reuses the regular auth flow with a preconfigured demo account.
+
+Add these variables to enable it:
+
+```env
+VITE_DEMO_EMAIL=demo@example.com
+VITE_DEMO_PASSWORD=demo-password
+```
+
+The button only works if that account exists in the backend and returns a valid auth response. This keeps demo access identical to a real session, so the user can browse protected routes and perform allowed actions without registering a new account.
+
 ### HTTP Client
 
 All backend communication goes through a centralized Axios client in `src/shared/api/httpClient.ts`.
@@ -216,6 +229,8 @@ Create a `.env` file with the following content:
 ```env
 VITE_API_URL=http://localhost:5081/api
 VITE_APP_NAME=Project Manager
+VITE_DEMO_EMAIL=demo@example.com
+VITE_DEMO_PASSWORD=demo-password
 VITE_ENABLE_DEBUG=true
 ```
 
@@ -243,6 +258,8 @@ Add these in the Vercel project settings:
 ```env
 VITE_API_URL=https://projectmanagerbackend-f8df.onrender.com/api
 VITE_APP_NAME=Project Manager
+VITE_DEMO_EMAIL=demo@example.com
+VITE_DEMO_PASSWORD=demo-password
 VITE_ENABLE_DEBUG=false
 ```
 

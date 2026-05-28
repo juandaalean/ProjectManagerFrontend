@@ -1,1 +1,10 @@
 /* Global app styles will live here. */
+
+.auth-layout .card {
+	background-color: transparent !important;
+	box-shadow: none !important;
+}
+
+.auth-layout .card .card-body {
+	background-color: transparent !important;
+}

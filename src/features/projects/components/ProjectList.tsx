@@ -1,23 +1,72 @@
 import { useNavigate } from 'react-router-dom'
 import { useProjectsQuery } from '../hooks/useProjectsQuery'
 import { useAuth } from '../../auth/context/AuthContext'
+import { useProjectMembersQuery } from '../hooks/useProjectMembersQuery'
 import { useDeleteProjectMutation } from '../hooks/useProjectMutations'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
 import { EmptyState } from '../../../shared/ui/EmptyState'
 import { ErrorState } from '../../../shared/ui/ErrorState'
 import type { Project } from '../types/project.types'
+import { canManageProject, getMemberRoleForUser } from '../utils/projectPermissions'
 
 interface ProjectListProps {
   onEdit?: (project: Project) => void
   onCreate?: () => void
 }
 
+function ProjectCardActions({
+  project,
+  onEdit,
+  onDelete,
+}: {
+  project: Project
+  onEdit?: (project: Project) => void
+  onDelete?: (projectId: string) => void
+}) {
+  const { user } = useAuth()
+  const { data: members } = useProjectMembersQuery(project.projectId)
+
+  const canManage = canManageProject({
+    currentUserId: user?.userId,
+    ownerId: project.ownerId,
+    memberRole: getMemberRoleForUser(members, user?.userId),
+  })
+
+  return (
+    <div className="flex items-center gap-2">
+      {canManage && onEdit && (
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={(event) => {
+            event.stopPropagation()
+            onEdit(project)
+          }}
+        >
+          Edit
+        </Button>
+      )}
+      {canManage && onDelete && (
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={(event) => {
+            event.stopPropagation()
+            onDelete(project.projectId)
+          }}
+        >
+          Delete
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
   const { data: projects, isLoading, error } = useProjectsQuery()
   const deleteMutation = useDeleteProjectMutation()
   const navigate = useNavigate()
-  const { user } = useAuth()
 
   if (isLoading) {
     return <div className="text-center py-8">Loading projects...</div>
@@ -46,7 +95,19 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {projects.map((project) => (
-        <Card key={project.projectId} className="border border-base-300 bg-base-100">
+        <Card
+          key={project.projectId}
+          className="border border-base-300 bg-base-100 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+          role="link"
+          tabIndex={0}
+          onClick={() => navigate(`/projects/${project.projectId}`)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              navigate(`/projects/${project.projectId}`)
+            }
+          }}
+        >
           <div className="card-body gap-4 p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -57,10 +118,11 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
               </div>
               <div className="flex items-center gap-2">
                 <div className="badge badge-ghost">Project</div>
-                {/* Owner badge when current user is owner */}
-                {user && user.userId === project.ownerId && (
-                  <div className="badge badge-accent text-accent-content">Owner</div>
-                )}
+                <ProjectCardActions
+                  project={project}
+                  onEdit={onEdit}
+                  onDelete={handleDelete}
+                />
               </div>
             </div>
 
@@ -75,29 +137,6 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
                 <p className="text-xs uppercase tracking-wide text-base-content/60">End</p>
                 <p className="mt-1 font-medium">{new Date(project.endDate).toLocaleDateString()}</p>
               </div>
-            </div>
-
-            <div className="card-actions justify-end">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate(`/projects/${project.projectId}`)}
-              >
-                Open Project
-              </Button>
-              {onEdit && (
-                <Button variant="secondary" size="sm" onClick={() => onEdit(project)}>
-                  Edit
-                </Button>
-              )}
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => handleDelete(project.projectId)}
-                disabled={deleteMutation.isPending}
-              >
-                Delete
-              </Button>
             </div>
           </div>
         </Card>
