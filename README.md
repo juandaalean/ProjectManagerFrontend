@@ -74,7 +74,7 @@ This is the only value the frontend needs in order to talk to your deployed API.
 
 ### Demo Access
 
-The login screen can show an "Entrar como demo" button that reuses the regular auth flow with a preconfigured demo account.
+The login screen can show an "Login as a Demo" button that reuses the regular auth flow with a preconfigured demo account.
 
 Add these variables to enable it:
 

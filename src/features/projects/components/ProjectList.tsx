@@ -35,6 +35,7 @@ function ProjectCardActions({
 
   return (
     <div className="flex items-center gap-2">
+      {canManage && <div className="badge badge-ghost">Owner</div>}
       {canManage && onEdit && (
         <Button
           variant="secondary"
@@ -117,7 +118,6 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <div className="badge badge-ghost">Project</div>
                 <ProjectCardActions
                   project={project}
                   onEdit={onEdit}
