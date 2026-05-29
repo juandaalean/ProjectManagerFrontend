@@ -19,8 +19,9 @@ export function ProjectDetailPage() {
   const { data: tasks = [] } = useTasksQuery(projectId)
   const { data: members } = useProjectMembersQuery(projectId)
   const { user } = useAuth()
-  const canManage = !!project
-    && canManageProject({
+  const canManage =
+    !!project &&
+    canManageProject({
       currentUserId: user?.userId,
       ownerId: project.ownerId,
       memberRole: getMemberRoleForUser(members, user?.userId),
@@ -48,7 +49,9 @@ export function ProjectDetailPage() {
           <div>
             <div className="flex items-center gap-2">
               <div className="badge badge-primary text-primary-content mb-3">Project detail</div>
-              {canManage && <div className="badge badge-accent text-accent-content mb-3">Manager</div>}
+              {canManage && (
+                <div className="badge badge-accent text-accent-content mb-3">Manager</div>
+              )}
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
             {project.description && (

@@ -20,7 +20,12 @@ interface TaskFormModalProps {
   onClose: () => void
 }
 
-export function TaskFormModal({ task, projectId, initialCompletedAt, onClose }: TaskFormModalProps) {
+export function TaskFormModal({
+  task,
+  projectId,
+  initialCompletedAt,
+  onClose,
+}: TaskFormModalProps) {
   const isEditing = !!task
   const createMutation = useCreateTaskMutation()
   const updateMutation = useUpdateTaskMutation()

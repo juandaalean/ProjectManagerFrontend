@@ -42,10 +42,12 @@ export function ProjectMembersSection({ projectId, canManageMembers }: ProjectMe
   const deleteMutation = useDeleteProjectMemberMutation(projectId)
   const [editingMember, setEditingMember] = useState<ProjectMemberDto | null>(null)
   const { user } = useAuth()
-  const canManage = canManageMembers ?? canManageProject({
-    currentUserId: user?.userId,
-    memberRole: getMemberRoleForUser(members, user?.userId),
-  })
+  const canManage =
+    canManageMembers ??
+    canManageProject({
+      currentUserId: user?.userId,
+      memberRole: getMemberRoleForUser(members, user?.userId),
+    })
 
   const form = useForm<ProjectMemberFormData>({
     resolver: zodResolver(projectMemberSchema) as never,
@@ -235,7 +237,9 @@ export function ProjectMembersSection({ projectId, canManageMembers }: ProjectMe
                       ))}
                     </select>
                     {form.formState.errors.role && (
-                      <p className="mt-1 text-sm text-error">{form.formState.errors.role.message}</p>
+                      <p className="mt-1 text-sm text-error">
+                        {form.formState.errors.role.message}
+                      </p>
                     )}
                   </label>
 

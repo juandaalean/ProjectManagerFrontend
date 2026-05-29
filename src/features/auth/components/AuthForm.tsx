@@ -62,7 +62,7 @@ export function AuthForm() {
           <p className="mt-1 text-sm text-base-content/70">
             {mode === 'login'
               ? 'Access your projects, tasks, and comments from a clean and fast panel.'
-              : 'Create your account to start organizing your team\'s work.'}
+              : "Create your account to start organizing your team's work."}
           </p>
         </div>
 
@@ -160,7 +160,8 @@ export function AuthForm() {
 
           {mode === 'login' && env.demoLoginEnabled && (
             <p className="text-center text-xs text-base-content/60">
-              The demo uses {env.demoLoginEmail} and logs in with the same session as the regular login.
+              The demo uses {env.demoLoginEmail} and logs in with the same session as the regular
+              login.
             </p>
           )}
 

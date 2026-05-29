@@ -3,7 +3,10 @@ import { Card } from '../../../shared/ui/Card'
 import { Button } from '../../../shared/ui/Button'
 import { createTaskSchema } from '../../tasks/schemas/taskSchema'
 import { useCreateTaskMutation } from '../../tasks/hooks/useTaskMutations'
-import { extractTasksFromTranscript, type TaskDraftForCreation } from '../../tasks/ai/transcriptTaskAgent'
+import {
+  extractTasksFromTranscript,
+  type TaskDraftForCreation,
+} from '../../tasks/ai/transcriptTaskAgent'
 import type { ProjectMemberDto } from '../types/project.types'
 import { TaskPriorityValues } from '../../tasks/types/task.types'
 
@@ -121,7 +124,10 @@ export function TranscriptTaskAutomationPanel({
       })
 
       setDrafts((current) => [...current, ...extracted])
-      pushLog('success', `Extraction finished with ${extracted.length} draft tasks. Total drafts: ${drafts.length + extracted.length}.`)
+      pushLog(
+        'success',
+        `Extraction finished with ${extracted.length} draft tasks. Total drafts: ${drafts.length + extracted.length}.`,
+      )
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to process transcript.'
       setErrorMessage(message)
@@ -275,7 +281,10 @@ export function TranscriptTaskAutomationPanel({
                     to the project owner.
                   </div>
 
-                  <Button onClick={() => void onExtract()} disabled={isExtracting || !transcript.trim()}>
+                  <Button
+                    onClick={() => void onExtract()}
+                    disabled={isExtracting || !transcript.trim()}
+                  >
                     {isExtracting ? 'Processing...' : 'Process with AI'}
                   </Button>
                 </div>
@@ -334,7 +343,10 @@ export function TranscriptTaskAutomationPanel({
                   <h3 className="text-lg font-semibold">Draft tasks ({drafts.length})</h3>
                   <div className="max-h-[45vh] space-y-3 overflow-auto pr-1">
                     {drafts.map((draft, index) => (
-                      <div key={`${draft.title}-${index}`} className="rounded-box border border-base-300 p-3">
+                      <div
+                        key={`${draft.title}-${index}`}
+                        className="rounded-box border border-base-300 p-3"
+                      >
                         <div className="grid gap-3 md:grid-cols-2">
                           <div>
                             <label className="label">
@@ -354,7 +366,13 @@ export function TranscriptTaskAutomationPanel({
                             <select
                               className="select select-bordered w-full"
                               value={draft.priority}
-                              onChange={(event) => updateDraft(index, 'priority', event.target.value as TaskDraftForCreation['priority'])}
+                              onChange={(event) =>
+                                updateDraft(
+                                  index,
+                                  'priority',
+                                  event.target.value as TaskDraftForCreation['priority'],
+                                )
+                              }
                             >
                               {TaskPriorityValues.map((priority) => (
                                 <option key={priority} value={priority}>
@@ -371,7 +389,9 @@ export function TranscriptTaskAutomationPanel({
                             <textarea
                               className="textarea textarea-bordered h-20 w-full"
                               value={draft.description ?? ''}
-                              onChange={(event) => updateDraft(index, 'description', event.target.value)}
+                              onChange={(event) =>
+                                updateDraft(index, 'description', event.target.value)
+                              }
                             />
                           </div>
 
@@ -382,7 +402,9 @@ export function TranscriptTaskAutomationPanel({
                             <select
                               className="select select-bordered w-full"
                               value={draft.assignedUserId}
-                              onChange={(event) => updateDraft(index, 'assignedUserId', event.target.value)}
+                              onChange={(event) =>
+                                updateDraft(index, 'assignedUserId', event.target.value)
+                              }
                             >
                               {members.map((member) => (
                                 <option key={member.userId} value={member.userId}>
@@ -400,14 +422,17 @@ export function TranscriptTaskAutomationPanel({
                               type="date"
                               className="input input-bordered w-full"
                               value={draft.completedAt ?? ''}
-                              onChange={(event) => updateDraft(index, 'completedAt', event.target.value || undefined)}
+                              onChange={(event) =>
+                                updateDraft(index, 'completedAt', event.target.value || undefined)
+                              }
                             />
                           </div>
                         </div>
 
                         <div className="mt-2 flex items-center justify-between text-xs text-base-content/60">
                           <span>
-                            Resolved assignee: {memberById.get(draft.assignedUserId)?.userName ?? draft.assignedUserId}
+                            Resolved assignee:{' '}
+                            {memberById.get(draft.assignedUserId)?.userName ?? draft.assignedUserId}
                           </span>
                           {typeof draft.confidence === 'number' && (
                             <span>Confidence: {Math.round(draft.confidence * 100)}%</span>
@@ -415,7 +440,9 @@ export function TranscriptTaskAutomationPanel({
                         </div>
 
                         {rowErrors[index] && (
-                          <p className="mt-2 text-sm text-error">Row {index + 1}: {rowErrors[index]}</p>
+                          <p className="mt-2 text-sm text-error">
+                            Row {index + 1}: {rowErrors[index]}
+                          </p>
                         )}
                       </div>
                     ))}
@@ -427,7 +454,10 @@ export function TranscriptTaskAutomationPanel({
                 <Button variant="secondary" onClick={closeModal}>
                   Close
                 </Button>
-                <Button onClick={() => void onCreateTasks()} disabled={!drafts.length || isSaving || isExtracting}>
+                <Button
+                  onClick={() => void onCreateTasks()}
+                  disabled={!drafts.length || isSaving || isExtracting}
+                >
                   {isSaving ? 'Creating tasks...' : 'Create tasks'}
                 </Button>
               </div>

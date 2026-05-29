@@ -118,11 +118,7 @@ export function ProjectList({ onEdit, onCreate }: ProjectListProps) {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <ProjectCardActions
-                  project={project}
-                  onEdit={onEdit}
-                  onDelete={handleDelete}
-                />
+                <ProjectCardActions project={project} onEdit={onEdit} onDelete={handleDelete} />
               </div>
             </div>
 

@@ -12,7 +12,7 @@ interface ProjectTaskCalendarProps {
   projectId: string
   tasks: TaskItem[]
 }
-  
+
 const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const toLocalDate = (value: string) => new Date(value)
@@ -104,7 +104,9 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   const { data: project } = useProjectQuery(projectId)
   const { user } = useAuth()
   const isOwner = !!project && !!user && project.ownerId === user.userId
-  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(projectMembers, user?.userId) })
+  const canCreate = canCreateTask({
+    memberRole: getMemberRoleForUser(projectMembers, user?.userId),
+  })
 
   return (
     <section className="space-y-4 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">

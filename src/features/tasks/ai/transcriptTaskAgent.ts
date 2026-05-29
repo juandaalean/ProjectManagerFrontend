@@ -98,7 +98,7 @@ const resolveAssigneeId = (
 
 const buildPrompt = (transcript: string, members: ProjectMemberDto[]) => {
   const membersContext = members
-    .map((member) => `- ${member.userName} <${member.userEmail}>`) 
+    .map((member) => `- ${member.userName} <${member.userEmail}>`)
     .join('\n')
 
   return [
@@ -121,7 +121,11 @@ const buildPrompt = (transcript: string, members: ProjectMemberDto[]) => {
 }
 
 const extractJsonObject = (rawContent: string) => {
-  const content = rawContent.trim().replace(/^```json\s*/i, '').replace(/```$/i, '').trim()
+  const content = rawContent
+    .trim()
+    .replace(/^```json\s*/i, '')
+    .replace(/```$/i, '')
+    .trim()
   const start = content.indexOf('{')
   const end = content.lastIndexOf('}')
 
@@ -218,7 +222,11 @@ const hasActionKeywords = (value: string) =>
   )
 
 const detectPriority = (value: string): TaskPriority => {
-  if (/\b(urgent|asap|critical|blocked|bloquead|immediate|prioridad alta|high priority)\b/i.test(value)) {
+  if (
+    /\b(urgent|asap|critical|blocked|bloquead|immediate|prioridad alta|high priority)\b/i.test(
+      value,
+    )
+  ) {
     return 'High'
   }
 
@@ -232,7 +240,9 @@ const detectPriority = (value: string): TaskPriority => {
 const extractAssigneeHint = (value: string, members: ProjectMemberDto[]) => {
   const normalizedValue = normalizeText(value)
 
-  const emailMatch = members.find((member) => normalizedValue.includes(normalizeText(member.userEmail)))
+  const emailMatch = members.find((member) =>
+    normalizedValue.includes(normalizeText(member.userEmail)),
+  )
   if (emailMatch) {
     return emailMatch.userEmail
   }
@@ -360,7 +370,9 @@ export async function extractTasksFromTranscript(input: ExtractTasksFromTranscri
 
     const drafts = parsed.data.tasks.map((item) => {
       const title = buildReadableTaskTitle(item.title || 'Untitled task')
-      const description = item.description ? buildReadableTaskDescription(item.description) : undefined
+      const description = item.description
+        ? buildReadableTaskDescription(item.description)
+        : undefined
       const completedAt = normalizeDate(item.dueDate)
 
       return {

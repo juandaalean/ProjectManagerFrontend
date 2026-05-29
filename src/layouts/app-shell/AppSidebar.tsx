@@ -6,13 +6,13 @@ const navItems = [
     to: '/projects',
     label: 'Projects',
     description: 'Project overview and CRUD',
-    icon: FolderKanban
+    icon: FolderKanban,
   },
   {
     to: '/tasks',
     label: 'Tasks',
     description: 'Show all tasks and filters',
-    icon: CheckSquare
+    icon: CheckSquare,
   },
 ]
 
@@ -55,7 +55,10 @@ export function AppSidebar() {
                   to={item.to}
                   title={item.label}
                   className={({ isActive }) =>
-                    `block w-full rounded-md px-2 py-1 transition-colors ${isActive ? 'bg-secondary text-secondary-content' : 'text-base-content hover:bg-base-200/50'
+                    `block w-full rounded-md px-2 py-1 transition-colors ${
+                      isActive
+                        ? 'bg-secondary text-secondary-content'
+                        : 'text-base-content hover:bg-base-200/50'
                     }`
                   }
                 >
@@ -78,8 +81,8 @@ export function AppSidebar() {
         <div className="mt-4 rounded-box border border-base-300 bg-base-200 p-4 w-full">
           <p className="text-sm font-semibold">Ready for sections</p>
           <p className="mt-1 text-sm text-base-content/70">
-            This shell follows the official drawer pattern and is ready for dashboards, filters,
-            and widgets for next features.
+            This shell follows the official drawer pattern and is ready for dashboards, filters, and
+            widgets for next features.
           </p>
         </div>
       </div>

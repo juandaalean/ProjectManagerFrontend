@@ -40,7 +40,9 @@ export function TasksPage() {
   )
 
   const { data: projectMembers = [] } = useProjectMembersQuery(projectId)
-  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(projectMembers, user?.userId) })
+  const canCreate = canCreateTask({
+    memberRole: getMemberRoleForUser(projectMembers, user?.userId),
+  })
 
   if (isGlobalTasksView) {
     if (projectsLoading || groupedTasksLoading) {

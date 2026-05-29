@@ -10,10 +10,7 @@ import { useUpdateTaskMutation } from '../hooks/useTaskMutations'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge'
 import { useAuth } from '../../auth/context/AuthContext'
-import {
-  canToggleTaskState,
-  getMemberRoleForUser,
-} from '../../projects/utils/projectPermissions'
+import { canToggleTaskState, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
 import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
 
 export function TaskDetailPage() {
@@ -35,12 +32,14 @@ export function TaskDetailPage() {
     )
   }, [projectMembers, task])
 
-  const canToggle = !!task && canToggleTaskState({
-    currentUserId: user?.userId,
-    assignedUserId: task.assignedUserId,
-    ownerId: project?.ownerId,
-    memberRole: getMemberRoleForUser(projectMembers, user?.userId),
-  })
+  const canToggle =
+    !!task &&
+    canToggleTaskState({
+      currentUserId: user?.userId,
+      assignedUserId: task.assignedUserId,
+      ownerId: project?.ownerId,
+      memberRole: getMemberRoleForUser(projectMembers, user?.userId),
+    })
 
   const countdownInfo = (() => {
     if (!task?.completedAt) {
@@ -102,7 +101,11 @@ export function TaskDetailPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {canToggle && (
-            <Button variant="secondary" onClick={handleToggleState} disabled={updateMutation.isPending}>
+            <Button
+              variant="secondary"
+              onClick={handleToggleState}
+              disabled={updateMutation.isPending}
+            >
               {task.state === 'Active' ? 'Mark Finished' : 'Mark Active'}
             </Button>
           )}
@@ -116,7 +119,9 @@ export function TaskDetailPage() {
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold">Description</h2>
-              <p className="text-base-content/70">{task.description || 'No description provided.'}</p>
+              <p className="text-base-content/70">
+                {task.description || 'No description provided.'}
+              </p>
             </div>
             <div className="flex gap-4">
               <span className={getTaskPriorityBadgeClassName(task.priority)}>
