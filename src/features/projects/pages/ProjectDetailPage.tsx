@@ -9,6 +9,7 @@ import { ProjectMembersSection } from '../components/ProjectMembersSection'
 import { useAuth } from '../../auth/context/AuthContext'
 import { useProjectMembersQuery } from '../hooks/useProjectMembersQuery'
 import { canCreateTask, canManageProject, getMemberRoleForUser } from '../utils/projectPermissions'
+import { TranscriptTaskAutomationPanel } from '../components/TranscriptTaskAutomationPanel'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -69,23 +70,32 @@ export function ProjectDetailPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {viewButtons.map((button) => (
-            <Button
-              key={button.id}
-              variant={viewMode === button.id ? 'primary' : 'secondary'}
-              onClick={() => {
-                if (button.id === 'overview') {
-                  setSearchParams({ view: 'overview' })
-                  return
-                }
+        <div className="mt-6 flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2">
+            {viewButtons.map((button) => (
+              <Button
+                key={button.id}
+                variant={viewMode === button.id ? 'primary' : 'secondary'}
+                onClick={() => {
+                  if (button.id === 'overview') {
+                    setSearchParams({ view: 'overview' })
+                    return
+                  }
 
-                setSearchParams({})
-              }}
-            >
-              {button.label}
-            </Button>
-          ))}
+                  setSearchParams({})
+                }}
+              >
+                {button.label}
+              </Button>
+            ))}
+          </div>
+          <TranscriptTaskAutomationPanel
+            projectId={project.projectId}
+            projectName={project.name}
+            ownerId={project.ownerId}
+            members={members ?? []}
+            enabled={canCreate}
+          />
         </div>
       </div>
 

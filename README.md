@@ -11,6 +11,7 @@ This branch leaves the frontend in a functional state for the main product domai
 - Authentication with login, register, session persistence, and protected routes.
 - Projects dashboard with list, create, edit, delete, and detail views.
 - Task management with project-scoped and global views.
+- AI-assisted task automation from meeting transcripts using local WebLLM.
 - Comments attached to tasks from the task detail screen.
 - Application shell with navigation, sidebar, and theme switcher.
 
@@ -191,6 +192,85 @@ Related endpoints:
 - Detail view with project context.
 - Task creation from the page itself.
 
+### AI Task Automation
+
+The project detail screen now exposes an AI automation entry point next to the Calendar and Overview controls. The feature is restricted to project admins and coordinators.
+
+It is designed to turn Microsoft Teams or Google Meet transcripts into reviewable task drafts before they are persisted.
+
+#### User flow
+
+1. Open a project detail page.
+2. Launch the AI automation modal.
+3. Paste a transcript or upload a `.txt` / `.md` file.
+4. Extract one or more task drafts from the transcript.
+5. Review and edit the generated drafts.
+6. Create the tasks in batch.
+
+#### Model used
+
+The first version uses a local browser model through WebLLM:
+
+- `Llama-3.2-3B-Instruct-q4f32_1-MLC`
+
+The model runs locally in the browser when WebGPU is available. If initialization fails or takes too long, the feature falls back to a local transcript parser so the workflow remains usable and never blocks task creation.
+
+#### Prompt and output contract
+
+The extraction prompt instructs the model to return JSON only, with the following shape:
+
+```json
+{
+  "tasks": [
+    {
+      "title": "string",
+      "description": "string",
+      "priority": "Low | Medium | High | Critical",
+      "dueDate": "YYYY-MM-DD or ISO date",
+      "assigneeHint": "name or email",
+      "confidence": 0.0
+    }
+  ]
+}
+```
+
+Prompt rules:
+
+- Extract multiple tasks when the transcript contains more than one action item.
+- Rewrite the transcript into task language. Do not copy phrases literally.
+- Keep titles concise, specific, and action-oriented.
+- Keep descriptions as clean summaries of the action to be done.
+- Use `assigneeHint` only when a person is explicitly mentioned.
+- Keep `confidence` between `0` and `1`.
+- Return valid JSON only, with no markdown or extra commentary.
+
+#### Assignment logic
+
+Task assignment is resolved in this order:
+
+1. If the model returns an assignee hint, the app tries to match it against project members by email or display name.
+2. If no match is found, the task is assigned to the project owner.
+3. If the transcript does not mention a person, the same owner fallback is used.
+
+This keeps the workflow deterministic even when the transcript is ambiguous.
+
+#### Dates and priorities
+
+- When the model detects a date, the app normalizes it to `YYYY-MM-DD` before creating the task.
+- If a date cannot be parsed, the task remains without a completion date.
+- Priorities are normalized into the existing task enum: `Low`, `Medium`, `High`, `Critical`.
+- If priority is not clear, the app defaults to `Medium`.
+
+#### Confidence score
+
+`confidence` is a quality indicator for the extracted draft. It does not block creation by itself, but it helps the reviewer understand how certain the extraction was.
+
+#### Review and cleanup behavior
+
+- The modal keeps draft tasks available while the user performs consecutive extractions, so new transcript results are appended to the current review set.
+- When the modal is closed, the transcript, logs, and draft state are cleared.
+- The process log can be expanded or collapsed and shows model loading, parsing, fallback, and creation events.
+
 ### Task Comments
 
 - Comment listing by task.
@@ -294,6 +374,7 @@ The repository includes `vercel.json` with a rewrite so React Router routes like
 | Auth          | Implemented | Implemented |
 | Projects      | Implemented | Implemented |
 | Tasks         | Implemented | Implemented |
+| AI automation | N/A         | Implemented |
 | Task comments | Implemented | Implemented |
 
 ## Diagram

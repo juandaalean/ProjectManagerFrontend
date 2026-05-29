@@ -10,9 +10,8 @@ import { TaskFormModal } from '../components/TaskFormModal'
 import { useTasksQuery } from '../hooks/useTasksQuery'
 import { useTasksByProjectsQuery } from '../hooks/useTasksQuery'
 import { useAuth } from '../../auth/context/AuthContext'
-import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
-import { canCreateTask, canManageProject, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
+import { canCreateTask, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
 
 export function TasksPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -40,13 +39,7 @@ export function TasksPage() {
     [projects],
   )
 
-  const { data: project } = useProjectQuery(projectId || '')
   const { data: projectMembers = [] } = useProjectMembersQuery(projectId)
-  const canManage = canManageProject({
-    currentUserId: user?.userId,
-    ownerId: project?.ownerId,
-    memberRole: getMemberRoleForUser(projectMembers, user?.userId),
-  })
   const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(projectMembers, user?.userId) })
 
   if (isGlobalTasksView) {
