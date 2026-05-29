@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
 import { ErrorState } from '../../../shared/ui/ErrorState'
+import { useAuth } from '../../auth/context/AuthContext'
 import {
   useCreateProjectMemberMutation,
   useDeleteProjectMemberMutation,
@@ -16,9 +17,11 @@ import {
   type ProjectMemberFormData,
 } from '../schemas/projectMemberSchema'
 import type { ProjectMemberDto } from '../types/project.types'
+import { canManageProject, getMemberRoleForUser } from '../utils/projectPermissions'
 
 interface ProjectMembersSectionProps {
   projectId: string
+  canManageMembers?: boolean
 }
 
 const emptyMemberForm = {
@@ -32,12 +35,19 @@ function MemberBadge({ role }: { role: number }) {
   return <span className="badge badge-secondary badge-outline">{label}</span>
 }
 
-export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps) {
+export function ProjectMembersSection({ projectId, canManageMembers }: ProjectMembersSectionProps) {
   const { data: members = [], isLoading, error } = useProjectMembersQuery(projectId)
   const createMutation = useCreateProjectMemberMutation(projectId)
   const updateMutation = useUpdateProjectMemberRoleMutation(projectId)
   const deleteMutation = useDeleteProjectMemberMutation(projectId)
   const [editingMember, setEditingMember] = useState<ProjectMemberDto | null>(null)
+  const { user } = useAuth()
+  const canManage =
+    canManageMembers ??
+    canManageProject({
+      currentUserId: user?.userId,
+      memberRole: getMemberRoleForUser(members, user?.userId),
+    })
 
   const form = useForm<ProjectMemberFormData>({
     resolver: zodResolver(projectMemberSchema) as never,
@@ -153,17 +163,21 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      <Button variant="secondary" size="sm" onClick={() => handleEdit(member)}>
-                        Edit role
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDelete(member)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        Remove
-                      </Button>
+                      {canManage && (
+                        <>
+                          <Button variant="secondary" size="sm" onClick={() => handleEdit(member)}>
+                            Edit role
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDelete(member)}
+                            disabled={deleteMutation.isPending}
+                          >
+                            Remove
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))
@@ -173,75 +187,89 @@ export function ProjectMembersSection({ projectId }: ProjectMembersSectionProps)
             <div className="rounded-2xl border border-base-300 bg-base-200/40 p-5">
               <div className="mb-4 space-y-1">
                 <h4 className="text-lg font-semibold">
-                  {isEditing ? 'Update member role' : 'Add project member'}
+                  {canManage
+                    ? isEditing
+                      ? 'Update member role'
+                      : 'Add project member'
+                    : 'Project members'}
                 </h4>
                 <p className="text-sm text-base-content/70">
-                  {isEditing
-                    ? 'Update the role selected for this project user.'
-                    : 'Invite a user using email and assign the role.'}
+                  {canManage
+                    ? isEditing
+                      ? 'Update the role selected for this project user.'
+                      : 'Invite a user using email and assign the role.'
+                    : 'Only admins, coordinators, or the project owner can manage members.'}
                 </p>
               </div>
 
-              <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
-                <label className="form-control w-full">
-                  <span className="label-text mb-2 text-sm font-semibold tracking-wide text-base-content">
-                    User email
-                  </span>
-                  <input
-                    type="email"
-                    placeholder="name@company.com"
-                    disabled={isEditing}
-                    className={`input input-bordered bg-base-100 text-base-content placeholder:text-base-content/40 w-full ${form.formState.errors.userEmail ? 'input-error' : ''}`}
-                    {...form.register('userEmail')}
-                  />
-                  {form.formState.errors.userEmail && (
-                    <p className="mt-1 text-sm text-error">
-                      {form.formState.errors.userEmail.message}
+              {canManage ? (
+                <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
+                  <label className="form-control w-full">
+                    <span className="label-text mb-2 text-sm font-semibold tracking-wide text-base-content">
+                      User email
+                    </span>
+                    <input
+                      type="email"
+                      placeholder="name@company.com"
+                      disabled={isEditing}
+                      className={`input input-bordered bg-base-100 text-base-content placeholder:text-base-content/40 w-full ${form.formState.errors.userEmail ? 'input-error' : ''}`}
+                      {...form.register('userEmail')}
+                    />
+                    {form.formState.errors.userEmail && (
+                      <p className="mt-1 text-sm text-error">
+                        {form.formState.errors.userEmail.message}
+                      </p>
+                    )}
+                  </label>
+
+                  <label className="form-control w-full">
+                    <span className="label-text mb-2 text-sm font-semibold tracking-wide text-base-content">
+                      Role
+                    </span>
+                    <select
+                      className={`select select-bordered bg-base-100 text-base-content w-full ${form.formState.errors.role ? 'select-error' : ''}`}
+                      {...form.register('role', { valueAsNumber: true })}
+                    >
+                      {projectRoleOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {form.formState.errors.role && (
+                      <p className="mt-1 text-sm text-error">
+                        {form.formState.errors.role.message}
+                      </p>
+                    )}
+                  </label>
+
+                  {mutation.isError && (
+                    <p className="text-sm text-error">
+                      {mutation.error.message || 'An error occurred'}
                     </p>
                   )}
-                </label>
 
-                <label className="form-control w-full">
-                  <span className="label-text mb-2 text-sm font-semibold tracking-wide text-base-content">
-                    Role
-                  </span>
-                  <select
-                    className={`select select-bordered bg-base-100 text-base-content w-full ${form.formState.errors.role ? 'select-error' : ''}`}
-                    {...form.register('role', { valueAsNumber: true })}
-                  >
-                    {projectRoleOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {form.formState.errors.role && (
-                    <p className="mt-1 text-sm text-error">{form.formState.errors.role.message}</p>
-                  )}
-                </label>
-
-                {mutation.isError && (
-                  <p className="text-sm text-error">
-                    {mutation.error.message || 'An error occurred'}
-                  </p>
-                )}
-
-                <div className="flex flex-wrap justify-end gap-2 pt-2">
-                  {isEditing && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={handleCancelEdit}
-                      disabled={mutation.isPending}
-                    >
-                      Cancel
+                  <div className="flex flex-wrap justify-end gap-2 pt-2">
+                    {isEditing && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={handleCancelEdit}
+                        disabled={mutation.isPending}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                    <Button type="submit" disabled={mutation.isPending}>
+                      {mutation.isPending ? 'Saving...' : isEditing ? 'Update role' : 'Add member'}
                     </Button>
-                  )}
-                  <Button type="submit" disabled={mutation.isPending}>
-                    {mutation.isPending ? 'Saving...' : isEditing ? 'Update role' : 'Add member'}
-                  </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-4 text-sm text-base-content/70">
+                  Member management is read-only for your role.
                 </div>
-              </form>
+              )}
             </div>
           </div>
         )}

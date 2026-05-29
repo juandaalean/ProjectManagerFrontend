@@ -5,6 +5,7 @@ import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
 import { registerSchema, type RegisterFormData } from '../schemas/registerSchema'
 import { useLoginMutation } from '../hooks/useLoginMutation'
 import { useRegisterMutation } from '../hooks/useRegisterMutation'
+import { env } from '../../../shared/config/env'
 import { Button } from '../../../shared/ui/Button'
 import { Input } from '../../../shared/ui/Input'
 
@@ -39,6 +40,17 @@ export function AuthForm() {
     setMode(mode === 'login' ? 'register' : 'login')
   }
 
+  const handleDemoLogin = () => {
+    if (!env.demoLoginEnabled) {
+      return
+    }
+
+    loginMutation.mutate({
+      email: env.demoLoginEmail,
+      password: env.demoLoginPassword,
+    })
+  }
+
   return (
     <div className="card w-full max-w-md bg-base-100 shadow-lg">
       <div className="card-body">
@@ -49,8 +61,8 @@ export function AuthForm() {
           <h2 className="mt-1 text-2xl font-semibold">{mode === 'login' ? 'Login' : 'Register'}</h2>
           <p className="mt-1 text-sm text-base-content/70">
             {mode === 'login'
-              ? 'Accede a tus proyectos, tareas y comentarios desde un panel limpio y rápido.'
-              : 'Crea tu acceso para empezar a organizar el trabajo del equipo.'}
+              ? 'Access your projects, tasks, and comments from a clean and fast panel.'
+              : "Create your account to start organizing your team's work."}
           </p>
         </div>
 
@@ -118,11 +130,40 @@ export function AuthForm() {
             />
           )}
 
-          <div className="mt-3">
+          <div className="mt-3 space-y-3">
             <Button type="submit" disabled={currentMutation.isPending} className="w-full">
               {currentMutation.isPending ? 'Loading...' : mode === 'login' ? 'Login' : 'Register'}
             </Button>
+
+            {mode === 'login' && (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!env.demoLoginEnabled || loginMutation.isPending}
+                onClick={handleDemoLogin}
+                className="w-full border border-base-300"
+              >
+                {loginMutation.isPending
+                  ? 'Entering demo...'
+                  : env.demoLoginEnabled
+                    ? `Login as ${env.demoLoginEmail}`
+                    : 'Demo not configured'}
+              </Button>
+            )}
           </div>
+
+          {mode === 'login' && !env.demoLoginEnabled && (
+            <p className="text-center text-xs text-base-content/60">
+              Configure VITE_DEMO_EMAIL and VITE_DEMO_PASSWORD to enable demo access.
+            </p>
+          )}
+
+          {mode === 'login' && env.demoLoginEnabled && (
+            <p className="text-center text-xs text-base-content/60">
+              The demo uses {env.demoLoginEmail} and logs in with the same session as the regular
+              login.
+            </p>
+          )}
 
           {currentMutation.isError && (
             <p className="text-red-500 text-sm text-center">

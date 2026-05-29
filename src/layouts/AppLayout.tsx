@@ -5,7 +5,6 @@ import { AppNavbar } from './app-shell/AppNavbar'
 import { AppSidebar } from './app-shell/AppSidebar'
 
 export function AppLayout({ children }: PropsWithChildren) {
-  const [collapsed, setCollapsed] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     localStorage.getItem('theme') === 'dark' ? 'dark' : 'light',
   )
@@ -36,7 +35,7 @@ export function AppLayout({ children }: PropsWithChildren) {
         <AppFooter />
       </div>
 
-      <AppSidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed((c) => !c)} />
+      <AppSidebar />
     </div>
   )
 }

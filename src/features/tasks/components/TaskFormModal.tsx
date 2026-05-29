@@ -11,14 +11,21 @@ import { createTaskSchema, updateTaskSchema } from '../schemas/taskSchema'
 import { useCreateTaskMutation, useUpdateTaskMutation } from '../hooks/useTaskMutations'
 import { useAuth } from '../../auth/context/AuthContext'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
+import { canCreateTask, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
 
 interface TaskFormModalProps {
   task?: TaskItem
   projectId?: string
+  initialCompletedAt?: string
   onClose: () => void
 }
 
-export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) {
+export function TaskFormModal({
+  task,
+  projectId,
+  initialCompletedAt,
+  onClose,
+}: TaskFormModalProps) {
   const isEditing = !!task
   const createMutation = useCreateTaskMutation()
   const updateMutation = useUpdateTaskMutation()
@@ -29,6 +36,8 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
     isLoading: isMembersLoading,
     error: projectMembersError,
   } = useProjectMembersQuery(resolvedProjectId)
+  const currentUserMemberRole = getMemberRoleForUser(projectMembers, user?.userId)
+  const canCreate = isEditing || canCreateTask({ memberRole: currentUserMemberRole })
 
   const {
     register,
@@ -52,7 +61,7 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
       : {
           priority: 'Medium',
           assignedUserId: '',
-          completedAt: '',
+          completedAt: initialCompletedAt ?? '',
         },
   })
   const editErrors = errors as typeof errors & {
@@ -140,6 +149,26 @@ export function TaskFormModal({ task, projectId, onClose }: TaskFormModalProps) 
     createMutation.isPending ||
     updateMutation.isPending
   const selectedAssignee = projectMembers.find((member) => member.userId === assignedUserId)
+
+  if (!isEditing && !isMembersLoading && !canCreate) {
+    return (
+      <div className="modal modal-open">
+        <Card className="modal-box w-full max-w-md border border-base-300 bg-base-100 shadow-xl">
+          <div className="space-y-3 p-6 text-center">
+            <h2 className="text-xl font-bold">No permission</h2>
+            <p className="text-sm text-base-content/70">
+              Only admins or coordinators can create tasks for this project.
+            </p>
+            <div className="modal-action justify-center">
+              <Button type="button" variant="secondary" onClick={onClose}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="modal modal-open">
