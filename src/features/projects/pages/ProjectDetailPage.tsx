@@ -7,6 +7,9 @@ import { useTasksQuery } from '../../tasks/hooks/useTasksQuery'
 import { ProjectTaskCalendar } from '../components/ProjectTaskCalendar'
 import { ProjectMembersSection } from '../components/ProjectMembersSection'
 import { useAuth } from '../../auth/context/AuthContext'
+import { useProjectMembersQuery } from '../hooks/useProjectMembersQuery'
+import { canCreateTask, canManageProject, getMemberRoleForUser } from '../utils/projectPermissions'
+import { TranscriptTaskAutomationPanel } from '../components/TranscriptTaskAutomationPanel'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -14,8 +17,16 @@ export function ProjectDetailPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: project, isLoading, error } = useProjectQuery(projectId!)
   const { data: tasks = [] } = useTasksQuery(projectId)
+  const { data: members } = useProjectMembersQuery(projectId)
   const { user } = useAuth()
-  const isOwner = !!project && !!user && project.ownerId === user.userId
+  const canManage =
+    !!project &&
+    canManageProject({
+      currentUserId: user?.userId,
+      ownerId: project.ownerId,
+      memberRole: getMemberRoleForUser(members, user?.userId),
+    })
+  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(members, user?.userId) })
   const viewMode = searchParams.get('view') === 'overview' ? 'overview' : 'calendar'
 
   const viewButtons = [
@@ -38,7 +49,9 @@ export function ProjectDetailPage() {
           <div>
             <div className="flex items-center gap-2">
               <div className="badge badge-primary text-primary-content mb-3">Project detail</div>
-              {isOwner && <div className="badge badge-accent text-accent-content mb-3">Owner</div>}
+              {canManage && (
+                <div className="badge badge-accent text-accent-content mb-3">Manager</div>
+              )}
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
             {project.description && (
@@ -52,29 +65,40 @@ export function ProjectDetailPage() {
             >
               View Tasks
             </Button>
-            <Button onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}>
-              Add Task
-            </Button>
+            {canCreate && (
+              <Button onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}>
+                Add Task
+              </Button>
+            )}
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {viewButtons.map((button) => (
-            <Button
-              key={button.id}
-              variant={viewMode === button.id ? 'primary' : 'secondary'}
-              onClick={() => {
-                if (button.id === 'overview') {
-                  setSearchParams({ view: 'overview' })
-                  return
-                }
+        <div className="mt-6 flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2">
+            {viewButtons.map((button) => (
+              <Button
+                key={button.id}
+                variant={viewMode === button.id ? 'primary' : 'secondary'}
+                onClick={() => {
+                  if (button.id === 'overview') {
+                    setSearchParams({ view: 'overview' })
+                    return
+                  }
 
-                setSearchParams({})
-              }}
-            >
-              {button.label}
-            </Button>
-          ))}
+                  setSearchParams({})
+                }}
+              >
+                {button.label}
+              </Button>
+            ))}
+          </div>
+          <TranscriptTaskAutomationPanel
+            projectId={project.projectId}
+            projectName={project.name}
+            ownerId={project.ownerId}
+            members={members ?? []}
+            enabled={canCreate}
+          />
         </div>
       </div>
 
@@ -97,7 +121,7 @@ export function ProjectDetailPage() {
             </div>
           </Card>
 
-          <ProjectMembersSection projectId={project.projectId} />
+          <ProjectMembersSection projectId={project.projectId} canManageMembers={canManage} />
         </div>
       ) : (
         <ProjectTaskCalendar projectId={project.projectId} tasks={tasks} />

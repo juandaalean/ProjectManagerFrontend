@@ -4,6 +4,9 @@ import { useProjectQuery } from '../hooks/useProjectsQuery'
 import { useAuth } from '../../auth/context/AuthContext'
 import type { TaskItem } from '../../tasks/types/task.types'
 import { useProjectMembersQuery } from '../hooks/useProjectMembersQuery'
+import { TaskFormModal } from '../../tasks/components/TaskFormModal'
+import { canCreateTask, getMemberRoleForUser } from '../utils/projectPermissions'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface ProjectTaskCalendarProps {
   projectId: string
@@ -53,6 +56,7 @@ const formatMonth = (date: Date) =>
 export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarProps) {
   const navigate = useNavigate()
   const [viewDate, setViewDate] = useState(() => new Date())
+  const [createTaskDate, setCreateTaskDate] = useState<string | null>(null)
   const { data: projectMembers = [] } = useProjectMembersQuery(projectId)
 
   const calendarDays = useMemo(() => {
@@ -95,10 +99,14 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   const previousMonth = () => setViewDate((current) => addMonths(current, -1))
   const nextMonth = () => setViewDate((current) => addMonths(current, 1))
   const goToToday = () => setViewDate(new Date())
+  const closeCreateTaskModal = () => setCreateTaskDate(null)
 
   const { data: project } = useProjectQuery(projectId)
   const { user } = useAuth()
   const isOwner = !!project && !!user && project.ownerId === user.userId
+  const canCreate = canCreateTask({
+    memberRole: getMemberRoleForUser(projectMembers, user?.userId),
+  })
 
   return (
     <section className="space-y-4 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
@@ -118,13 +126,13 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
 
         <div className="flex flex-wrap gap-2">
           <button className="btn btn-ghost btn-sm" onClick={previousMonth} type="button">
-            Previous
+            <ChevronLeft className="w-4 h-4" />
           </button>
           <button className="btn btn-ghost btn-sm" onClick={goToToday} type="button">
             Today
           </button>
           <button className="btn btn-ghost btn-sm" onClick={nextMonth} type="button">
-            Next
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -146,18 +154,26 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
           return (
             <div
               key={dayKey}
-              className={`min-h-28 rounded-2xl border p-2 ${isCurrentMonth ? 'border-base-300 bg-base-200/40' : 'border-base-300/60 bg-base-100 opacity-60'}`}
+              className={`relative min-h-28 overflow-hidden rounded-2xl border p-2 ${isCurrentMonth ? 'border-base-300 bg-base-200/40' : 'border-base-300/60 bg-base-100 opacity-60'}`}
             >
+              {canCreate && (
+                <button
+                  type="button"
+                  className="absolute inset-0 z-0 cursor-pointer rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
+                  onClick={() => setCreateTaskDate(dayKey)}
+                  aria-label={`Create task for ${day.toLocaleDateString()}`}
+                />
+              )}
               <div className="flex items-start justify-between gap-2">
-                <span className="text-sm font-semibold">{day.getDate()}</span>
+                <span className="relative z-10 text-sm font-semibold">{day.getDate()}</span>
                 {dayTasks.length > 0 && (
-                  <span className="badge badge-primary badge-outline badge-sm">
+                  <span className="relative z-10 badge badge-primary badge-outline badge-sm">
                     {dayTasks.length}
                   </span>
                 )}
               </div>
 
-              <div className="mt-2 space-y-2">
+              <div className="relative z-10 mt-2 space-y-2">
                 {dayTasks.slice(0, 3).map((task) => {
                   const stateClass =
                     task.state === 'Finished'
@@ -194,6 +210,14 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
           )
         })}
       </div>
+
+      {createTaskDate && canCreate && (
+        <TaskFormModal
+          projectId={projectId}
+          initialCompletedAt={createTaskDate}
+          onClose={closeCreateTaskModal}
+        />
+      )}
     </section>
   )
 }

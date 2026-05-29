@@ -50,30 +50,6 @@ export function AppNavbar({ theme, onToggleTheme }: Props) {
         {/* Collapse control moved into the sidebar for better UX */}
       </div>
 
-      <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">
-          <li>
-            <NavLink to="/projects">Projects</NavLink>
-          </li>
-          <li>
-            <NavLink to="/tasks">Tasks</NavLink>
-          </li>
-          <li>
-            <details>
-              <summary>Workspace</summary>
-              <ul className="bg-base-100 rounded-t-none p-2 shadow-sm">
-                <li>
-                  <NavLink to="/projects">Project board</NavLink>
-                </li>
-                <li>
-                  <NavLink to="/tasks">Task board</NavLink>
-                </li>
-              </ul>
-            </details>
-          </li>
-        </ul>
-      </div>
-
       <div className="navbar-end gap-2">
         <div className="flex items-center gap-2">
           <button
