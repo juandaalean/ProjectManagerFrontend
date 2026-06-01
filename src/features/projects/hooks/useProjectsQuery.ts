@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { projectsApi } from '../api/projectsApi'
+import type { ListProjectsQuery } from '../types/project.types'
 
-export function useProjectsQuery(enabled = true) {
+export function useProjectsQuery(enabled = true, query?: ListProjectsQuery) {
   return useQuery({
-    queryKey: ['projects'],
-    queryFn: projectsApi.getProjects,
+    queryKey: ['projects', query ?? {}],
+    queryFn: () => projectsApi.getProjects(query),
     enabled,
   })
 }

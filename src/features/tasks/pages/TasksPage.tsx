@@ -81,8 +81,8 @@ export function TasksPage() {
 
     return (
       <div className="space-y-6">
-        <div className="hero rounded-box bg-base-100 shadow-sm">
-          <div className="hero-content flex-col items-start gap-4 p-6 lg:flex-row lg:justify-between">
+        <div className="rounded-box bg-base-100 p-6 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
               <h1 className="text-3xl font-bold tracking-tight">All tasks</h1>
@@ -135,8 +135,8 @@ export function TasksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="hero rounded-box bg-base-100 shadow-sm">
-        <div className="hero-content flex-col items-start gap-4 p-6 lg:flex-row lg:justify-between">
+      <div className="rounded-box bg-base-100 p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
             <h1 className="text-3xl font-bold tracking-tight">Task board</h1>

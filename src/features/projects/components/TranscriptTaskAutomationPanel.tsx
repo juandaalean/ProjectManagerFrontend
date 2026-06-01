@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Card } from '../../../shared/ui/Card'
 import { Button } from '../../../shared/ui/Button'
-import { createTaskSchema } from '../../tasks/schemas/taskSchema'
+import { createTaskSchemaForProject } from '../../tasks/schemas/taskSchema'
 import { useCreateTaskMutation } from '../../tasks/hooks/useTaskMutations'
 import {
   extractTasksFromTranscript,
@@ -14,6 +14,8 @@ interface TranscriptTaskAutomationPanelProps {
   projectId: string
   projectName: string
   ownerId: string
+  projectStartDate?: string
+  projectEndDate?: string
   members: ProjectMemberDto[]
   enabled: boolean
 }
@@ -38,6 +40,8 @@ export function TranscriptTaskAutomationPanel({
   projectId,
   projectName,
   ownerId,
+  projectStartDate,
+  projectEndDate,
   members,
   enabled,
 }: TranscriptTaskAutomationPanelProps) {
@@ -159,9 +163,13 @@ export function TranscriptTaskAutomationPanel({
     setStatusMessage(null)
     const nextRowErrors: Record<number, string> = {}
     pushLog('info', `Validating ${drafts.length} draft tasks before creation...`)
+    const taskSchema = createTaskSchemaForProject({
+      startDate: projectStartDate,
+      endDate: projectEndDate,
+    })
 
     const payloads = drafts.map((draft, index) => {
-      const validation = createTaskSchema.safeParse({
+      const validation = taskSchema.safeParse({
         title: draft.title,
         description: draft.description,
         priority: draft.priority,

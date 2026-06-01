@@ -17,6 +17,8 @@ const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const toLocalDate = (value: string) => new Date(value)
 
+const toDateOnlyKey = (value: string) => value.split('T')[0]
+
 const toDayKey = (date: Date) => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -107,6 +109,16 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   const canCreate = canCreateTask({
     memberRole: getMemberRoleForUser(projectMembers, user?.userId),
   })
+  const projectStartDate = project?.startDate ? toDateOnlyKey(project.startDate) : null
+  const projectEndDate = project?.endDate ? toDateOnlyKey(project.endDate) : null
+
+  const isWithinProjectRange = (dayKey: string) => {
+    if (!projectStartDate || !projectEndDate) {
+      return true
+    }
+
+    return dayKey >= projectStartDate && dayKey <= projectEndDate
+  }
 
   return (
     <section className="space-y-4 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm">
@@ -122,6 +134,12 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
           <p className="text-sm text-base-content/70">
             Tasks are placed on the completion day when available.
           </p>
+          {projectStartDate && projectEndDate && (
+            <p className="mt-1 text-sm text-base-content/60">
+              Project span: {new Date(projectStartDate).toLocaleDateString()} -{' '}
+              {new Date(projectEndDate).toLocaleDateString()}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -150,22 +168,35 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
           const isCurrentMonth = day.getMonth() === selectedMonth.getMonth()
           const dayKey = toDayKey(day)
           const dayTasks = eventsByDay.get(dayKey) ?? []
+          const withinProjectRange = isWithinProjectRange(dayKey)
+          const isProjectStart = projectStartDate === dayKey
+          const isProjectEnd = projectEndDate === dayKey
 
           return (
             <div
               key={dayKey}
-              className={`relative min-h-28 overflow-hidden rounded-2xl border p-2 ${isCurrentMonth ? 'border-base-300 bg-base-200/40' : 'border-base-300/60 bg-base-100 opacity-60'}`}
+              className={`relative min-h-28 overflow-hidden rounded-2xl border p-2 ${isCurrentMonth ? 'border-base-300 bg-base-200/40' : 'border-base-300/60 bg-base-100 opacity-60'} ${withinProjectRange ? 'ring-1 ring-primary/15' : ''} ${isProjectStart || isProjectEnd ? 'border-secondary/60 bg-secondary/10' : ''}`}
             >
               {canCreate && (
                 <button
                   type="button"
-                  className="absolute inset-0 z-0 cursor-pointer rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100"
-                  onClick={() => setCreateTaskDate(dayKey)}
+                  className="absolute inset-0 z-0 cursor-pointer rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    if (withinProjectRange) {
+                      setCreateTaskDate(dayKey)
+                    }
+                  }}
+                  disabled={!withinProjectRange}
                   aria-label={`Create task for ${day.toLocaleDateString()}`}
                 />
               )}
               <div className="flex items-start justify-between gap-2">
                 <span className="relative z-10 text-sm font-semibold">{day.getDate()}</span>
+                {withinProjectRange && (
+                  <span className="relative z-10 badge badge-secondary badge-outline badge-sm">
+                    Project
+                  </span>
+                )}
                 {dayTasks.length > 0 && (
                   <span className="relative z-10 badge badge-primary badge-outline badge-sm">
                     {dayTasks.length}
@@ -174,6 +205,12 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
               </div>
 
               <div className="relative z-10 mt-2 space-y-2">
+                {(isProjectStart || isProjectEnd) && (
+                  <div className="flex gap-2 text-[10px] uppercase tracking-wide text-secondary-content">
+                    {isProjectStart && <span className="badge badge-secondary badge-sm">Start</span>}
+                    {isProjectEnd && <span className="badge badge-secondary badge-sm">End</span>}
+                  </div>
+                )}
                 {dayTasks.slice(0, 3).map((task) => {
                   const stateClass =
                     task.state === 'Finished'
