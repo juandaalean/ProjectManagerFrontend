@@ -24,7 +24,7 @@ import {
   isProjectArchived,
 } from '../utils/projectStatus'
 
-import { ArchiveRestore, SquareCheckBig, RotateCcw} from 'lucide-react'
+import { ArchiveRestore, SquareCheckBig, RotateCcw } from 'lucide-react'
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -44,27 +44,28 @@ export function ProjectDetailPage() {
       memberRole: getMemberRoleForUser(members, user?.userId),
     })
   const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(members, user?.userId) })
-  const viewMode = searchParams.get('view') === 'calendar'
-    ? 'calendar'
-    : searchParams.get('view') === 'sprints'
-      ? 'sprints'
-      : searchParams.get('view') === 'ai'
-        ? 'ai'
-        : searchParams.get('view') === 'tasks'
-          ? 'tasks'
-          : 'overview'
-    const projectStatus = project ? getProjectStatus(project) : 'Active'
+  const viewMode =
+    searchParams.get('view') === 'calendar'
+      ? 'calendar'
+      : searchParams.get('view') === 'sprints'
+        ? 'sprints'
+        : searchParams.get('view') === 'ai'
+          ? 'ai'
+          : searchParams.get('view') === 'tasks'
+            ? 'tasks'
+            : 'overview'
+  const projectStatus = project ? getProjectStatus(project) : 'Active'
 
-    const updateProjectStatus = (status: ProjectStatus) => {
-      if (!projectId) {
-        return
-      }
-
-      updateProjectMutation.mutate({
-        id: projectId,
-        project: { status },
-      })
+  const updateProjectStatus = (status: ProjectStatus) => {
+    if (!projectId) {
+      return
     }
+
+    updateProjectMutation.mutate({
+      id: projectId,
+      project: { status },
+    })
+  }
 
   if (isLoading) {
     return <div className="text-center py-8">Loading project...</div>
@@ -109,7 +110,7 @@ export function ProjectDetailPage() {
               <Button
                 variant="secondary"
                 title="Archive project"
-                onClick={() =>  updateProjectStatus('Archived')}
+                onClick={() => updateProjectStatus('Archived')}
                 disabled={updateProjectMutation.isPending}
               >
                 <ArchiveRestore className="h-5 w-5" />
@@ -137,11 +138,7 @@ export function ProjectDetailPage() {
 
         {viewMode !== 'overview' && viewMode !== 'sprints' && (
           <div className="mt-6">
-            <TasksFilterBar
-              projectId={project.projectId}
-              filters={filters}
-              onChange={setFilters}
-            />
+            <TasksFilterBar projectId={project.projectId} filters={filters} onChange={setFilters} />
           </div>
         )}
 

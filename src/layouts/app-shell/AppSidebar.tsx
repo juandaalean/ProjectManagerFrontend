@@ -36,7 +36,9 @@ export function AppSidebar() {
           label: 'Overview',
           description: 'Project overview',
           icon: LayoutDashboard,
-          active: location.pathname === `/projects/${projectId}` && !new URLSearchParams(location.search).get('view'),
+          active:
+            location.pathname === `/projects/${projectId}` &&
+            !new URLSearchParams(location.search).get('view'),
           onClick: () => navigate(`/projects/${projectId}`),
         },
         {
@@ -44,8 +46,10 @@ export function AppSidebar() {
           label: 'Tasks',
           description: 'View project tasks',
           icon: ListTodo,
-          active: location.pathname === `/projects/${projectId}/tasks` ||
-            (location.pathname === `/projects/${projectId}` && new URLSearchParams(location.search).get('view') === 'tasks'),
+          active:
+            location.pathname === `/projects/${projectId}/tasks` ||
+            (location.pathname === `/projects/${projectId}` &&
+              new URLSearchParams(location.search).get('view') === 'tasks'),
           onClick: () => navigate(`/projects/${projectId}/tasks`),
         },
         {
@@ -53,7 +57,9 @@ export function AppSidebar() {
           label: 'Calendar',
           description: 'Calendar view',
           icon: Calendar,
-          active: location.pathname === `/projects/${projectId}` && new URLSearchParams(location.search).get('view') === 'calendar',
+          active:
+            location.pathname === `/projects/${projectId}` &&
+            new URLSearchParams(location.search).get('view') === 'calendar',
           onClick: () => navigate(`/projects/${projectId}?view=calendar`),
         },
         {
@@ -61,7 +67,9 @@ export function AppSidebar() {
           label: 'Sprints',
           description: 'Sprint management',
           icon: Layers,
-          active: location.pathname === `/projects/${projectId}` && new URLSearchParams(location.search).get('view') === 'sprints',
+          active:
+            location.pathname === `/projects/${projectId}` &&
+            new URLSearchParams(location.search).get('view') === 'sprints',
           onClick: () => navigate(`/projects/${projectId}?view=sprints`),
         },
         {
@@ -69,7 +77,9 @@ export function AppSidebar() {
           label: 'AI Tasks',
           description: 'AI task automation',
           icon: Sparkles,
-          active: location.pathname === `/projects/${projectId}` && new URLSearchParams(location.search).get('view') === 'ai',
+          active:
+            location.pathname === `/projects/${projectId}` &&
+            new URLSearchParams(location.search).get('view') === 'ai',
           onClick: () => navigate(`/projects/${projectId}?view=ai`),
         },
       ]

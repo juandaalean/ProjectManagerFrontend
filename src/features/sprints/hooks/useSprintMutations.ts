@@ -16,13 +16,8 @@ export function useCreateSprintMutation(projectId: string) {
 export function useUpdateSprintMutation(projectId: string) {
   const queryClient = useQueryClient()
 
-  return useMutation<
-    Sprint,
-    Error,
-    { sprintId: string; request: UpdateSprintRequest }
-  >({
-    mutationFn: ({ sprintId, request }) =>
-      sprintsApi.updateSprint(projectId, sprintId, request),
+  return useMutation<Sprint, Error, { sprintId: string; request: UpdateSprintRequest }>({
+    mutationFn: ({ sprintId, request }) => sprintsApi.updateSprint(projectId, sprintId, request),
     onSuccess: (sprint) => {
       queryClient.invalidateQueries({ queryKey: ['sprints', projectId] })
       queryClient.invalidateQueries({

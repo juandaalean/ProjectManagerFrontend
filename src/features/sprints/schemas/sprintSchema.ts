@@ -8,23 +8,13 @@ type SprintDateBounds = {
 }
 
 const baseCreateSprintSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Name is required')
-    .max(120, 'Name must be less than 120 characters'),
-  goal: z
-    .string()
-    .max(500, 'Goal must be less than 500 characters')
-    .optional()
-    .or(z.literal('')),
+  name: z.string().min(1, 'Name is required').max(120, 'Name must be less than 120 characters'),
+  goal: z.string().max(500, 'Goal must be less than 500 characters').optional().or(z.literal('')),
   startDate: z
     .string()
     .regex(dateOnlyRegex, 'Start date is required')
     .min(1, 'Start date is required'),
-  endDate: z
-    .string()
-    .regex(dateOnlyRegex, 'End date is required')
-    .min(1, 'End date is required'),
+  endDate: z.string().regex(dateOnlyRegex, 'End date is required').min(1, 'End date is required'),
 })
 
 const baseUpdateSprintSchema = z
@@ -40,16 +30,8 @@ const baseUpdateSprintSchema = z
       .optional()
       .nullable()
       .or(z.literal('')),
-    startDate: z
-      .string()
-      .regex(dateOnlyRegex, 'Invalid start date')
-      .optional()
-      .or(z.literal('')),
-    endDate: z
-      .string()
-      .regex(dateOnlyRegex, 'Invalid end date')
-      .optional()
-      .or(z.literal('')),
+    startDate: z.string().regex(dateOnlyRegex, 'Invalid start date').optional().or(z.literal('')),
+    endDate: z.string().regex(dateOnlyRegex, 'Invalid end date').optional().or(z.literal('')),
     state: z.enum(['Planned', 'Active', 'Completed', 'Canceled']).optional(),
   })
   .refine(

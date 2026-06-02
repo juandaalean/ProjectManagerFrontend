@@ -12,10 +12,7 @@ import { useAuth } from '../../auth/context/AuthContext'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { canCreateTask, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
 import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
-import {
-  createTaskSchemaForProject,
-  updateTaskSchemaForProject,
-} from '../schemas/taskSchema'
+import { createTaskSchemaForProject, updateTaskSchemaForProject } from '../schemas/taskSchema'
 
 interface TaskFormModalProps {
   task?: TaskItem

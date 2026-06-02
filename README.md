@@ -297,7 +297,6 @@ The fallback has two scanning modes, applied in order:
 2. **Natural mode** (`scanNaturalTranscript`)
 
    Designed for transcripts without `Tarea:` markers, bold formatting, or bullet lists. It detects:
-
    - Title from `funcionalidad/módulo/sistema/página llamada X` or imperative verbs at the start of a line (`Desarrollar X`, `Actualizar X`, `Mejorar X`, `Crear X`, `Revisar X`, `Implementar X`, `Optimizar X`, `Migrar X`, `Diseñar X`).
    - Block boundaries from ordinal markers (`Primera tarea`, `Segunda tarea`, `Tercera tarea`, etc.) or from consecutive imperative titles.
    - Assignees from `voy a asignar esta tarea a X`, `queda asignada a X`, `será para X`, `responsable X`, and from `me encargo` lines (the speaker of the line is the assignee).
@@ -308,7 +307,6 @@ The fallback has two scanning modes, applied in order:
    Speaker prefixes are stripped carefully: only the `**Nombre:**` marker at the start of a line is removed, never any bold markers inside the body. This avoids the common bug where the closing `**` of a task title gets eaten by an over-eager replace.
 
 3. **Filter pass** on the resulting items:
-
    - Recap lines of the form `Task name -> Priority -> Assignee` are dropped.
    - Lines that match `Resumen final` are dropped.
    - Empty bullets are dropped.
@@ -325,7 +323,6 @@ The consolidator (`consolidateItems`) receives the `LlmItemExtraction` and produ
 3. **Block splitting**. If the items contain one or more `block_start` items, the consolidator slices the list at each `block_start` and produces one draft per slice. The header attributes (title, assignee, due date, priority) come from the `block_start` item, and the body items are split by the boundaries.
 4. **Fallback grouping**. If no `block_start` items are present, items are grouped by `assigneeHint`. A side group only becomes its own task if it contains at least 2 items. Single-mention side groups are merged into the main group, which prevents the model or the fallback parser from creating phantom tasks for incidental name mentions.
 5. **Description assembly**. For each group:
-
    - `context` items become the opening sentence.
    - `requirement` and `decision` items become a `Requisitos:` bullet list.
    - `spec` items become a `Detalles técnicos:` bullet list.

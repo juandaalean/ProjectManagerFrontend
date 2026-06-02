@@ -1,6 +1,10 @@
 import type { ProjectMemberDto } from '../../projects/types/project.types'
 import type { TaskPriority } from '../types/task.types'
-import { llmItemExtractionSchema, type LlmExtractedItem, type LlmItemExtraction } from './transcriptTaskSchemas'
+import {
+  llmItemExtractionSchema,
+  type LlmExtractedItem,
+  type LlmItemExtraction,
+} from './transcriptTaskSchemas'
 
 const DEFAULT_MODEL = 'Llama-3.2-3B-Instruct-q4f32_1-MLC'
 const PRIORITY_VALUES: readonly TaskPriority[] = ['Low', 'Medium', 'High', 'Critical']
@@ -240,10 +244,7 @@ const parseSpanishDate = (value: string, referenceYear?: number): string | undef
   return `${y}-${mo}-${d}`
 }
 
-const findMemberInText = (
-  value: string,
-  members: ProjectMemberDto[],
-): string | undefined => {
+const findMemberInText = (value: string, members: ProjectMemberDto[]): string | undefined => {
   const normalizedValue = normalizeText(value)
   const emailMatch = members.find((member) =>
     normalizedValue.includes(normalizeText(member.userEmail)),
@@ -264,7 +265,11 @@ const extractTaskTitleFromLine = (line: string): string | undefined => {
     return undefined
   }
   // Exclude lines that are actually metadata (priority, assignee, date).
-  if (/\b(prioridad|asignad[oa]|Responsable|Fecha\s+l[ií]mite|requisitos?|especificaciones?)\b/i.test(line)) {
+  if (
+    /\b(prioridad|asignad[oa]|Responsable|Fecha\s+l[ií]mite|requisitos?|especificaciones?)\b/i.test(
+      line,
+    )
+  ) {
     return undefined
   }
   // "Tarea: **<title>**." (bold form)
@@ -353,7 +358,10 @@ const sliceTranscriptIntoTaskBlocks = (
   transcript: string,
   members: ProjectMemberDto[],
 ): RawTaskBlock[] => {
-  const lines = transcript.split(/\n+/).map((l) => l.trim()).filter(Boolean)
+  const lines = transcript
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter(Boolean)
   const blocks: RawTaskBlock[] = []
   let current: RawTaskBlock | null = null
 
@@ -446,7 +454,10 @@ const sliceTranscriptIntoTaskBlocks = (
 const scanNaturalTranscript = (transcript: string, members: ProjectMemberDto[]): RawTaskBlock[] => {
   // For transcripts without "Tarea:" markers or bold formatting.
   // Looks for natural language patterns to extract a task.
-  const lines = transcript.split(/\n+/).map((l) => l.trim()).filter(Boolean)
+  const lines = transcript
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter(Boolean)
   const blocks: RawTaskBlock[] = []
   let current: RawTaskBlock | null = null
 
@@ -806,15 +817,11 @@ const buildDraftForBlock = ({
   ownerId: string
 }): TaskDraftForCreation | null => {
   const context = items.filter((i) => i.kind === 'context')
-  const requirements = items.filter(
-    (i) => i.kind === 'requirement' || i.kind === 'decision',
-  )
+  const requirements = items.filter((i) => i.kind === 'requirement' || i.kind === 'decision')
   const specs = items.filter((i) => i.kind === 'spec')
 
   const sections: string[] = []
-  const contextSentence = context
-    .map((i) => finalizeText(i.text).replace(/\.$/, ''))
-    .join(' ')
+  const contextSentence = context.map((i) => finalizeText(i.text).replace(/\.$/, '')).join(' ')
   if (contextSentence) {
     sections.push(`${contextSentence}.`)
   }
@@ -827,9 +834,7 @@ const buildDraftForBlock = ({
   }
 
   if (specs.length > 0) {
-    const bullets = specs
-      .map((i) => `- ${finalizeText(i.text).replace(/\.$/, '')}`)
-      .join('\n')
+    const bullets = specs.map((i) => `- ${finalizeText(i.text).replace(/\.$/, '')}`).join('\n')
     sections.push(`Detalles técnicos:\n${bullets}`)
   }
 
@@ -839,9 +844,7 @@ const buildDraftForBlock = ({
   }
 
   const titleBase =
-    headerItem.taskTitle?.trim() ||
-    headerItem.text.trim() ||
-    'Tarea extraída de la reunión'
+    headerItem.taskTitle?.trim() || headerItem.text.trim() || 'Tarea extraída de la reunión'
   const title = finalizeText(titleBase)
 
   const assigneeHint = headerItem.assigneeHint?.trim() || ''
@@ -918,9 +921,7 @@ const consolidateAsSingleTask = (
     const sections: string[] = []
 
     if (isMain) {
-      const contextSentence = context
-        .map((i) => finalizeText(i.text).replace(/\.$/, ''))
-        .join(' ')
+      const contextSentence = context.map((i) => finalizeText(i.text).replace(/\.$/, '')).join(' ')
       if (contextSentence) {
         sections.push(`${contextSentence}.`)
       } else {
@@ -943,9 +944,7 @@ const consolidateAsSingleTask = (
     }
 
     if (specs.length > 0) {
-      const bullets = specs
-        .map((i) => `- ${finalizeText(i.text).replace(/\.$/, '')}`)
-        .join('\n')
+      const bullets = specs.map((i) => `- ${finalizeText(i.text).replace(/\.$/, '')}`).join('\n')
       sections.push(`Detalles técnicos:\n${bullets}`)
     }
 
@@ -968,18 +967,14 @@ const consolidateAsSingleTask = (
       description = `${description.slice(0, 7997).trim()}...`
     }
 
-    let titleBase = isMain
-      ? extraction.taskTitle?.trim() || ''
-      : ''
+    let titleBase = isMain ? extraction.taskTitle?.trim() || '' : ''
     if (isMain && !titleBase) {
       // Try to infer a title from a decision item that names a module/feature
       const decisionItem = items.find(
         (i) => i.kind === 'decision' && /\b(m[oó]dulo|funcionalidad|p[aá]gina)\b/i.test(i.text),
       )
       if (decisionItem) {
-        const namedMatch = decisionItem.text.match(
-          /\*\*?[""]?([A-ZÁÉÍÓÚÑ][\wÀ-ſ\s]+?)[""]?\*\*/u,
-        )
+        const namedMatch = decisionItem.text.match(/\*\*?[""]?([A-ZÁÉÍÓÚÑ][\wÀ-ſ\s]+?)[""]?\*\*/u)
         if (namedMatch) {
           titleBase = `Desarrollar el módulo ${namedMatch[1].trim()}`
         } else {
@@ -1115,7 +1110,7 @@ export async function extractTasksFromTranscript(input: ExtractTasksFromTranscri
     input.onProgress?.(`JSON validated. ${extraction.items.length} raw items received.`)
 
     // DEBUG: log raw LLM response
-     
+
     console.log('[AI DEBUG] Raw LLM extraction:', JSON.stringify(extraction, null, 2))
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown model error.'
@@ -1133,10 +1128,14 @@ export async function extractTasksFromTranscript(input: ExtractTasksFromTranscri
 
   input.onProgress?.('Consolidating items into tasks...')
   const drafts = consolidateItems(extraction, input.members, input.ownerId)
-   
+
   console.log(
     '[AI DEBUG] Consolidated drafts:',
-    drafts.map((d) => ({ title: d.title, assigneeHint: d.assigneeHint, description: d.description })),
+    drafts.map((d) => ({
+      title: d.title,
+      assigneeHint: d.assigneeHint,
+      description: d.description,
+    })),
   )
   input.onProgress?.(
     `${drafts.length} task${drafts.length === 1 ? '' : 's'} consolidated${

@@ -65,8 +65,7 @@ const mapSprint = (sprint: ApiSprint | Sprint): Sprint => {
 }
 
 const mapTask = (task: ApiTaskItem): TaskItem => {
-  const stateIndex =
-    typeof task.taskState === 'number' ? task.taskState : (task.state ?? 0)
+  const stateIndex = typeof task.taskState === 'number' ? task.taskState : (task.state ?? 0)
   const priorityIndex =
     typeof task.taskPriority === 'number' ? task.taskPriority : (task.priority ?? 0)
 
@@ -86,10 +85,8 @@ const mapTask = (task: ApiTaskItem): TaskItem => {
   }
 }
 
-
-
 const mapSprintTasks = (payload: ApiSprintTasksResponse) => {
-  const tasks = Array.isArray(payload) ? payload : payload.tasks ?? payload.taskItems ?? []
+  const tasks = Array.isArray(payload) ? payload : (payload.tasks ?? payload.taskItems ?? [])
   return tasks.map(mapTask)
 }
 
@@ -140,9 +137,7 @@ export const sprintsApi = {
     }
 
     const qs = params.toString()
-    const url = qs
-      ? `/projects/${projectId}/sprints?${qs}`
-      : `/projects/${projectId}/sprints`
+    const url = qs ? `/projects/${projectId}/sprints?${qs}` : `/projects/${projectId}/sprints`
 
     const response = await httpClient.get<ApiSprint[]>(url)
     return response.data.map(mapSprint)
@@ -193,14 +188,8 @@ export const sprintsApi = {
     await httpClient.delete(`/projects/${projectId}/sprints/${sprintId}`)
   },
 
-  async assignTaskToSprint(
-    projectId: string,
-    sprintId: string,
-    taskItemId: string,
-  ): Promise<void> {
-    await httpClient.put(
-      `/projects/${projectId}/sprints/${sprintId}/tasks/${taskItemId}`,
-    )
+  async assignTaskToSprint(projectId: string, sprintId: string, taskItemId: string): Promise<void> {
+    await httpClient.put(`/projects/${projectId}/sprints/${sprintId}/tasks/${taskItemId}`)
   },
 
   async removeTaskFromSprint(

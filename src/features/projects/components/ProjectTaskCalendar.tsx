@@ -207,7 +207,9 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
               <div className="relative z-10 mt-2 space-y-2">
                 {(isProjectStart || isProjectEnd) && (
                   <div className="flex gap-2 text-[10px] uppercase tracking-wide text-secondary-content">
-                    {isProjectStart && <span className="badge badge-secondary badge-sm">Start</span>}
+                    {isProjectStart && (
+                      <span className="badge badge-secondary badge-sm">Start</span>
+                    )}
                     {isProjectEnd && <span className="badge badge-secondary badge-sm">End</span>}
                   </div>
                 )}

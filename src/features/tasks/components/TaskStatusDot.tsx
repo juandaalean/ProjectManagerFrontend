@@ -13,9 +13,7 @@ export function TaskStatusDot({ label, className }: TaskStatusDotProps) {
       title={label}
     >
       <span className={className} aria-hidden="true" />
-      <span className="text-[11px] font-medium text-base-content">
-        {label}
-      </span>
+      <span className="text-[11px] font-medium text-base-content">{label}</span>
     </span>
   )
 }

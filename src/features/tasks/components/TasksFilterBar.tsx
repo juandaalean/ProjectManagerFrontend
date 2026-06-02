@@ -20,8 +20,12 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
   const filtersRef = useRef(filters)
   filtersRef.current = filters
 
-  const hasActiveFilters = !!(filters.searchTerm || filters.taskState || filters.taskPriority ||
-    (projectId && (filters.assignedUser || filters.sprintId)))
+  const hasActiveFilters = !!(
+    filters.searchTerm ||
+    filters.taskState ||
+    filters.taskPriority ||
+    (projectId && (filters.assignedUser || filters.sprintId))
+  )
 
   const [collapseOpen, setCollapseOpen] = useState(hasActiveFilters)
 
@@ -54,8 +58,14 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
   }
 
   return (
-    <div className={`collapse collapse-arrow border border-base-300 bg-base-100 ${collapseOpen ? 'collapse-open' : ''}`}>
-      <button type="button" className="collapse-title text-base font-semibold w-full text-left" onClick={() => setCollapseOpen((prev) => !prev)}>
+    <div
+      className={`collapse collapse-arrow border border-base-300 bg-base-100 ${collapseOpen ? 'collapse-open' : ''}`}
+    >
+      <button
+        type="button"
+        className="collapse-title text-base font-semibold w-full text-left"
+        onClick={() => setCollapseOpen((prev) => !prev)}
+      >
         Search filters
       </button>
       <div className="collapse-content">
@@ -101,7 +111,9 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
                 className="select select-bordered w-full"
                 value={filters.taskPriority ?? ''}
                 onChange={(e) =>
-                  update({ taskPriority: (e.target.value || undefined) as TaskPriority | undefined })
+                  update({
+                    taskPriority: (e.target.value || undefined) as TaskPriority | undefined,
+                  })
                 }
               >
                 <option value="">All priorities</option>

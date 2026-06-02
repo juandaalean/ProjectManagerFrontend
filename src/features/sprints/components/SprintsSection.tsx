@@ -119,14 +119,9 @@ export function SprintsSection({
     return Object.keys(filters).length > 0 ? filters : undefined
   }, [searchTerm, startFrom, startTo, stateFilter])
 
-  const {
-    data: sprints = [],
-    isLoading,
-    error,
-  } = useSprintsQuery(projectId, queryFilters)
+  const { data: sprints = [], isLoading, error } = useSprintsQuery(projectId, queryFilters)
 
-  const hasActiveFilters =
-    !!searchTerm.trim() || !!stateFilter || !!startFrom || !!startTo
+  const hasActiveFilters = !!searchTerm.trim() || !!stateFilter || !!startFrom || !!startTo
 
   const handleClearFilters = () => {
     setSearchTerm('')
@@ -172,9 +167,7 @@ export function SprintsSection({
           <div>
             <div className="badge badge-primary badge-outline mb-2">Sprints</div>
             <h3 className="text-3xl font-bold tracking-tight">Project sprints</h3>
-            <p className="mt-1 text-sm text-base-content/70">
-              Pick a sprint to open its board.
-            </p>
+            <p className="mt-1 text-sm text-base-content/70">Pick a sprint to open its board.</p>
           </div>
           {canManage && (
             <Button onClick={() => setIsCreateOpen(true)}>
@@ -439,13 +432,10 @@ function SprintBoardView({
       { taskItemId: tId, sprintId: sId },
       {
         onSuccess: () => {
-          queryClient.setQueryData(
-            ['sprint-with-tasks', projectId, sId],
-            {
-              sprint: sprintDetail?.sprint ?? null,
-              tasks: tasksInSprint.filter((t) => t.id !== tId),
-            },
-          )
+          queryClient.setQueryData(['sprint-with-tasks', projectId, sId], {
+            sprint: sprintDetail?.sprint ?? null,
+            tasks: tasksInSprint.filter((t) => t.id !== tId),
+          })
           onCloseDrawer()
         },
       },
@@ -497,20 +487,12 @@ function SprintBoardView({
             <div className="flex flex-wrap items-center gap-2">
               {canManage && (
                 <>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onEditSprint(sprint)}
-                  >
+                  <Button variant="secondary" size="sm" onClick={() => onEditSprint(sprint)}>
                     <Pencil className="h-4 w-4" />
                     Edit
                   </Button>
                   {sprint.state !== 'Completed' && sprint.state !== 'Canceled' && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => setIsAssignOpen(true)}
-                    >
+                    <Button variant="primary" size="sm" onClick={() => setIsAssignOpen(true)}>
                       <Plus className="h-4 w-4" />
                       Add tasks
                     </Button>
@@ -620,32 +602,21 @@ interface KanbanColumnProps {
   onSelectTask: (task: TaskItem) => void
 }
 
-function KanbanColumn({
-  title,
-  accent,
-  bg,
-  hint,
-  tasks,
-  onSelectTask,
-}: KanbanColumnProps) {
+function KanbanColumn({ title, accent, bg, hint, tasks, onSelectTask }: KanbanColumnProps) {
   return (
     <div className={`flex min-h-[280px] flex-col rounded-2xl border-t-4 ${accent} ${bg} p-3`}>
       <div className="mb-1 flex items-center justify-between px-1">
         <h6 className="text-xs font-semibold uppercase tracking-wider">{title}</h6>
         <span className="badge badge-ghost badge-sm">{tasks.length}</span>
       </div>
-      <p className="px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">
-        {hint}
-      </p>
+      <p className="px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">{hint}</p>
       <div className="flex-1 space-y-2">
         {tasks.length === 0 ? (
           <div className="rounded-lg border border-dashed border-base-300/60 bg-base-100/50 p-4 text-center text-xs text-base-content/40">
             No tasks
           </div>
         ) : (
-          tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onSelect={onSelectTask} />
-          ))
+          tasks.map((task) => <TaskCard key={task.id} task={task} onSelect={onSelectTask} />)
         )}
       </div>
     </div>
@@ -664,9 +635,7 @@ function TaskCard({ task, onSelect }: TaskCardProps) {
       onClick={() => onSelect(task)}
       className="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-left text-sm transition hover:border-primary/40 hover:shadow-sm"
     >
-      <p className="line-clamp-2 text-sm font-semibold text-base-content">
-        {task.title}
-      </p>
+      <p className="line-clamp-2 text-sm font-semibold text-base-content">{task.title}</p>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <PriorityChip priority={task.priority} />
         <AssigneeChip assigneeId={task.assignedUserId} />
@@ -775,20 +744,14 @@ function TaskDrawer({
           <section className="rounded-box bg-base-200/40 p-3 text-xs text-base-content/60">
             <p className="font-semibold uppercase tracking-wider">Sprint</p>
             <p className="mt-1">
-              This task is part of the current sprint. Remove it from the sprint to
-              unassign.
+              This task is part of the current sprint. Remove it from the sprint to unassign.
             </p>
           </section>
         </div>
 
         {canManage && (
           <div className="flex flex-wrap items-center justify-end gap-2 border-t border-base-300 p-4">
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={onRemove}
-              disabled={isRemoving}
-            >
+            <Button variant="danger" size="sm" onClick={onRemove} disabled={isRemoving}>
               <Unlink className="h-4 w-4" />
               Remove from sprint
             </Button>
@@ -810,13 +773,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <SectionLabel>{label}</SectionLabel>
@@ -827,11 +784,7 @@ function Field({
 
 function StateDot({ state }: { state: TaskItem['state'] }) {
   const className =
-    state === 'Finished'
-      ? 'bg-success'
-      : state === 'Canceled'
-        ? 'bg-error'
-        : 'bg-primary'
+    state === 'Finished' ? 'bg-success' : state === 'Canceled' ? 'bg-error' : 'bg-primary'
   return <span className={`inline-block h-2.5 w-2.5 rounded-full ${className}`} />
 }
 
@@ -882,9 +835,7 @@ function AddTasksModal({
   const available = useMemo(() => {
     const lowered = search.toLowerCase().trim()
     return allTasks.filter(
-      (t) =>
-        !existingSet.has(t.id) &&
-        (lowered === '' || t.title.toLowerCase().includes(lowered)),
+      (t) => !existingSet.has(t.id) && (lowered === '' || t.title.toLowerCase().includes(lowered)),
     )
   }, [allTasks, existingSet, search])
 
@@ -947,9 +898,7 @@ function AddTasksModal({
 
         <div className="max-h-80 overflow-y-auto px-2 py-2">
           {isLoading ? (
-            <div className="px-4 py-6 text-center text-sm text-base-content/60">
-              Loading tasks…
-            </div>
+            <div className="px-4 py-6 text-center text-sm text-base-content/60">Loading tasks…</div>
           ) : available.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-base-content/60">
               {allTasks.length === 0
@@ -985,9 +934,7 @@ function AddTasksModal({
         </div>
 
         <div className="flex items-center justify-between border-t border-base-300 px-5 py-4">
-          <span className="text-xs text-base-content/60">
-            {selectedIds.size} selected
-          </span>
+          <span className="text-xs text-base-content/60">{selectedIds.size} selected</span>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" onClick={handleClose} disabled={isAssigning}>
               Cancel
@@ -998,7 +945,9 @@ function AddTasksModal({
               onClick={handleConfirm}
               disabled={selectedIds.size === 0 || isAssigning}
             >
-              {isAssigning ? 'Adding…' : `Add ${selectedIds.size || ''} task${selectedIds.size === 1 ? '' : 's'}`}
+              {isAssigning
+                ? 'Adding…'
+                : `Add ${selectedIds.size || ''} task${selectedIds.size === 1 ? '' : 's'}`}
             </Button>
           </div>
         </div>

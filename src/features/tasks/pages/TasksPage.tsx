@@ -98,10 +98,7 @@ export function TasksPage() {
             </Button>
           </div>
           <div className="mt-6">
-            <TasksFilterBar
-              filters={filters}
-              onChange={setFilters}
-            />
+            <TasksFilterBar filters={filters} onChange={setFilters} />
           </div>
         </div>
 
@@ -167,11 +164,7 @@ export function TasksPage() {
             )}
           </div>
         </div>
-        <TasksFilterBar
-          projectId={projectId}
-          filters={filters}
-          onChange={setFilters}
-        />
+        <TasksFilterBar projectId={projectId} filters={filters} onChange={setFilters} />
       </div>
       <TaskList tasks={projectTasks || []} projectId={projectId} />
       {showCreateModal && canCreate && (

@@ -10,10 +10,7 @@ import {
   type CreateSprintFormData,
   type UpdateSprintFormData,
 } from '../schemas/sprintSchema'
-import {
-  useCreateSprintMutation,
-  useUpdateSprintMutation,
-} from '../hooks/useSprintMutations'
+import { useCreateSprintMutation, useUpdateSprintMutation } from '../hooks/useSprintMutations'
 import type { Sprint, UpdateSprintRequest } from '../types/sprint.types'
 import { SprintStateValues } from '../types/sprint.types'
 
@@ -60,20 +57,21 @@ export function SprintFormModal({
     reset,
   } = useForm<CreateSprintFormData | UpdateSprintFormData>({
     resolver: zodResolver(schema as never),
-    defaultValues: isEditing && sprint
-      ? {
-          name: sprint.name,
-          goal: sprint.goal ?? '',
-          startDate: toDateOnly(sprint.startDate),
-          endDate: toDateOnly(sprint.endDate),
-          state: sprint.state,
-        }
-      : {
-          name: '',
-          goal: '',
-          startDate: toDateOnly(projectStartDate),
-          endDate: toDateOnly(projectEndDate),
-        },
+    defaultValues:
+      isEditing && sprint
+        ? {
+            name: sprint.name,
+            goal: sprint.goal ?? '',
+            startDate: toDateOnly(sprint.startDate),
+            endDate: toDateOnly(sprint.endDate),
+            state: sprint.state,
+          }
+        : {
+            name: '',
+            goal: '',
+            startDate: toDateOnly(projectStartDate),
+            endDate: toDateOnly(projectEndDate),
+          },
   })
 
   useEffect(() => {
@@ -145,9 +143,7 @@ export function SprintFormModal({
     <div className="modal modal-open">
       <Card className="modal-box w-full max-w-xl border border-base-300 bg-base-100 p-0 shadow-xl">
         <div className="p-6">
-          <h2 className="text-xl font-bold">
-            {isEditing ? 'Edit Sprint' : 'Create Sprint'}
-          </h2>
+          <h2 className="text-xl font-bold">{isEditing ? 'Edit Sprint' : 'Create Sprint'}</h2>
           <p className="mb-4 text-sm text-base-content/70">
             {isEditing
               ? 'Update the sprint details and state for this project.'
@@ -202,10 +198,7 @@ export function SprintFormModal({
                 <label className="label">
                   <span className="label-text font-semibold">State</span>
                 </label>
-                <select
-                  {...register('state')}
-                  className="select select-bordered w-full"
-                >
+                <select {...register('state')} className="select select-bordered w-full">
                   {SprintStateValues.map((state) => (
                     <option key={state} value={state}>
                       {state}
@@ -221,9 +214,7 @@ export function SprintFormModal({
             )}
 
             {mutation.isError && (
-              <p className="text-sm text-error">
-                {mutation.error?.message || 'An error occurred'}
-              </p>
+              <p className="text-sm text-error">{mutation.error?.message || 'An error occurred'}</p>
             )}
 
             <div className="modal-action">
@@ -231,11 +222,7 @@ export function SprintFormModal({
                 Cancel
               </Button>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending
-                  ? 'Saving...'
-                  : isEditing
-                    ? 'Update sprint'
-                    : 'Create sprint'}
+                {mutation.isPending ? 'Saving...' : isEditing ? 'Update sprint' : 'Create sprint'}
               </Button>
             </div>
           </form>
