@@ -1,24 +1,24 @@
 import type { TaskPriority, TaskState } from '../types/task.types'
 
-const badgeBaseClass = 'badge border-transparent px-6 py-2 text-xs font-semibold tracking-wide'
+const dotBaseClass = 'inline-flex h-4 w-4 shrink-0 rounded-full border border-base-100 shadow-sm'
 
 const stateBadgeClasses: Record<TaskState, string> = {
-  Active: 'badge-primary text-primary-content',
-  Finished: 'badge-success text-success-content',
-  Canceled: 'badge-error text-error-content',
+  Active: 'bg-primary',
+  Finished: 'bg-success',
+  Canceled: 'bg-error',
 }
 
 const priorityBadgeClasses: Record<TaskPriority, string> = {
-  Critical: 'badge-error text-error-content',
-  High: 'badge-warning text-warning-content',
-  Medium: 'badge-secondary text-secondary-content',
-  Low: 'badge-info text-info-content',
+  Critical: 'bg-error',
+  High: 'bg-warning',
+  Medium: 'bg-secondary',
+  Low: 'bg-info',
 }
 
 export function getTaskStateBadgeClassName(state: TaskState) {
-  return `${badgeBaseClass} ${stateBadgeClasses[state]}`
+  return `${dotBaseClass} ${stateBadgeClasses[state]}`
 }
 
 export function getTaskPriorityBadgeClassName(priority: TaskPriority) {
-  return `${badgeBaseClass} ${priorityBadgeClasses[priority]}`
+  return `${dotBaseClass} ${priorityBadgeClasses[priority]}`
 }

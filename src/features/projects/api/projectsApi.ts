@@ -6,12 +6,83 @@ import type {
   ProjectMemberDto,
   CreateProjectMemberRequest,
   UpdateProjectMemberRoleRequest,
+  ListProjectsQuery,
 } from '../types/project.types'
 
+type ApiProjectState = 0 | 1 | 2
+
+type ApiProject = Omit<Project, 'status'> & {
+  status?: ApiProjectState | null
+  state?: ApiProjectState | null
+  projectState?: ApiProjectState | null
+}
+
+const projectStatusToApiState = {
+  Active: 0,
+  Archived: 1,
+  Finished: 2,
+} as const
+
+const apiStateToProjectStatus = {
+  0: 'Active',
+  1: 'Archived',
+  2: 'Finished',
+} as const
+
+const mapApiProjectToProject = (project: ApiProject): Project => {
+  const rawState = project.state ?? project.projectState ?? project.status ?? null
+
+  const status =
+    rawState != null && rawState in apiStateToProjectStatus
+      ? apiStateToProjectStatus[rawState as keyof typeof apiStateToProjectStatus]
+      : undefined
+
+  return {
+    ...project,
+    status,
+  }
+}
+
+const mapProjectPayloadToApi = (project: CreateProjectRequest | UpdateProjectRequest) => {
+  if (project.status == null) {
+    return project
+  }
+
+  const { status, ...rest } = project
+  const state = projectStatusToApiState[status]
+
+  return {
+    ...rest,
+    state,
+    status: state,
+  }
+}
+
 export const projectsApi = {
-  async getProjects(): Promise<Project[]> {
-    const response = await httpClient.get<Project[]>('/projects')
-    return response.data
+  async getProjects(query?: ListProjectsQuery): Promise<Project[]> {
+    const params = new URLSearchParams()
+
+    if (query?.searchTerm) {
+      params.set('SearchTerm', query.searchTerm)
+    }
+
+    if (query?.startDateFrom) {
+      params.set('StartDateFrom', query.startDateFrom)
+    }
+
+    if (query?.startDateTo) {
+      params.set('StartDateTo', query.startDateTo)
+    }
+
+    if (query?.state) {
+      params.set('State', String(projectStatusToApiState[query.state]))
+    }
+
+    const queryString = params.toString()
+    const response = await httpClient.get<ApiProject[]>(
+      queryString ? `/projects?${queryString}` : '/projects',
+    )
+    return response.data.map(mapApiProjectToProject)
   },
 
   async getProject(id: string): Promise<Project> {
@@ -26,13 +97,16 @@ export const projectsApi = {
   },
 
   async createProject(project: CreateProjectRequest): Promise<Project> {
-    const response = await httpClient.post<Project>('/projects', project)
-    return response.data
+    const response = await httpClient.post<ApiProject>('/projects', mapProjectPayloadToApi(project))
+    return mapApiProjectToProject(response.data)
   },
 
   async updateProject(id: string, project: UpdateProjectRequest): Promise<Project> {
-    const response = await httpClient.put<Project>(`/projects/${id}`, project)
-    return response.data
+    const response = await httpClient.put<ApiProject>(
+      `/projects/${id}`,
+      mapProjectPayloadToApi(project),
+    )
+    return mapApiProjectToProject(response.data)
   },
 
   async deleteProject(id: string): Promise<void> {

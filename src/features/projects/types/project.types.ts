@@ -1,3 +1,7 @@
+export type ProjectStatus = 'Active' | 'Finished' | 'Archived'
+
+export const ProjectStatusValues: readonly ProjectStatus[] = ['Active', 'Finished', 'Archived']
+
 export type Project = {
   projectId: string
   name: string
@@ -5,6 +9,7 @@ export type Project = {
   startDate: string
   endDate: string
   ownerId: string
+  status?: ProjectStatus | null
 }
 
 export type ProjectMemberDto = {
@@ -28,6 +33,7 @@ export type CreateProjectRequest = {
   description?: string
   startDate: string
   endDate: string
+  status?: ProjectStatus
 }
 
 export type UpdateProjectRequest = {
@@ -35,4 +41,12 @@ export type UpdateProjectRequest = {
   description?: string
   startDate?: string
   endDate?: string
+  status?: ProjectStatus
+}
+
+export type ListProjectsQuery = {
+  searchTerm?: string
+  startDateFrom?: string
+  startDateTo?: string
+  state?: ProjectStatus
 }

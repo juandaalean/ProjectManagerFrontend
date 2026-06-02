@@ -12,6 +12,7 @@ import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../ut
 import { useAuth } from '../../auth/context/AuthContext'
 import { canToggleTaskState, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
 import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
+import { TaskStatusDot } from '../components/TaskStatusDot'
 
 export function TaskDetailPage() {
   const { projectId, taskItemId } = useParams<{ projectId: string; taskItemId: string }>()
@@ -123,11 +124,15 @@ export function TaskDetailPage() {
                 {task.description || 'No description provided.'}
               </p>
             </div>
-            <div className="flex gap-4">
-              <span className={getTaskPriorityBadgeClassName(task.priority)}>
-                Priority: {task.priority}
-              </span>
-              <span className={getTaskStateBadgeClassName(task.state)}>State: {task.state}</span>
+            <div className="flex flex-wrap items-center gap-4">
+              <TaskStatusDot
+                label={`Priority: ${task.priority}`}
+                className={getTaskPriorityBadgeClassName(task.priority)}
+              />
+              <TaskStatusDot
+                label={`State: ${task.state}`}
+                className={getTaskStateBadgeClassName(task.state)}
+              />
             </div>
             <div className="text-sm text-base-content/70">
               Assigned to: <span className="font-semibold text-base-content">{assigneeName}</span>

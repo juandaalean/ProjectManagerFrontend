@@ -9,11 +9,13 @@ import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge'
 import { useAuth } from '../../auth/context/AuthContext'
+import { EllipsisVertical } from 'lucide-react'
 import {
   canManageProject,
   canToggleTaskState,
   getMemberRoleForUser,
 } from '../../projects/utils/projectPermissions'
+import { TaskStatusDot } from './TaskStatusDot'
 
 interface TaskListProps {
   tasks: TaskItem[]
@@ -101,10 +103,14 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="card-title text-lg">{task.title}</h3>
-                  <span className={getTaskStateBadgeClassName(task.state)}>{task.state}</span>
-                  <span className={getTaskPriorityBadgeClassName(task.priority)}>
-                    {task.priority}
-                  </span>
+                  <TaskStatusDot
+                    label={`State: ${task.state}`}
+                    className={getTaskStateBadgeClassName(task.state)}
+                  />
+                  <TaskStatusDot
+                    label={`Priority: ${task.priority}`}
+                    className={getTaskPriorityBadgeClassName(task.priority)}
+                  />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-base-content/70">
                   <span className="font-medium text-base-content">Assigned to:</span>
@@ -135,28 +141,49 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
                   </Button>
                 )}
                 {canManage && (
-                  <>
-                    <Button
-                      variant="secondary"
-                      size="sm"
+                  <div className="dropdown dropdown-end">
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-circle btn-sm"
+                      aria-label="Task actions"
                       onClick={(event) => {
                         event.stopPropagation()
-                        setEditingTask(task)
                       }}
                     >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
+                      <EllipsisVertical className="h-5 w-5" />
+                    </button>
+
+                    <ul
+                      className="menu dropdown-content menu-sm z-[1] mt-3 w-44 rounded-box bg-base-100 p-2 shadow"
                       onClick={(event) => {
                         event.stopPropagation()
-                        handleDelete(task)
                       }}
                     >
-                      Delete
-                    </Button>
-                  </>
+                      <li>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            setEditingTask(task)
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          type="button"
+                          className="text-error"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            handleDelete(task)
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 )}
               </div>
             </div>
