@@ -46,3 +46,11 @@ export type UpdateTaskRequest = {
   createdAt?: string
   completedAt?: string | null
 }
+
+export type ListTaskItemsQuery = {
+  searchTerm?: string
+  taskState?: TaskState
+  taskPriority?: TaskPriority
+  assignedUser?: string
+  sprintId?: string
+}

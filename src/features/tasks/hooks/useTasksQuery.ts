@@ -1,19 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import { tasksApi } from '../api/tasksApi'
-import type { ProjectTaskItemsGroup, TaskItem } from '../types/task.types'
+import type { ListTaskItemsQuery, ProjectTaskItemsGroup, TaskItem } from '../types/task.types'
 
-export function useTasksQuery(projectId?: string) {
+export function useTasksQuery(projectId?: string, query?: ListTaskItemsQuery) {
   return useQuery<TaskItem[]>({
-    queryKey: ['tasks', projectId],
-    queryFn: () => tasksApi.getTasks(projectId!),
+    queryKey: ['tasks', projectId, query ?? {}],
+    queryFn: () => tasksApi.getTasks(projectId!, query),
     enabled: !!projectId,
   })
 }
 
-export function useTasksByProjectsQuery(projectIds?: string[]) {
+export function useTasksByProjectsQuery(projectIds?: string[], query?: ListTaskItemsQuery) {
   return useQuery<ProjectTaskItemsGroup[]>({
-    queryKey: ['tasks', 'by-projects', ...(projectIds ?? [])],
-    queryFn: () => tasksApi.getTasksByProjects(projectIds ?? []),
+    queryKey: ['tasks', 'by-projects', ...(projectIds ?? []), query ?? {}],
+    queryFn: () => tasksApi.getTasksByProjects(projectIds ?? [], query),
     enabled: !!projectIds && projectIds.length > 0,
   })
 }

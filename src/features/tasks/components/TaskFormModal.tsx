@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card } from '../../../shared/ui/Card'
@@ -7,11 +7,12 @@ import { Input } from '../../../shared/ui/Input'
 import type { TaskItem, CreateTaskRequest, UpdateTaskRequest } from '../types/task.types'
 import { TaskPriorityValues, TaskStateValues } from '../types/task.types'
 import type { CreateTaskFormData, UpdateTaskFormData } from '../schemas/taskSchema'
-import { createTaskSchema, updateTaskSchema } from '../schemas/taskSchema'
 import { useCreateTaskMutation, useUpdateTaskMutation } from '../hooks/useTaskMutations'
 import { useAuth } from '../../auth/context/AuthContext'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { canCreateTask, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
+import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
+import { createTaskSchemaForProject, updateTaskSchemaForProject } from '../schemas/taskSchema'
 
 interface TaskFormModalProps {
   task?: TaskItem
@@ -31,6 +32,7 @@ export function TaskFormModal({
   const updateMutation = useUpdateTaskMutation()
   const { user } = useAuth()
   const resolvedProjectId = task?.projectId ?? projectId
+  const { data: project, isLoading: isProjectLoading } = useProjectQuery(resolvedProjectId ?? '')
   const {
     data: projectMembers = [],
     isLoading: isMembersLoading,
@@ -38,6 +40,21 @@ export function TaskFormModal({
   } = useProjectMembersQuery(resolvedProjectId)
   const currentUserMemberRole = getMemberRoleForUser(projectMembers, user?.userId)
   const canCreate = isEditing || canCreateTask({ memberRole: currentUserMemberRole })
+  const taskSchema = useMemo(
+    () =>
+      isEditing
+        ? updateTaskSchemaForProject({
+            startDate: project?.startDate,
+            endDate: project?.endDate,
+          })
+        : createTaskSchemaForProject({
+            startDate: project?.startDate,
+            endDate: project?.endDate,
+          }),
+    [isEditing, project?.endDate, project?.startDate],
+  )
+  const projectStartDate = project?.startDate?.split('T')[0]
+  const projectEndDate = project?.endDate?.split('T')[0]
 
   const {
     register,
@@ -48,7 +65,7 @@ export function TaskFormModal({
     getValues,
     reset,
   } = useForm<CreateTaskFormData | UpdateTaskFormData>({
-    resolver: zodResolver(isEditing ? updateTaskSchema : createTaskSchema),
+    resolver: zodResolver(taskSchema as never),
     defaultValues: task
       ? {
           title: task.title,
@@ -144,6 +161,7 @@ export function TaskFormModal({
 
   const isSubmitDisabled =
     !resolvedProjectId ||
+    isProjectLoading ||
     isMembersLoading ||
     projectMembers.length === 0 ||
     createMutation.isPending ||
@@ -236,6 +254,8 @@ export function TaskFormModal({
             <Input
               label="Completed At"
               type="date"
+              min={projectStartDate}
+              max={projectEndDate}
               {...register('completedAt')}
               error={errors.completedAt?.message}
             />
@@ -261,6 +281,9 @@ export function TaskFormModal({
             )}
             {isMembersLoading && (
               <p className="text-sm text-base-content/60">Loading project members...</p>
+            )}
+            {isProjectLoading && (
+              <p className="text-sm text-base-content/60">Loading project dates...</p>
             )}
             <div className="modal-action">
               <Button type="button" variant="secondary" onClick={onClose}>
