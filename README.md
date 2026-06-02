@@ -194,9 +194,9 @@ Related endpoints:
 
 ### AI Task Automation
 
-The project detail screen now exposes an AI automation entry point next to the Calendar and Overview controls. The feature is restricted to project admins and coordinators.
+The project detail screen exposes an AI automation entry point next to the Calendar and Overview controls. The feature is restricted to project admins and coordinators.
 
-It is designed to turn Microsoft Teams or Google Meet transcripts into reviewable task drafts before they are persisted.
+It is designed to turn Microsoft Teams or Google Meet transcripts into reviewable task drafts before they are persisted. A small in-browser language model produces the extraction, and a deterministic post-processor in TypeScript consolidates the raw output into well-formed task drafts. The whole pipeline never blocks task creation, because there is always a deterministic local fallback when the model is unavailable or produces low-quality output.
 
 #### User flow
 
@@ -207,69 +207,175 @@ It is designed to turn Microsoft Teams or Google Meet transcripts into reviewabl
 5. Review and edit the generated drafts.
 6. Create the tasks in batch.
 
+#### Architecture overview
+
+The feature is implemented around a strict two-stage pipeline. The LLM is intentionally limited to a single, easy job. Everything that requires reasoning about structure, deduplication, and grouping is done in TypeScript, where the rules are explicit and predictable.
+
+```text
+Transcript
+   |
+   v
+Stage 1: LLM (WebLLM) extracts raw items           <- one well-defined task
+   |       or, if it fails, the local fallback parser
+   v
+Stage 2: Consolidator (TypeScript) groups items
+   |       into task drafts, cleans text, resolves
+   |       assignees, normalizes dates and priorities
+   v
+TaskDraftForCreation[] -> modal review -> backend
+```
+
+Stage 1 always produces an `LlmItemExtraction` with a flat list of tagged items. Stage 2 always produces `TaskDraftForCreation[]`. The two stages are connected through a single contract, the `LlmItemExtraction` schema, which makes it possible to swap the LLM path for the fallback path without changing anything downstream.
+
 #### Model used
 
-The first version uses a local browser model through WebLLM:
+The browser model is loaded through WebLLM:
 
 - `Llama-3.2-3B-Instruct-q4f32_1-MLC`
 
-The model runs locally in the browser when WebGPU is available. If initialization fails or takes too long, the feature falls back to a local transcript parser so the workflow remains usable and never blocks task creation.
+The model runs locally when WebGPU is available. If initialization fails, takes too long, runs out of GPU memory, or returns invalid JSON, the feature transparently falls back to a deterministic transcript parser so the workflow is never blocked. The user always sees drafts in the modal, regardless of which path produced them.
 
-#### Prompt and output contract
+#### Stage 1 - LLM extraction
 
-The extraction prompt instructs the model to return JSON only, with the following shape:
+The LLM is prompted to extract **raw, tagged information** rather than finished tasks. This is a deliberate choice: a 3B parameter quantized model is much more reliable when it just classifies and lifts pieces of information, instead of having to decide on its own how many tasks to create and how to group them.
+
+The model returns this JSON shape:
 
 ```json
 {
-  "tasks": [
+  "taskTitle": "short action-oriented title or empty",
+  "taskAssigneeHint": "name of the person who accepted the work or empty",
+  "taskDueDate": "YYYY-MM-DD of the official final deadline or empty",
+  "taskPriority": "Low | Medium | High | Critical",
+  "items": [
     {
-      "title": "string",
-      "description": "string",
+      "kind": "requirement | spec | decision | date | assignee | context | block_start | priority",
+      "text": "...",
+      "assigneeHint": "...",
+      "date": "YYYY-MM-DD",
       "priority": "Low | Medium | High | Critical",
-      "dueDate": "YYYY-MM-DD or ISO date",
-      "assigneeHint": "name or email",
-      "confidence": 0.0
+      "taskTitle": "..."
     }
   ]
 }
 ```
 
-Prompt rules:
+Every item carries a `kind` so the consolidator can reason about it without re-parsing prose. `block_start` items are emitted by the fallback parser to mark the start of a new task within the same transcript. `date` items carry the parsed date so the consolidator does not have to re-parse Spanish date strings.
 
-- Extract multiple tasks when the transcript contains more than one action item.
-- Rewrite the transcript into task language. Do not copy phrases literally.
-- Keep titles concise, specific, and action-oriented.
-- Keep descriptions as clean summaries of the action to be done.
-- Use `assigneeHint` only when a person is explicitly mentioned.
-- Keep `confidence` between `0` and `1`.
-- Return valid JSON only, with no markdown or extra commentary.
+Prompt rules the model is given:
+
+- One item per piece of information, do not merge across items.
+- `kind` taxonomy: requirement, spec, decision, date, assignee, context.
+- `taskTitle` starts with a verb and contains the module or feature name, no assignee name, no date.
+- `taskDueDate` is the official final deadline only, intermediate dates go in `date` items.
+- `taskAssigneeHint` is the person who explicitly accepted the work, matched against the project members list.
+- Skip greetings, small talk, agenda items that are not work.
+- Skip duplicate requirements.
+
+#### Stage 1b - Fallback transcript parser
+
+If the LLM is unavailable, a deterministic parser takes over. It produces the same `LlmItemExtraction` shape, so the rest of the pipeline does not care which path produced the items.
+
+The fallback has two scanning modes, applied in order:
+
+1. **Structured mode** (`sliceTranscriptIntoTaskBlocks`)
+
+   Designed for transcripts that follow a strict format like:
+
+   ```text
+   **María:** Tarea: **<title>**
+   **María:** La prioridad será **alta**.
+   **María:** Requisitos:
+   * bullet 1
+   * bullet 2
+   **María:** Asignado a **Juanda**.
+   **María:** Fecha límite: **20 de junio de 2026**.
+   ```
+
+   It segments the transcript into blocks using the `Tarea: **<title>**` marker, then extracts priority, assignee, date, and bullet lists inside each block.
+
+2. **Natural mode** (`scanNaturalTranscript`)
+
+   Designed for transcripts without `Tarea:` markers, bold formatting, or bullet lists. It detects:
+
+   - Title from `funcionalidad/módulo/sistema/página llamada X` or imperative verbs at the start of a line (`Desarrollar X`, `Actualizar X`, `Mejorar X`, `Crear X`, `Revisar X`, `Implementar X`, `Optimizar X`, `Migrar X`, `Diseñar X`).
+   - Block boundaries from ordinal markers (`Primera tarea`, `Segunda tarea`, `Tercera tarea`, etc.) or from consecutive imperative titles.
+   - Assignees from `voy a asignar esta tarea a X`, `queda asignada a X`, `será para X`, `responsable X`, and from `me encargo` lines (the speaker of the line is the assignee).
+   - Dates from lines that mention `fecha límite`, `deadline`, `entrega`, `finalización`, followed by a Spanish natural date.
+   - Specs from lines containing `endpoint`, `api`, `actualice`, `cada N minutos`, `automáticamente`.
+   - Requirements from lines that start with a verb in infinitive or that have `*`, `-`, or `1.` bullet markers.
+
+   Speaker prefixes are stripped carefully: only the `**Nombre:**` marker at the start of a line is removed, never any bold markers inside the body. This avoids the common bug where the closing `**` of a task title gets eaten by an over-eager replace.
+
+3. **Filter pass** on the resulting items:
+
+   - Recap lines of the form `Task name -> Priority -> Assignee` are dropped.
+   - Lines that match `Resumen final` are dropped.
+   - Empty bullets are dropped.
+   - The header date of the meeting (e.g. `**Fecha:** 2 de junio de 2026`) is excluded from the due date.
+
+If both modes return no blocks, the pipeline produces a single empty draft titled `Tarea extraída de la reunión` with the description `No se pudo extraer información estructurada. Revisa la transcripción.`, which the reviewer can manually fill in.
+
+#### Stage 2 - Consolidator
+
+The consolidator (`consolidateItems`) receives the `LlmItemExtraction` and produces one or more `TaskDraftForCreation` objects. It does the following in order:
+
+1. **Cleanup**. Strips transcript artifacts like speaker prefixes, `we need to`, `hay que`, `please`, `action item`, etc.
+2. **Deduplication**. Drops items that have the same `(kind, normalized text)` pair.
+3. **Block splitting**. If the items contain one or more `block_start` items, the consolidator slices the list at each `block_start` and produces one draft per slice. The header attributes (title, assignee, due date, priority) come from the `block_start` item, and the body items are split by the boundaries.
+4. **Fallback grouping**. If no `block_start` items are present, items are grouped by `assigneeHint`. A side group only becomes its own task if it contains at least 2 items. Single-mention side groups are merged into the main group, which prevents the model or the fallback parser from creating phantom tasks for incidental name mentions.
+5. **Description assembly**. For each group:
+
+   - `context` items become the opening sentence.
+   - `requirement` and `decision` items become a `Requisitos:` bullet list.
+   - `spec` items become a `Detalles técnicos:` bullet list.
+   - `date` items become a `Hitos:` bullet list with the parsed ISO date.
+   - `assignee` items become an `Asignaciones:` bullet list.
+
+6. **Truncation**. The description is hard-capped at 8000 characters to stay within the backend's description limit.
 
 #### Assignment logic
 
 Task assignment is resolved in this order:
 
-1. If the model returns an assignee hint, the app tries to match it against project members by email or display name.
+1. The consolidator tries to match the `assigneeHint` (or `block_start.assigneeHint`) against project members by email first, then by display name.
 2. If no match is found, the task is assigned to the project owner.
-3. If the transcript does not mention a person, the same owner fallback is used.
+3. If the transcript does not mention any person, the same owner fallback is used.
 
 This keeps the workflow deterministic even when the transcript is ambiguous.
 
 #### Dates and priorities
 
-- When the model detects a date, the app normalizes it to `YYYY-MM-DD` before creating the task.
-- If a date cannot be parsed, the task remains without a completion date.
-- Priorities are normalized into the existing task enum: `Low`, `Medium`, `High`, `Critical`.
-- If priority is not clear, the app defaults to `Medium`.
+- Dates are normalized to `YYYY-MM-DD`. The fallback parser uses a Spanish natural date parser for expressions like `20 de junio de 2026` and infers the year from the meeting date in the header.
+- The official final deadline goes into `dueDate`. Intermediate dates (`primera versión el 13 de junio`, etc.) go into the `Hitos:` section of the description.
+- Priorities are normalized into the existing task enum: `Low`, `Medium`, `High`, `Critical`. If priority is not clear, the consolidator defaults to `Medium`.
+- The header date of the meeting itself is never used as a milestone.
 
 #### Confidence score
 
-`confidence` is a quality indicator for the extracted draft. It does not block creation by itself, but it helps the reviewer understand how certain the extraction was.
+`confidence` is a quality indicator for the extracted draft. It does not block creation by itself, but it helps the reviewer understand how certain the extraction was. LLM-produced drafts get a higher confidence than fallback-produced ones.
 
 #### Review and cleanup behavior
 
 - The modal keeps draft tasks available while the user performs consecutive extractions, so new transcript results are appended to the current review set.
 - When the modal is closed, the transcript, logs, and draft state are cleared.
 - The process log can be expanded or collapsed and shows model loading, parsing, fallback, and creation events.
+
+#### Debugging the extraction
+
+The agent prints two `console.log` entries while it runs:
+
+- `[AI DEBUG] Raw LLM extraction` - the exact JSON the model returned.
+- `[AI DEBUG] Consolidated drafts` - the list of `TaskDraftForCreation` that the consolidator produced.
+
+When the LLM is unavailable and the fallback parser is used, only the second log is printed, and the extraction message says `(fallback parser)`. This is the easiest way to tell which path produced the drafts when iterating on the prompt or the parser rules.
+
+#### Why the extraction is split in two stages
+
+A 3B parameter quantized model running in the browser cannot reliably decide on its own how many tasks a transcript contains. It tends to over-segment bullet lists and under-segment the natural sentences. Splitting the work has two effects:
+
+- The model only does what it is good at: classifying and lifting pieces of information.
+- Every structural decision (how many tasks, what goes in the description, who is assigned) is made by a TypeScript function that can be unit tested, audited, and changed without retraining anything.
 
 ### Task Comments
 
