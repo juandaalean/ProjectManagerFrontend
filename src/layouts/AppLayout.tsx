@@ -1,6 +1,5 @@
 import type { PropsWithChildren } from 'react'
 import { useEffect, useState } from 'react'
-import { AppFooter } from './app-shell/AppFooter'
 import { AppNavbar } from './app-shell/AppNavbar'
 import { AppSidebar } from './app-shell/AppSidebar'
 
@@ -31,8 +30,6 @@ export function AppLayout({ children }: PropsWithChildren) {
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
-
-        <AppFooter />
       </div>
 
       <AppSidebar />

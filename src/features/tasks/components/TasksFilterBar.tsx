@@ -16,9 +16,18 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
   const { data: members = [] } = useProjectMembersQuery(projectId)
   const { data: sprints = [] } = useSprintsQuery(projectId)
   const [searchInput, setSearchInput] = useState(filters.searchTerm ?? '')
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const filtersRef = useRef(filters)
-  filtersRef.current = filters
+  const onChangeRef = useRef(onChange)
+  const [userCollapseOverride, setUserCollapseOverride] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    filtersRef.current = filters
+  }, [filters])
+
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   const hasActiveFilters = !!(
     filters.searchTerm ||
@@ -27,18 +36,23 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
     (projectId && (filters.assignedUser || filters.sprintId))
   )
 
-  const [collapseOpen, setCollapseOpen] = useState(hasActiveFilters)
+  const collapseOpen = userCollapseOverride ?? hasActiveFilters
 
-  useEffect(() => {
-    setSearchInput(filters.searchTerm ?? '')
-  }, [filters.searchTerm])
+  // Keep the local search input in sync when the parent resets the search
+  // (e.g. via "Clear filters"). Doing it during render avoids the
+  // setState-in-effect cascading render warning.
+  if (filters.searchTerm !== undefined && filters.searchTerm !== searchInput) {
+    setSearchInput(filters.searchTerm)
+  } else if (filters.searchTerm === undefined && searchInput !== '') {
+    setSearchInput('')
+  }
 
   useEffect(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
     debounceRef.current = setTimeout(() => {
-      onChange({ ...filtersRef.current, searchTerm: searchInput || undefined })
+      onChangeRef.current({ ...filtersRef.current, searchTerm: searchInput || undefined })
     }, 400)
     return () => {
       if (debounceRef.current) {
@@ -46,12 +60,6 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
       }
     }
   }, [searchInput])
-
-  useEffect(() => {
-    if (hasActiveFilters) {
-      setCollapseOpen(true)
-    }
-  }, [hasActiveFilters])
 
   function update(partial: Partial<ListTaskItemsQuery>) {
     onChange({ ...filters, ...partial })
@@ -64,7 +72,7 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
       <button
         type="button"
         className="collapse-title text-base font-semibold w-full text-left"
-        onClick={() => setCollapseOpen((prev) => !prev)}
+        onClick={() => setUserCollapseOverride((prev) => !(prev ?? hasActiveFilters))}
       >
         Search filters
       </button>
