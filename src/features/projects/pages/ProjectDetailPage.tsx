@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useProjectQuery } from '../hooks/useProjectsQuery'
 import { Card } from '../../../shared/ui/Card'
@@ -11,6 +12,10 @@ import { useProjectMembersQuery } from '../hooks/useProjectMembersQuery'
 import { useUpdateProjectMutation } from '../hooks/useProjectMutations'
 import { canCreateTask, canManageProject, getMemberRoleForUser } from '../utils/projectPermissions'
 import { TranscriptTaskAutomationPanel } from '../components/TranscriptTaskAutomationPanel'
+import { SprintsSection } from '../../sprints/components/SprintsSection'
+import { TasksFilterBar } from '../../tasks/components/TasksFilterBar'
+import { TaskList } from '../../tasks/components/TaskList'
+import type { ListTaskItemsQuery } from '../../tasks/types/task.types'
 import type { ProjectStatus } from '../types/project.types'
 import {
   getProjectStatus,
@@ -26,7 +31,8 @@ export function ProjectDetailPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: project, isLoading, error } = useProjectQuery(projectId!)
-  const { data: tasks = [] } = useTasksQuery(projectId)
+  const [filters, setFilters] = useState<ListTaskItemsQuery>({})
+  const { data: tasks = [] } = useTasksQuery(projectId, filters)
   const { data: members } = useProjectMembersQuery(projectId)
   const updateProjectMutation = useUpdateProjectMutation()
   const { user } = useAuth()
@@ -38,7 +44,15 @@ export function ProjectDetailPage() {
       memberRole: getMemberRoleForUser(members, user?.userId),
     })
   const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(members, user?.userId) })
-  const viewMode = searchParams.get('view') === 'overview' ? 'overview' : 'calendar'
+  const viewMode = searchParams.get('view') === 'calendar'
+    ? 'calendar'
+    : searchParams.get('view') === 'sprints'
+      ? 'sprints'
+      : searchParams.get('view') === 'ai'
+        ? 'ai'
+        : searchParams.get('view') === 'tasks'
+          ? 'tasks'
+          : 'overview'
     const projectStatus = project ? getProjectStatus(project) : 'Active'
 
     const updateProjectStatus = (status: ProjectStatus) => {
@@ -51,11 +65,6 @@ export function ProjectDetailPage() {
         project: { status },
       })
     }
-
-  const viewButtons = [
-    { id: 'calendar' as const, label: 'Calendar' },
-    { id: 'overview' as const, label: 'Overview' },
-  ]
 
   if (isLoading) {
     return <div className="text-center py-8">Loading project...</div>
@@ -118,12 +127,6 @@ export function ProjectDetailPage() {
                 {/* Restore */}
               </Button>
             )}
-            <Button
-              variant="secondary"
-              onClick={() => navigate(`/projects/${project.projectId}/tasks`)}
-            >
-              View Tasks
-            </Button>
             {canCreate && (
               <Button onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}>
                 Add Task
@@ -132,35 +135,32 @@ export function ProjectDetailPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2 items-center">
-          <div className="flex flex-wrap gap-2">
-            {viewButtons.map((button) => (
-              <Button
-                key={button.id}
-                variant={viewMode === button.id ? 'primary' : 'secondary'}
-                onClick={() => {
-                  if (button.id === 'overview') {
-                    setSearchParams({ view: 'overview' })
-                    return
-                  }
-
-                  setSearchParams({})
-                }}
-              >
-                {button.label}
-              </Button>
-            ))}
+        {viewMode !== 'overview' && viewMode !== 'sprints' && (
+          <div className="mt-6">
+            <TasksFilterBar
+              projectId={project.projectId}
+              filters={filters}
+              onChange={setFilters}
+            />
           </div>
-          <TranscriptTaskAutomationPanel
-            projectId={project.projectId}
-            projectName={project.name}
-            ownerId={project.ownerId}
-            projectStartDate={project.startDate}
-            projectEndDate={project.endDate}
-            members={members ?? []}
-            enabled={canCreate}
-          />
-        </div>
+        )}
+
+        <TranscriptTaskAutomationPanel
+          projectId={project.projectId}
+          projectName={project.name}
+          ownerId={project.ownerId}
+          projectStartDate={project.startDate}
+          projectEndDate={project.endDate}
+          members={members ?? []}
+          enabled={canCreate}
+          autoOpen={viewMode === 'ai'}
+          hideTriggerButton
+          onClose={() => {
+            const newParams = new URLSearchParams(searchParams)
+            newParams.set('view', 'tasks')
+            setSearchParams(newParams)
+          }}
+        />
       </div>
 
       {viewMode === 'overview' ? (
@@ -188,6 +188,15 @@ export function ProjectDetailPage() {
 
           <ProjectMembersSection projectId={project.projectId} canManageMembers={canManage} />
         </div>
+      ) : viewMode === 'ai' || viewMode === 'tasks' ? (
+        <TaskList tasks={tasks} projectId={project.projectId} />
+      ) : viewMode === 'sprints' ? (
+        <SprintsSection
+          projectId={project.projectId}
+          projectStartDate={project.startDate}
+          projectEndDate={project.endDate}
+          canManage={canManage}
+        />
       ) : (
         <ProjectTaskCalendar projectId={project.projectId} tasks={tasks} />
       )}

@@ -128,12 +128,10 @@ export function TaskDetailPage() {
               <TaskStatusDot
                 label={`Priority: ${task.priority}`}
                 className={getTaskPriorityBadgeClassName(task.priority)}
-                expanded
               />
               <TaskStatusDot
                 label={`State: ${task.state}`}
                 className={getTaskStateBadgeClassName(task.state)}
-                expanded
               />
             </div>
             <div className="text-sm text-base-content/70">

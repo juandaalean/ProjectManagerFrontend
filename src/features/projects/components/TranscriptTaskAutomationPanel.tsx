@@ -18,6 +18,9 @@ interface TranscriptTaskAutomationPanelProps {
   projectEndDate?: string
   members: ProjectMemberDto[]
   enabled: boolean
+  autoOpen?: boolean
+  hideTriggerButton?: boolean
+  onClose?: () => void
 }
 
 type LogKind = 'info' | 'success' | 'error'
@@ -44,10 +47,14 @@ export function TranscriptTaskAutomationPanel({
   projectEndDate,
   members,
   enabled,
+  autoOpen,
+  hideTriggerButton = false,
+  onClose,
 }: TranscriptTaskAutomationPanelProps) {
   const createMutation = useCreateTaskMutation()
   const nextLogId = useRef(1)
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const isOpen = autoOpen !== undefined ? autoOpen : internalIsOpen
   const [transcript, setTranscript] = useState('')
   const [sourceName, setSourceName] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
@@ -91,7 +98,10 @@ export function TranscriptTaskAutomationPanel({
 
   const closeModal = () => {
     resetFlowState()
-    setIsOpen(false)
+    if (autoOpen === undefined) {
+      setInternalIsOpen(false)
+    }
+    onClose?.()
   }
 
   const onUploadTranscript = async (file: File | undefined) => {
@@ -236,9 +246,11 @@ export function TranscriptTaskAutomationPanel({
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setIsOpen(true)}>
-        AI Tasks
-      </Button>
+      {!hideTriggerButton && (
+        <Button variant="secondary" onClick={() => setInternalIsOpen(true)}>
+          AI Tasks
+        </Button>
+      )}
 
       {isOpen && (
         <div className="modal modal-open">

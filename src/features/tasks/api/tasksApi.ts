@@ -5,6 +5,7 @@ import type {
   CreateTaskRequest,
   AssignTaskItemRequest,
   UpdateTaskRequest,
+  ListTaskItemsQuery,
 } from '../types/task.types'
 
 type ApiTask = {
@@ -71,17 +72,35 @@ const mapAssignTaskItemRequest = (payload: AssignTaskItemRequest) => ({
 })
 
 export const tasksApi = {
-  getTasks: async (projectId: string): Promise<TaskItem[]> => {
-    const response = await httpClient.get<ApiTask[]>(`/projects/${projectId}/tasks`)
+  getTasks: async (projectId: string, query?: ListTaskItemsQuery): Promise<TaskItem[]> => {
+    const params = new URLSearchParams()
+    if (query?.searchTerm) params.append('searchTerm', query.searchTerm)
+    if (query?.taskState) params.append('taskState', query.taskState)
+    if (query?.taskPriority) params.append('taskPriority', query.taskPriority)
+    if (query?.assignedUser) params.append('assignedUser', query.assignedUser)
+    if (query?.sprintId) params.append('sprintId', query.sprintId)
+    const qs = params.toString()
+    const response = await httpClient.get<ApiTask[]>(
+      `/projects/${projectId}/tasks${qs ? '?' + qs : ''}`,
+    )
     return response.data.map(mapTask)
   },
 
-  getTasksByProjects: async (projectIds: string[]): Promise<ProjectTaskItemsGroup[]> => {
+  getTasksByProjects: async (
+    projectIds: string[],
+    query?: ListTaskItemsQuery,
+  ): Promise<ProjectTaskItemsGroup[]> => {
     const params = new URLSearchParams()
 
     projectIds.forEach((projectId) => {
       params.append('projectIds', projectId)
     })
+
+    if (query?.searchTerm) params.append('searchTerm', query.searchTerm)
+    if (query?.taskState) params.append('taskState', query.taskState)
+    if (query?.taskPriority) params.append('taskPriority', query.taskPriority)
+    if (query?.assignedUser) params.append('assignedUser', query.assignedUser)
+    if (query?.sprintId) params.append('sprintId', query.sprintId)
 
     const response = await httpClient.get<ApiProjectTaskItemsGroup[]>(
       `/task-items/by-projects?${params.toString()}`,

@@ -7,7 +7,7 @@ type TaskDateBounds = {
 
 const baseCreateTaskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
-  description: z.string().max(500, 'Description must be less than 500 characters').optional(),
+  description: z.string().max(8000, 'Description must be less than 8000 characters').optional(),
   priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
   assignedUserId: z.string().uuid('Invalid assigned user ID'),
   completedAt: z
@@ -24,7 +24,7 @@ const baseUpdateTaskSchema = z
       .min(1, 'Title is required')
       .max(100, 'Title must be less than 100 characters')
       .optional(),
-    description: z.string().max(500, 'Description must be less than 500 characters').optional(),
+    description: z.string().max(8000, 'Description must be less than 8000 characters').optional(),
     state: z.enum(['Active', 'Finished', 'Canceled']).optional(),
     priority: z.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
     assignedUserId: z.string().uuid('Invalid assigned user ID').optional(),

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
@@ -7,8 +7,10 @@ import { ErrorState } from '../../../shared/ui/ErrorState'
 import { useProjectsQuery } from '../../projects/hooks/useProjectsQuery'
 import { TaskList } from '../components/TaskList'
 import { TaskFormModal } from '../components/TaskFormModal'
+import { TasksFilterBar } from '../components/TasksFilterBar'
 import { useTasksQuery } from '../hooks/useTasksQuery'
 import { useTasksByProjectsQuery } from '../hooks/useTasksQuery'
+import type { ListTaskItemsQuery } from '../types/task.types'
 import { useAuth } from '../../auth/context/AuthContext'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { canCreateTask, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
@@ -20,8 +22,9 @@ export function TasksPage() {
   const showCreateModal = searchParams.get('create') === '1'
   const isGlobalTasksView = !projectId
   const { user } = useAuth()
+  const [filters, setFilters] = useState<ListTaskItemsQuery>({})
 
-  const { data: projectTasks, isLoading, error } = useTasksQuery(projectId)
+  const { data: projectTasks, isLoading, error } = useTasksQuery(projectId, filters)
   const {
     data: projects,
     isLoading: projectsLoading,
@@ -32,7 +35,7 @@ export function TasksPage() {
     data: tasksByProjects,
     isLoading: groupedTasksLoading,
     error: groupedTasksError,
-  } = useTasksByProjectsQuery(projectIds)
+  } = useTasksByProjectsQuery(projectIds, filters)
 
   const projectById = useMemo(
     () => new Map((projects ?? []).map((project) => [project.projectId, project])),
@@ -93,6 +96,12 @@ export function TasksPage() {
             <Button variant="secondary" onClick={() => navigate('/projects')}>
               Go to Projects
             </Button>
+          </div>
+          <div className="mt-6">
+            <TasksFilterBar
+              filters={filters}
+              onChange={setFilters}
+            />
           </div>
         </div>
 
@@ -158,6 +167,11 @@ export function TasksPage() {
             )}
           </div>
         </div>
+        <TasksFilterBar
+          projectId={projectId}
+          filters={filters}
+          onChange={setFilters}
+        />
       </div>
       <TaskList tasks={projectTasks || []} projectId={projectId} />
       {showCreateModal && canCreate && (
