@@ -1,5 +1,6 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../features/auth/hooks/useAuth'
+import { useProjectQuery } from '../../features/projects/hooks/useProjectsQuery'
 
 type Props = {
   theme?: 'light' | 'dark'
@@ -9,6 +10,8 @@ type Props = {
 export function AppNavbar({ theme, onToggleTheme }: Props) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const { projectId } = useParams<{ projectId: string }>()
+  const { data: project } = useProjectQuery(projectId ?? '')
 
   const handleLogout = () => {
     logout()
@@ -48,6 +51,12 @@ export function AppNavbar({ theme, onToggleTheme }: Props) {
         </button>
 
         {/* Collapse control moved into the sidebar for better UX */}
+      </div>
+
+      <div className="navbar-center hidden lg:flex">
+        {project && (
+          <span className="text-lg font-semibold">{project.name}</span>
+        )}
       </div>
 
       <div className="navbar-end gap-2">

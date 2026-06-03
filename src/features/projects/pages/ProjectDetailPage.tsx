@@ -43,7 +43,8 @@ export function ProjectDetailPage() {
       ownerId: project.ownerId,
       memberRole: getMemberRoleForUser(members, user?.userId),
     })
-  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(members, user?.userId) })
+  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(members, user?.userId), projectStatus: project?.status })
+  const canManageSprints = canManage && project?.status === 'Active'
   const viewMode =
     searchParams.get('view') === 'calendar'
       ? 'calendar'
@@ -192,7 +193,7 @@ export function ProjectDetailPage() {
           projectId={project.projectId}
           projectStartDate={project.startDate}
           projectEndDate={project.endDate}
-          canManage={canManage}
+          canManage={canManageSprints}
         />
       ) : (
         <ProjectTaskCalendar projectId={project.projectId} tasks={tasks} />

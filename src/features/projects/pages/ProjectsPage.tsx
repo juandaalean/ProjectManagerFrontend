@@ -37,16 +37,16 @@ export function ProjectsPage() {
             <div>
               <div className="badge badge-primary badge-outline mb-3">Projects</div>
               <h1 className="text-3xl font-bold tracking-tight">Project board</h1>
-              <p className="max-w-2xl text-base-content/70">
+              {/* <p className="max-w-2xl text-base-content/70">
                 Create, edit and manage projects from a dashboard layout.
-              </p>
+              </p> */}
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <Button
                 variant={viewMode === 'all' ? 'primary' : 'secondary'}
                 onClick={() => setViewMode('all')}
-                title="All projects" // <--- Esto muestra el texto al pasar el cursor
+                title="All projects" 
               >
                 <GalleryHorizontalEnd className="h-5 w-5" />
               </Button>

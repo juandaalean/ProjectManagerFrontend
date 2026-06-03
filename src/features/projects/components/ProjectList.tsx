@@ -172,6 +172,8 @@ export function ProjectList({ onEdit, onCreate, filters }: ProjectListProps) {
   const deleteMutation = useDeleteProjectMutation()
   const navigate = useNavigate()
 
+  const filterState = filters?.state
+
   if (isLoading) {
     return <div className="text-center py-8">Loading projects...</div>
   }
@@ -181,11 +183,24 @@ export function ProjectList({ onEdit, onCreate, filters }: ProjectListProps) {
   }
 
   if (!projects || projects.length === 0) {
+    const emptyConfig =
+      filterState === 'Active'
+        ? { title: 'No active projects', description: 'There are no active projects yet.' }
+        : filterState === 'Finished'
+          ? { title: 'No finished projects', description: 'There are no finished projects yet.' }
+          : filterState === 'Archived'
+            ? { title: 'No archived projects', description: 'There are no archived projects yet.' }
+            : { title: 'No projects yet', description: 'Create your first project to get started' }
+
+    const showCreate = !filterState || filterState === 'Active'
+
     return (
       <EmptyState
-        title="No projects yet"
-        description="Create your first project to get started"
-        action={onCreate ? <Button onClick={onCreate}>Create Project</Button> : undefined}
+        title={emptyConfig.title}
+        description={emptyConfig.description}
+        action={
+          showCreate && onCreate ? <Button onClick={onCreate}>Create Project</Button> : undefined
+        }
       />
     )
   }

@@ -39,7 +39,7 @@ export function TaskFormModal({
     error: projectMembersError,
   } = useProjectMembersQuery(resolvedProjectId)
   const currentUserMemberRole = getMemberRoleForUser(projectMembers, user?.userId)
-  const canCreate = isEditing || canCreateTask({ memberRole: currentUserMemberRole })
+  const canCreate = isEditing || canCreateTask({ memberRole: currentUserMemberRole, projectStatus: project?.status })
   const taskSchema = useMemo(
     () =>
       isEditing

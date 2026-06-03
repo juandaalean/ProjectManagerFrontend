@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext,
+  DragOverlay,
+  useDraggable,
+  useDroppable,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
 import { ErrorState } from '../../../shared/ui/ErrorState'
@@ -13,6 +21,7 @@ import {
 } from '../hooks/useSprintMutations'
 import { useSprintWithTasksQuery } from '../hooks/useSprintsQuery'
 import { useTasksQuery } from '../../tasks/hooks/useTasksQuery'
+import { useUpdateTaskMutation } from '../../tasks/hooks/useTaskMutations'
 import { SprintFormModal } from './SprintFormModal'
 import type { ListSprintsQuery, Sprint, SprintState } from '../types/sprint.types'
 import { SprintStateValues } from '../types/sprint.types'
@@ -22,7 +31,7 @@ import {
   ArrowLeft,
   CalendarRange,
   ChevronRight,
-  Pencil,
+  EllipsisVertical,
   Plus,
   Search,
   Target,
@@ -31,6 +40,7 @@ import {
   X,
 } from 'lucide-react'
 import type { TaskItem } from '../../tasks/types/task.types'
+import type { TaskState } from '../../tasks/types/task.types'
 
 interface SprintsSectionProps {
   projectId: string
@@ -196,7 +206,7 @@ export function SprintsSection({
           <ErrorState message={error.message} />
         ) : sprints.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-base-300 bg-base-200/30 p-12 text-center text-sm text-base-content/70">
-            No sprints match the current filters.
+            No sprints found.
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -376,6 +386,7 @@ function SprintBoardView({
   onEditSprint,
 }: SprintBoardViewProps) {
   const [isAssignOpen, setIsAssignOpen] = useState(false)
+  const [activeTask, setActiveTask] = useState<TaskItem | null>(null)
   const queryClient = useQueryClient()
   const { data: sprintDetail, isLoading } = useSprintWithTasksQuery(projectId, sprintId)
   const { data: members = [] } = useProjectMembersQuery(projectId)
@@ -388,6 +399,7 @@ function SprintBoardView({
   const deleteMutation = useDeleteSprintMutation(projectId)
   const removeMutation = useRemoveTaskFromSprintMutation(projectId)
   const assignMutation = useAssignTaskToSprintMutation(projectId)
+  const updateTaskMutation = useUpdateTaskMutation()
 
   const tasks = useMemo(() => sprintDetail?.tasks ?? [], [sprintDetail?.tasks])
   const tasksByColumn = useMemo(() => {
@@ -422,6 +434,62 @@ function SprintBoardView({
     if (window.confirm(`Delete sprint "${sprint.name}"? This action cannot be undone.`)) {
       deleteMutation.mutate(sprint.sprintId, { onSuccess: onBack })
     }
+  }
+
+  const handleRefreshBoard = () => {
+    queryClient.invalidateQueries({ queryKey: ['sprint-with-tasks', projectId, sprintId] })
+  }
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const task = tasks.find((t) => t.id === event.active.id)
+    if (task) setActiveTask(task)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveTask(null)
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const taskId = active.id as string
+    const targetColumnId = over.id as KanbanColumnId
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    const sourceColumnId = getKanbanColumn(task)
+    if (sourceColumnId === targetColumnId) return
+
+    const now = new Date().toISOString()
+
+    let newState: TaskState
+    let newCompletedAt: string | null
+
+    switch (targetColumnId) {
+      case 'todo':
+        newState = 'Active'
+        newCompletedAt = null
+        break
+      case 'in-progress':
+        newState = 'Active'
+        newCompletedAt = now
+        break
+      case 'done':
+        newState = 'Finished'
+        newCompletedAt = now
+        break
+      case 'canceled':
+        newState = 'Canceled'
+        newCompletedAt = null
+        break
+    }
+
+    updateTaskMutation.mutate(
+      { projectId, taskItemId: taskId, task: { state: newState, completedAt: newCompletedAt } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['sprint-with-tasks', projectId, sprintId] })
+        },
+      },
+    )
   }
 
   const handleRemoveTask = (task: TaskItem) => {
@@ -487,24 +555,10 @@ function SprintBoardView({
             <div className="flex flex-wrap items-center gap-2">
               {canManage && (
                 <>
-                  <Button variant="secondary" size="sm" onClick={() => onEditSprint(sprint)}>
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </Button>
                   {sprint.state !== 'Completed' && sprint.state !== 'Canceled' && (
                     <Button variant="primary" size="sm" onClick={() => setIsAssignOpen(true)}>
                       <Plus className="h-4 w-4" />
                       Add tasks
-                    </Button>
-                  )}
-                  {sprint.state !== 'Completed' && sprint.state !== 'Canceled' && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleCloseSprint(sprint)}
-                      disabled={updateMutation.isPending}
-                    >
-                      Close
                     </Button>
                   )}
                   <Button
@@ -516,6 +570,46 @@ function SprintBoardView({
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </Button>
+                  <div className="dropdown dropdown-end">
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-circle btn-sm"
+                      aria-label="Sprint actions"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                      }}
+                    >
+                      <EllipsisVertical className="h-5 w-5" />
+                    </button>
+                    <ul
+                      className="menu dropdown-content menu-sm z-[1] mt-3 w-44 rounded-box bg-base-100 p-2 shadow"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                      }}
+                    >
+                      <li>
+                        <button type="button" onClick={handleRefreshBoard}>
+                          Refresh
+                        </button>
+                      </li>
+                      <li>
+                        <button type="button" onClick={() => onEditSprint(sprint)}>
+                          Edit
+                        </button>
+                      </li>
+                      {sprint.state !== 'Completed' && sprint.state !== 'Canceled' && (
+                        <li>
+                          <button
+                            type="button"
+                            onClick={() => handleCloseSprint(sprint)}
+                            disabled={updateMutation.isPending}
+                          >
+                            End sprint
+                          </button>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
                 </>
               )}
             </div>
@@ -550,19 +644,35 @@ function SprintBoardView({
             </div>
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-4">
-            {KANBAN_COLUMNS.map((col) => (
-              <KanbanColumn
-                key={col.id}
-                title={col.title}
-                accent={col.accent}
-                bg={col.bg}
-                hint={KANBAN_HINT[col.id]}
-                tasks={tasksByColumn[col.id]}
-                onSelectTask={onOpenTask}
-              />
-            ))}
-          </div>
+          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <div className="grid gap-3 lg:grid-cols-4">
+              {KANBAN_COLUMNS.map((col) => (
+                <KanbanColumn
+                  key={col.id}
+                  columnId={col.id}
+                  title={col.title}
+                  accent={col.accent}
+                  bg={col.bg}
+                  hint={KANBAN_HINT[col.id]}
+                  tasks={tasksByColumn[col.id]}
+                  onSelectTask={onOpenTask}
+                />
+              ))}
+            </div>
+            <DragOverlay>
+              {activeTask ? (
+                <div className="w-72 rounded-lg border border-base-300 bg-base-100 p-2.5 shadow-xl">
+                  <p className="line-clamp-2 text-sm font-semibold text-base-content">
+                    {activeTask.title}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <PriorityChip priority={activeTask.priority} />
+                    <AssigneeChip assigneeId={activeTask.assignedUserId} />
+                  </div>
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         </div>
       </Card>
 
@@ -594,6 +704,7 @@ function SprintBoardView({
 }
 
 interface KanbanColumnProps {
+  columnId: KanbanColumnId
   title: string
   accent: string
   bg: string
@@ -602,9 +713,23 @@ interface KanbanColumnProps {
   onSelectTask: (task: TaskItem) => void
 }
 
-function KanbanColumn({ title, accent, bg, hint, tasks, onSelectTask }: KanbanColumnProps) {
+function KanbanColumn({
+  columnId,
+  title,
+  accent,
+  bg,
+  hint,
+  tasks,
+  onSelectTask,
+}: KanbanColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: columnId })
   return (
-    <div className={`flex min-h-[280px] flex-col rounded-2xl border-t-4 ${accent} ${bg} p-3`}>
+    <div
+      ref={setNodeRef}
+      className={`flex min-h-[280px] flex-col rounded-2xl border-t-4 p-3 transition-colors ${
+        isOver ? 'border-primary/80 bg-primary/5' : accent + ' ' + bg
+      }`}
+    >
       <div className="mb-1 flex items-center justify-between px-1">
         <h6 className="text-xs font-semibold uppercase tracking-wider">{title}</h6>
         <span className="badge badge-ghost badge-sm">{tasks.length}</span>
@@ -629,11 +754,17 @@ interface TaskCardProps {
 }
 
 function TaskCard({ task, onSelect }: TaskCardProps) {
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: task.id })
   return (
     <button
+      ref={setNodeRef}
       type="button"
+      {...listeners}
+      {...attributes}
       onClick={() => onSelect(task)}
-      className="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-left text-sm transition hover:border-primary/40 hover:shadow-sm"
+      className={`block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-left text-sm transition hover:border-primary/40 hover:shadow-sm ${
+        isDragging ? 'opacity-30' : ''
+      }`}
     >
       <p className="line-clamp-2 text-sm font-semibold text-base-content">{task.title}</p>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">

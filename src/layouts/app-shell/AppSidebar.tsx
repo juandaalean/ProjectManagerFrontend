@@ -19,7 +19,7 @@ const mainNavItems = [
   {
     to: '/tasks',
     label: 'Tasks',
-    description: 'Show all tasks and filters',
+    description: 'Show all your tasks across projects',
     icon: CheckSquare,
   },
 ]
@@ -102,13 +102,13 @@ export function AppSidebar() {
           </div>
 
           <div className="flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
               Project Manager
             </p>
-            <h2 className="mt-2 text-lg font-semibold">Workspace</h2>
-            <p className="mt-1 text-sm text-base-content/70">
+            <h2 className="mt-0.25 text-lg font-semibold">Workspace</h2>
+            {/* <p className="mt-1 text-sm text-base-content/70">
               Navigation prepared for projects, tasks and future sections.
-            </p>
+            </p> */}
           </div>
         </div>
 
@@ -189,13 +189,13 @@ export function AppSidebar() {
           </>
         )}
 
-        <div className="mt-4 rounded-box border border-base-300 bg-base-200 p-4 w-full">
+        {/* <div className="mt-4 rounded-box border border-base-300 bg-base-200 p-4 w-full">
           <p className="text-sm font-semibold">Ready for sections</p>
           <p className="mt-1 text-sm text-base-content/70">
             This shell follows the official drawer pattern and is ready for dashboards, filters, and
             widgets for next features.
           </p>
-        </div>
+        </div> */}
       </div>
     </aside>
   )

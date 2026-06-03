@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useQueries } from '@tanstack/react-query'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
 import { EmptyState } from '../../../shared/ui/EmptyState'
 import { ErrorState } from '../../../shared/ui/ErrorState'
-import { useProjectsQuery } from '../../projects/hooks/useProjectsQuery'
+import { useProjectsQuery, useProjectQuery } from '../../projects/hooks/useProjectsQuery'
+import { projectsApi } from '../../projects/api/projectsApi'
 import { TaskList } from '../components/TaskList'
 import { TaskFormModal } from '../components/TaskFormModal'
 import { TasksFilterBar } from '../components/TasksFilterBar'
@@ -13,7 +15,9 @@ import { useTasksByProjectsQuery } from '../hooks/useTasksQuery'
 import type { ListTaskItemsQuery } from '../types/task.types'
 import { useAuth } from '../../auth/context/AuthContext'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
-import { canCreateTask, getMemberRoleForUser } from '../../projects/utils/projectPermissions'
+import { canCreateTask, getMemberRoleForUser, isProjectManagerRole } from '../../projects/utils/projectPermissions'
+
+import { Calendar } from 'lucide-react'
 
 export function TasksPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -42,9 +46,49 @@ export function TasksPage() {
     [projects],
   )
 
+  const memberQueries = useQueries({
+    queries: (projectIds ?? []).map((id) => ({
+      queryKey: ['project-members', id],
+      queryFn: () => projectsApi.getProjectMembers(id),
+      enabled: isGlobalTasksView && projectIds.length > 0,
+      staleTime: 5 * 60 * 1000,
+    })),
+  })
+
+  const userRoleByProjectId = useMemo(() => {
+    const map = new Map<string, number | undefined>()
+    projectIds.forEach((id, index) => {
+      const members = memberQueries[index]?.data
+      map.set(id, getMemberRoleForUser(members, user?.userId))
+    })
+    return map
+  }, [projectIds, memberQueries, user?.userId])
+
+  const filteredGroups = useMemo(() => {
+    if (!tasksByProjects) return []
+
+    return tasksByProjects
+      .map((group) => {
+        const role = userRoleByProjectId.get(group.projectId)
+        const isManager = isProjectManagerRole(role)
+
+        if (isManager) return group
+
+        return {
+          ...group,
+          tasks: group.tasks.filter(
+            (task) => !task.assignedUserId || task.assignedUserId === user?.userId,
+          ),
+        }
+      })
+      .filter((group) => group.tasks.length > 0)
+  }, [tasksByProjects, userRoleByProjectId, user?.userId])
+
+  const { data: project } = useProjectQuery(projectId ?? '')
   const { data: projectMembers = [] } = useProjectMembersQuery(projectId)
   const canCreate = canCreateTask({
     memberRole: getMemberRoleForUser(projectMembers, user?.userId),
+    projectStatus: project?.status,
   })
 
   if (isGlobalTasksView) {
@@ -70,7 +114,7 @@ export function TasksPage() {
       )
     }
 
-    const visibleGroups = (tasksByProjects ?? []).filter((group) => group.tasks.length > 0)
+    const visibleGroups = filteredGroups
 
     if (visibleGroups.length === 0) {
       return (
@@ -90,7 +134,7 @@ export function TasksPage() {
               <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
               <h1 className="text-3xl font-bold tracking-tight">All tasks</h1>
               <p className="max-w-2xl text-base-content/70">
-                Review the tasks available across all projects you can access.
+                Review the tasks available across all projects you can access, if you are admin or coordinator you can see all tasks, if you are a contributor you will see only the tasks assigned to you or unassigned.
               </p>
             </div>
             <Button variant="secondary" onClick={() => navigate('/projects')}>
@@ -145,21 +189,23 @@ export function TasksPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
-            <h1 className="text-3xl font-bold tracking-tight">Task board</h1>
-            <p className="max-w-2xl text-base-content/70">
+            <h1 className="text-3xl font-bold tracking-tight mb-3">Task board</h1>
+            {/* <p className="max-w-2xl text-base-content/70">
               Track work items by priority and state in a cleaner dashboard surface.
-            </p>
+            </p> */}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="secondary"
               onClick={() => navigate(`/projects/${projectId}?view=calendar`)}
+              title="View project calendar"
             >
-              View Calendar
+              {/* View Calendar */}
+              <Calendar className="h-5 w-5" />
             </Button>
             {canCreate && (
               <Button onClick={() => navigate(`/projects/${projectId}/tasks?create=1`)}>
-                Create Task
+                Add Task
               </Button>
             )}
           </div>
