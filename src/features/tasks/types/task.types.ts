@@ -45,6 +45,7 @@ export type UpdateTaskRequest = {
   priority?: TaskPriority
   createdAt?: string
   completedAt?: string | null
+  clearCompletedAt?: boolean
 }
 
 export type ListTaskItemsQuery = {

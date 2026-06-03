@@ -65,6 +65,7 @@ const mapUpdateTaskRequest = (task: UpdateTaskRequest) => ({
   ...(task.priority !== undefined && { taskPriority: taskPriorityMap.indexOf(task.priority) }),
   ...(task.createdAt !== undefined && { createdAt: task.createdAt }),
   ...(task.completedAt !== undefined && { completedAt: task.completedAt }),
+  ...(task.clearCompletedAt !== undefined && { clearCompletedAt: task.clearCompletedAt }),
 })
 
 const mapAssignTaskItemRequest = (payload: AssignTaskItemRequest) => ({

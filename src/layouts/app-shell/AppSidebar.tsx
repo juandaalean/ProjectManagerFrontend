@@ -18,7 +18,7 @@ const mainNavItems = [
   },
   {
     to: '/tasks',
-    label: 'Tasks',
+    label: 'All Tasks',
     description: 'Show all your tasks across projects',
     icon: CheckSquare,
   },

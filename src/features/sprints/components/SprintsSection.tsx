@@ -461,29 +461,34 @@ function SprintBoardView({
     const now = new Date().toISOString()
 
     let newState: TaskState
-    let newCompletedAt: string | null
+    let newCompletedAt: string | null | undefined
+    let clearCompletedAt: boolean | undefined
 
     switch (targetColumnId) {
       case 'todo':
         newState = 'Active'
-        newCompletedAt = null
+        newCompletedAt = undefined
+        clearCompletedAt = true
         break
       case 'in-progress':
         newState = 'Active'
         newCompletedAt = now
+        clearCompletedAt = undefined
         break
       case 'done':
         newState = 'Finished'
         newCompletedAt = now
+        clearCompletedAt = undefined
         break
       case 'canceled':
         newState = 'Canceled'
-        newCompletedAt = null
+        newCompletedAt = undefined
+        clearCompletedAt = true
         break
     }
 
     updateTaskMutation.mutate(
-      { projectId, taskItemId: taskId, task: { state: newState, completedAt: newCompletedAt } },
+      { projectId, taskItemId: taskId, task: { state: newState, completedAt: newCompletedAt, clearCompletedAt } },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['sprint-with-tasks', projectId, sprintId] })
@@ -726,7 +731,7 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex min-h-[280px] flex-col rounded-2xl border-t-4 p-3 transition-colors ${
+      className={`flex min-h-[280px] flex-col justify-start rounded-2xl border-t-4 p-3 transition-colors ${
         isOver ? 'border-primary/80 bg-primary/5' : accent + ' ' + bg
       }`}
     >
@@ -734,8 +739,8 @@ function KanbanColumn({
         <h6 className="text-xs font-semibold uppercase tracking-wider">{title}</h6>
         <span className="badge badge-ghost badge-sm">{tasks.length}</span>
       </div>
-      <p className="px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">{hint}</p>
-      <div className="flex-1 space-y-2">
+      <p className="grow-0 px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">{hint}</p>
+      <div className="flex flex-1 flex-col justify-start space-y-2">
         {tasks.length === 0 ? (
           <div className="rounded-lg border border-dashed border-base-300/60 bg-base-100/50 p-4 text-center text-xs text-base-content/40">
             No tasks
