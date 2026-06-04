@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '../../../shared/ui/Card'
 import { Button } from '../../../shared/ui/Button'
 import { createTaskSchemaForProject } from '../../tasks/schemas/taskSchema'
@@ -21,6 +21,7 @@ interface TranscriptTaskAutomationPanelProps {
   autoOpen?: boolean
   hideTriggerButton?: boolean
   onClose?: () => void
+  demoFile?: string
 }
 
 type LogKind = 'info' | 'success' | 'error'
@@ -50,6 +51,7 @@ export function TranscriptTaskAutomationPanel({
   autoOpen,
   hideTriggerButton = false,
   onClose,
+  demoFile,
 }: TranscriptTaskAutomationPanelProps) {
   const createMutation = useCreateTaskMutation()
   const nextLogId = useRef(1)
@@ -69,6 +71,34 @@ export function TranscriptTaskAutomationPanel({
     () => new Map(members.map((member) => [member.userId, member])),
     [members],
   )
+
+  useEffect(() => {
+    if (!demoFile || !isOpen) return
+
+    let cancelled = false
+
+    fetch(`/demos/${demoFile}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load demo file: ${demoFile}`)
+        return res.text()
+      })
+      .then((content) => {
+        if (cancelled) return
+        setTranscript(content)
+        setSourceName(demoFile)
+        pushLog('info', `Loaded demo transcript: ${demoFile}`)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          pushLog('error', `Could not load demo file: ${demoFile}`)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoFile, isOpen])
 
   if (!enabled) {
     return null
@@ -237,6 +267,7 @@ export function TranscriptTaskAutomationPanel({
       const message = `${successCount} tasks created successfully.`
       setStatusMessage(message)
       pushLog('success', message)
+      setTimeout(() => closeModal(), 800)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed creating tasks.'
       setErrorMessage(message)

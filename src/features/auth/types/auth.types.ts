@@ -18,6 +18,8 @@ export type AuthUser = {
   name: string
   email: string
   rol: string
+  plan?: string
+  projectLimit?: number
 }
 
 export type AuthResponse = {

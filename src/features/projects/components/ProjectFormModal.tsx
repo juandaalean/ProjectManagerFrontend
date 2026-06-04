@@ -2,6 +2,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCreateProjectMutation, useUpdateProjectMutation } from '../hooks/useProjectMutations'
 import { projectSchema, type ProjectFormData } from '../schemas/projectSchema'
+import { useAuth } from '../../auth/hooks/useAuth'
+import { useUserStats } from '../../users/hooks/useUserStats'
 import { Button } from '../../../shared/ui/Button'
 import { Input } from '../../../shared/ui/Input'
 import type { Project } from '../types/project.types'
@@ -15,9 +17,17 @@ interface ProjectFormModalProps {
 export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalProps) {
   const createMutation = useCreateProjectMutation()
   const updateMutation = useUpdateProjectMutation()
+  const { user } = useAuth()
+  const { data: stats } = useUserStats()
 
   const isEditing = !!project
   const mutation = isEditing ? updateMutation : createMutation
+
+  const plan = user?.plan ?? stats?.plan ?? 'free'
+  const projectLimit = user?.projectLimit ?? stats?.projectLimit ?? 3
+  const projectCount = stats?.projectCount ?? 0
+
+  const isLocked = !isEditing && plan !== 'pro' && projectCount >= projectLimit
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
@@ -44,6 +54,8 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
   })
 
   const onSubmit = (data: ProjectFormData) => {
+    if (isLocked) return
+
     const payload = toProjectPayload(data)
 
     if (isEditing && project) {
@@ -74,6 +86,12 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
         <h2 className="text-xl font-semibold mb-4">
           {isEditing ? 'Edit Project' : 'Create Project'}
         </h2>
+
+        {isLocked && (
+          <div className="alert alert-warning mb-4">
+            <span>You have reached your free plan limit. Upgrade to Pro to create more projects.</span>
+          </div>
+        )}
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <Input
@@ -131,7 +149,7 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
               Cancel
             </Button>
 
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={mutation.isPending || isLocked}>
               {mutation.isPending ? 'Saving...' : isEditing ? 'Update' : 'Create'}
             </Button>
           </div>

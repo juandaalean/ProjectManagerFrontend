@@ -74,6 +74,23 @@ function addTaskDateBounds<
 
     validateDateField(data.startAt, ['startAt'])
     validateDateField(data.completedAt, ['completedAt'])
+
+    if (data.startAt && data.completedAt) {
+      const start = normalizeDateOnly(data.startAt)
+      const end = normalizeDateOnly(data.completedAt)
+      if (start > end) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['startAt'],
+          message: 'Start date cannot be after the completion date',
+        })
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['completedAt'],
+          message: 'Completion date cannot be before the start date',
+        })
+      }
+    }
   })
 }
 

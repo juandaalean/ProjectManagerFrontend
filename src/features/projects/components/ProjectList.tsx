@@ -9,7 +9,7 @@ import { EmptyState } from '../../../shared/ui/EmptyState'
 import { ErrorState } from '../../../shared/ui/ErrorState'
 import type { Project, ProjectStatus, ListProjectsQuery } from '../types/project.types'
 import { canManageProject, getMemberRoleForUser } from '../utils/projectPermissions'
-import { EllipsisVertical } from 'lucide-react'
+import { EllipsisVertical, Lock } from 'lucide-react'
 import {
   getProjectStatus,
   getProjectStatusBadgeClassName,
@@ -19,6 +19,7 @@ import {
 interface ProjectListProps {
   onEdit?: (project: Project) => void
   onCreate?: () => void
+  isLocked?: boolean
   filters?: ListProjectsQuery
 }
 
@@ -167,7 +168,7 @@ function ProjectCardActions({
   )
 }
 
-export function ProjectList({ onEdit, onCreate, filters }: ProjectListProps) {
+export function ProjectList({ onEdit, onCreate, isLocked, filters }: ProjectListProps) {
   const { data: projects, isLoading, error } = useProjectsQuery(true, filters)
   const deleteMutation = useDeleteProjectMutation()
   const navigate = useNavigate()
@@ -199,7 +200,12 @@ export function ProjectList({ onEdit, onCreate, filters }: ProjectListProps) {
         title={emptyConfig.title}
         description={emptyConfig.description}
         action={
-          showCreate && onCreate ? <Button onClick={onCreate}>Create Project</Button> : undefined
+          showCreate && onCreate ? (
+            <Button onClick={onCreate} className="gap-2">
+              {isLocked && <Lock className="w-4 h-4" />}
+              Create Project
+            </Button>
+          ) : undefined
         }
       />
     )

@@ -38,14 +38,9 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
 
   const collapseOpen = userCollapseOverride ?? hasActiveFilters
 
-  // Keep the local search input in sync when the parent resets the search
-  // (e.g. via "Clear filters"). Doing it during render avoids the
-  // setState-in-effect cascading render warning.
-  if (filters.searchTerm !== undefined && filters.searchTerm !== searchInput) {
-    setSearchInput(filters.searchTerm)
-  } else if (filters.searchTerm === undefined && searchInput !== '') {
-    setSearchInput('')
-  }
+  useEffect(() => {
+    setSearchInput(filters.searchTerm ?? '')
+  }, [filters.searchTerm])
 
   useEffect(() => {
     if (debounceRef.current) {

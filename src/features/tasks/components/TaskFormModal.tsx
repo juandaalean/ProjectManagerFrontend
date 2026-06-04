@@ -112,6 +112,8 @@ export function TaskFormModal({
   }, [getValues, isEditing, isMembersLoading, projectMembers, setValue, user?.userId])
 
   const assignedUserId = watch('assignedUserId')
+  const startAtValue = watch('startAt')
+  const completedAtValue = watch('completedAt')
 
   const onSubmit = (data: CreateTaskFormData | UpdateTaskFormData) => {
     if (isEditing && task) {
@@ -283,14 +285,14 @@ export function TaskFormModal({
               label="Start At"
               type="date"
               min={projectStartDate}
-              max={projectEndDate}
+              max={projectEndDate && completedAtValue ? (completedAtValue < projectEndDate ? completedAtValue : projectEndDate) : projectEndDate}
               {...register('startAt')}
               error={errors.startAt?.message}
             />
             <Input
               label="Completed At"
               type="date"
-              min={projectStartDate}
+              min={projectStartDate && startAtValue ? (startAtValue > projectStartDate ? startAtValue : projectStartDate) : projectStartDate}
               max={projectEndDate}
               {...register('completedAt')}
               error={errors.completedAt?.message}

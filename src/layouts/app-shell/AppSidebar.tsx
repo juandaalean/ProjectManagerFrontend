@@ -8,6 +8,8 @@ import {
   ListTodo,
   Sparkles,
 } from 'lucide-react'
+import { ProPlanSidebar } from '../../features/users/components/ProPlanSidebar'
+import { DemoTranscriptsSidebar } from './DemoTranscriptsSidebar'
 
 const mainNavItems = [
   {
@@ -188,6 +190,10 @@ export function AppSidebar() {
             </ul>
           </>
         )}
+
+        <DemoTranscriptsSidebar />
+
+        <ProPlanSidebar />
 
         {/* <div className="mt-4 rounded-box border border-base-300 bg-base-200 p-4 w-full">
           <p className="text-sm font-semibold">Ready for sections</p>

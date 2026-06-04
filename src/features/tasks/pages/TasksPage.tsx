@@ -92,10 +92,6 @@ export function TasksPage() {
   })
 
   if (isGlobalTasksView) {
-    if (projectsLoading || groupedTasksLoading) {
-      return <div className="text-center py-8">Loading tasks...</div>
-    }
-
     if (projectsError) {
       return <ErrorState message={projectsError.message} />
     }
@@ -104,7 +100,7 @@ export function TasksPage() {
       return <ErrorState message={groupedTasksError.message} />
     }
 
-    if (!projects || projects.length === 0) {
+    if (!projectsLoading && (!projects || projects.length === 0)) {
       return (
         <EmptyState
           title="No projects yet"
@@ -115,16 +111,8 @@ export function TasksPage() {
     }
 
     const visibleGroups = filteredGroups
-
-    if (visibleGroups.length === 0) {
-      return (
-        <EmptyState
-          title="No tasks yet"
-          description="Your projects do not have tasks assigned yet"
-          action={<Button onClick={() => navigate('/projects')}>Go to Projects</Button>}
-        />
-      )
-    }
+    const hasActiveFilters = !!(filters.searchTerm || filters.taskState || filters.taskPriority)
+    const showInitialLoading = (projectsLoading && !projects) || (groupedTasksLoading && !tasksByProjects)
 
     return (
       <div className="space-y-6">
@@ -146,49 +134,59 @@ export function TasksPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          {visibleGroups.map((group) => {
-            const project = projectById.get(group.projectId)
-            const projectName = group.projectName ?? project?.name ?? group.projectId
-            const role = userRoleByProjectId.get(group.projectId)
-            const isOwner = user?.userId === project?.ownerId
+        {showInitialLoading ? (
+          <div className="text-center py-8">Loading tasks...</div>
+        ) : visibleGroups.length === 0 ? (
+          <div className="rounded-box border border-base-300 bg-base-100 p-8 text-center">
+            <p className="text-base-content/70">
+              {hasActiveFilters
+                ? `No tasks found with the current filters.`
+                : 'Your projects do not have tasks assigned yet'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {visibleGroups.map((group) => {
+              const project = projectById.get(group.projectId)
+              const projectName = group.projectName ?? project?.name ?? group.projectId
+              const role = userRoleByProjectId.get(group.projectId)
+              const isOwner = user?.userId === project?.ownerId
 
-            return (
-              <Card key={group.projectId} className="border border-base-300 bg-base-100">
-                <div className="card-body gap-4 p-6">
-                  <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <div className="badge badge-secondary text-secondary-content">
-                          Project
+              return (
+                <Card key={group.projectId} className="border border-base-300 bg-base-100">
+                  <div className="card-body gap-4 p-6">
+                    <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <div className="badge badge-secondary text-secondary-content">
+                            Project
+                          </div>
+                          {isProjectManagerRole(role) && isOwner && (
+                            <div className="badge badge-accent text-accent-content">Owner</div>
+                          )}
                         </div>
-                        {isProjectManagerRole(role) && isOwner && (
-                          <div className="badge badge-accent text-accent-content">Owner</div>
-                        )}
+                        <h2 className="text-2xl font-bold tracking-tight">{projectName}</h2>
                       </div>
-                      <h2 className="text-2xl font-bold tracking-tight">{projectName}</h2>
+                      <div className="badge badge-accent text-accent-content">
+                        {group.tasks.length} tasks
+                      </div>
                     </div>
-                    <div className="badge badge-accent text-accent-content">
-                      {group.tasks.length} tasks
-                    </div>
+                    <TaskList tasks={group.tasks} projectId={group.projectId} />
                   </div>
-                  <TaskList tasks={group.tasks} projectId={group.projectId} />
-                </div>
-              </Card>
-            )
-          })}
-        </div>
+                </Card>
+              )
+            })}
+          </div>
+        )}
       </div>
     )
-  }
-
-  if (isLoading) {
-    return <div className="text-center py-8">Loading tasks...</div>
   }
 
   if (error) {
     return <ErrorState message={error.message} />
   }
+
+  const showProjectLoading = isLoading && !projectTasks
 
   return (
     <div className="space-y-6">
@@ -197,9 +195,6 @@ export function TasksPage() {
           <div>
             <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
             <h1 className="text-3xl font-bold tracking-tight mb-3">Task board</h1>
-            {/* <p className="max-w-2xl text-base-content/70">
-              Track work items by priority and state in a cleaner dashboard surface.
-            </p> */}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -207,7 +202,6 @@ export function TasksPage() {
               onClick={() => navigate(`/projects/${projectId}?view=calendar`)}
               title="View project calendar"
             >
-              {/* View Calendar */}
               <Calendar className="h-5 w-5" />
             </Button>
             {canCreate && (
@@ -219,7 +213,11 @@ export function TasksPage() {
         </div>
         <TasksFilterBar projectId={projectId} filters={filters} onChange={setFilters} />
       </div>
-      <TaskList tasks={projectTasks || []} projectId={projectId} />
+      {showProjectLoading ? (
+        <div className="text-center py-8">Loading tasks...</div>
+      ) : (
+        <TaskList tasks={projectTasks || []} projectId={projectId} />
+      )}
       {showCreateModal && canCreate && (
         <TaskFormModal
           projectId={projectId}

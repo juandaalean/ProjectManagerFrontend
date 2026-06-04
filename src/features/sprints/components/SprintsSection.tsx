@@ -730,6 +730,7 @@ function SprintBoardView({
             <DueDateModal
               task={pendingTask}
               isPending={updateTaskMutation.isPending}
+              maxDate={sprint.endDate}
               onClose={() => setPendingInProgress(null)}
               onConfirm={(date) => {
                 updateTaskMutation.mutate(
@@ -1143,12 +1144,14 @@ function AddTasksModal({
 interface DueDateModalProps {
   task: TaskItem
   isPending: boolean
+  maxDate?: string
   onClose: () => void
   onConfirm: (dateIso: string) => void
 }
 
-function DueDateModal({ task, isPending, onClose, onConfirm }: DueDateModalProps) {
+function DueDateModal({ task, isPending, maxDate, onClose, onConfirm }: DueDateModalProps) {
   const today = new Date().toISOString().slice(0, 10)
+  const sprintEnd = maxDate ? new Date(maxDate).toISOString().slice(0, 10) : ''
   const [date, setDate] = useState(today)
 
   function handleConfirm() {
@@ -1188,6 +1191,7 @@ function DueDateModal({ task, isPending, onClose, onConfirm }: DueDateModalProps
             label="Due date"
             type="date"
             value={date}
+            max={sprintEnd}
             onChange={(event) => setDate(event.target.value)}
             icon={<CalendarRange className="h-4 w-4" />}
           />

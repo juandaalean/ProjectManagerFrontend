@@ -8,6 +8,7 @@ type AuthContextType = {
   login: (authResponse: AuthResponse) => void
   logout: () => void
   isLoading: boolean
+  updateUser: (user: Partial<AuthUser>) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -53,12 +54,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthResponse(null)
   }
 
+  const updateUser = (updates: Partial<AuthUser>) => {
+    setAuthResponse((prev) => {
+      if (!prev) return prev
+      const updated = {
+        ...prev,
+        user: { ...prev.user, ...updates },
+      }
+      localStorage.setItem(AUTH_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }
+
   const value: AuthContextType = {
     user: authResponse?.user || null,
     isAuthenticated: !!authResponse,
     login,
     logout,
     isLoading,
+    updateUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
