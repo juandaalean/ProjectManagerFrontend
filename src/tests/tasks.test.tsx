@@ -41,6 +41,18 @@ describe('tasks', () => {
 
       expect(result.success).toBe(true)
     })
+
+    it('allows an empty start date without project bounds', () => {
+      const result = createTaskSchema.safeParse({
+        title: 'Test Task',
+        description: 'Test description',
+        priority: 'Medium' as const,
+        assignedUserId: '123e4567-e89b-12d3-a456-426614174000',
+        startAt: '',
+      })
+
+      expect(result.success).toBe(true)
+    })
   })
 
   describe('createTaskSchemaForProject', () => {
@@ -78,6 +90,24 @@ describe('tasks', () => {
 
       expect(result.success).toBe(true)
     })
+
+    it('rejects start dates outside the project range', () => {
+      const schema = createTaskSchemaForProject({
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      })
+
+      const result = schema.safeParse({
+        title: 'Test Task',
+        description: 'Test description',
+        priority: 'Medium' as const,
+        assignedUserId: '123e4567-e89b-12d3-a456-426614174000',
+        startAt: '2025-01-01',
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error?.issues[0].path).toContain('startAt')
+    })
   })
 
   describe('updateTaskSchema', () => {
@@ -105,6 +135,20 @@ describe('tasks', () => {
 
       expect(result.success).toBe(false)
       expect(result.error?.issues[0].path).toContain('completedAt')
+    })
+
+    it('rejects invalid start dates when updating a task', () => {
+      const schema = updateTaskSchemaForProject({
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      })
+
+      const result = schema.safeParse({
+        startAt: '2025-01-01',
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error?.issues[0].path).toContain('startAt')
     })
   })
 })

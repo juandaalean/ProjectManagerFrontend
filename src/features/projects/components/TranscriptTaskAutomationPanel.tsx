@@ -184,6 +184,7 @@ export function TranscriptTaskAutomationPanel({
         description: draft.description,
         priority: draft.priority,
         assignedUserId: draft.assignedUserId,
+        startAt: draft.startAt ?? '',
         completedAt: draft.completedAt ?? '',
       })
 
@@ -199,6 +200,7 @@ export function TranscriptTaskAutomationPanel({
         title: draft.title,
         description: draft.description,
         priority: draft.priority,
+        startAt: toIsoDateStartUtc(draft.startAt),
         completedAt: toIsoDateStartUtc(draft.completedAt),
       }
     })
@@ -432,6 +434,20 @@ export function TranscriptTaskAutomationPanel({
                                 </option>
                               ))}
                             </select>
+                          </div>
+
+                          <div>
+                            <label className="label">
+                              <span className="label-text font-semibold">Start At</span>
+                            </label>
+                            <input
+                              type="date"
+                              className="input input-bordered w-full"
+                              value={draft.startAt ?? ''}
+                              onChange={(event) =>
+                                updateDraft(index, 'startAt', event.target.value || undefined)
+                              }
+                            />
                           </div>
 
                           <div>

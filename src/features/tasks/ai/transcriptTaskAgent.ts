@@ -30,6 +30,7 @@ export type TaskDraftForCreation = {
   description?: string
   priority: TaskPriority
   assignedUserId: string
+  startAt?: string
   completedAt?: string
   assigneeHint?: string
   confidence?: number

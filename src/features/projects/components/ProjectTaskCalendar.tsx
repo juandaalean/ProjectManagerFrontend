@@ -254,6 +254,7 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
       {createTaskDate && canCreate && (
         <TaskFormModal
           projectId={projectId}
+          initialStartAt={createTaskDate}
           initialCompletedAt={createTaskDate}
           onClose={closeCreateTaskModal}
         />
