@@ -387,6 +387,7 @@ function SprintBoardView({
 }: SprintBoardViewProps) {
   const [isAssignOpen, setIsAssignOpen] = useState(false)
   const [activeTask, setActiveTask] = useState<TaskItem | null>(null)
+  const [pendingInProgress, setPendingInProgress] = useState<{ taskId: string } | null>(null)
   const queryClient = useQueryClient()
   const { data: sprintDetail, isLoading } = useSprintWithTasksQuery(projectId, sprintId)
   const { data: members = [] } = useProjectMembersQuery(projectId)
@@ -457,6 +458,11 @@ function SprintBoardView({
 
     const sourceColumnId = getKanbanColumn(task)
     if (sourceColumnId === targetColumnId) return
+
+    if (targetColumnId === 'in-progress' && !task.completedAt) {
+      setPendingInProgress({ taskId })
+      return
+    }
 
     const now = new Date().toISOString()
 
@@ -704,6 +710,36 @@ function SprintBoardView({
         }}
         isAssigning={assignMutation.isPending}
       />
+
+      {pendingInProgress &&
+        (() => {
+          const pendingTask = tasks.find((t) => t.id === pendingInProgress.taskId)
+          if (!pendingTask) return null
+          return (
+            <DueDateModal
+              task={pendingTask}
+              isPending={updateTaskMutation.isPending}
+              onClose={() => setPendingInProgress(null)}
+              onConfirm={(date) => {
+                updateTaskMutation.mutate(
+                  {
+                    projectId,
+                    taskItemId: pendingInProgress.taskId,
+                    task: { state: 'Active', completedAt: date },
+                  },
+                  {
+                    onSuccess: () => {
+                      queryClient.invalidateQueries({
+                        queryKey: ['sprint-with-tasks', projectId, sprintId],
+                      })
+                      setPendingInProgress(null)
+                    },
+                  },
+                )
+              }}
+            />
+          )
+        })()}
     </>
   )
 }
@@ -1086,6 +1122,77 @@ function AddTasksModal({
                 : `Add ${selectedIds.size || ''} task${selectedIds.size === 1 ? '' : 's'}`}
             </Button>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface DueDateModalProps {
+  task: TaskItem
+  isPending: boolean
+  onClose: () => void
+  onConfirm: (dateIso: string) => void
+}
+
+function DueDateModal({ task, isPending, onClose, onConfirm }: DueDateModalProps) {
+  const today = new Date().toISOString().slice(0, 10)
+  const [date, setDate] = useState(today)
+
+  function handleConfirm() {
+    if (!date) return
+    onConfirm(new Date(`${date}T00:00:00`).toISOString())
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={isPending ? undefined : onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="flex w-full max-w-md flex-col rounded-2xl bg-base-100 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-base-300 px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+              In progress
+            </p>
+            <h3 className="text-lg font-semibold">Set a due date</h3>
+          </div>
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={isPending}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="space-y-3 px-5 py-4">
+          <p className="text-sm text-base-content/70">
+            The task <span className="font-semibold text-base-content">"{task.title}"</span> has
+            no due date. Pick a date manually to move it to <strong>In progress</strong>.
+          </p>
+          <Input
+            label="Due date"
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+            icon={<CalendarRange className="h-4 w-4" />}
+          />
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-base-300 px-5 py-4">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={isPending}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleConfirm}
+            disabled={!date || isPending}
+          >
+            {isPending ? 'Saving…' : 'Move to In progress'}
+          </Button>
         </div>
       </div>
     </div>
