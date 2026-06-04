@@ -15,7 +15,9 @@ export type TaskItem = {
   projectId: string
   assignedUserId: string
   createdAt: string
+  startAt: string | null
   completedAt: string | null
+  sprintId: string | null
 }
 
 export type ProjectTaskItemsGroup = {
@@ -30,7 +32,9 @@ export type CreateTaskRequest = {
   description?: string
   priority: TaskPriority
   state?: TaskState
+  startAt?: string | null
   completedAt?: string | null
+  sprintId?: string | null
 }
 
 export type AssignTaskItemRequest = {
@@ -44,8 +48,12 @@ export type UpdateTaskRequest = {
   state?: TaskState
   priority?: TaskPriority
   createdAt?: string
+  startAt?: string | null
   completedAt?: string | null
+  sprintId?: string | null
+  clearStartAt?: boolean
   clearCompletedAt?: boolean
+  clearSprint?: boolean
 }
 
 export type ListTaskItemsQuery = {

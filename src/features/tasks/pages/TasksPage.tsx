@@ -150,14 +150,21 @@ export function TasksPage() {
           {visibleGroups.map((group) => {
             const project = projectById.get(group.projectId)
             const projectName = group.projectName ?? project?.name ?? group.projectId
+            const role = userRoleByProjectId.get(group.projectId)
+            const isOwner = user?.userId === project?.ownerId
 
             return (
               <Card key={group.projectId} className="border border-base-300 bg-base-100">
                 <div className="card-body gap-4 p-6">
                   <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                      <div className="badge badge-secondary text-secondary-content mb-2">
-                        Project
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <div className="badge badge-secondary text-secondary-content">
+                          Project
+                        </div>
+                        {isProjectManagerRole(role) && isOwner && (
+                          <div className="badge badge-accent text-accent-content">Owner</div>
+                        )}
                       </div>
                       <h2 className="text-2xl font-bold tracking-tight">{projectName}</h2>
                     </div>

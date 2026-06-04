@@ -41,6 +41,7 @@ import {
 } from 'lucide-react'
 import type { TaskItem } from '../../tasks/types/task.types'
 import type { TaskState } from '../../tasks/types/task.types'
+import type { ProjectMemberDto } from '../../projects/types/project.types'
 
 interface SprintsSectionProps {
   projectId: string
@@ -93,7 +94,7 @@ const formatDateRange = (start?: string, end?: string) => {
 const getKanbanColumn = (task: TaskItem): KanbanColumnId => {
   if (task.state === 'Finished') return 'done'
   if (task.state === 'Canceled') return 'canceled'
-  if (task.completedAt) return 'in-progress'
+  if (task.startAt || task.completedAt) return 'in-progress'
   return 'todo'
 }
 
@@ -661,6 +662,7 @@ function SprintBoardView({
                   hint={KANBAN_HINT[col.id]}
                   tasks={tasksByColumn[col.id]}
                   onSelectTask={onOpenTask}
+                  memberById={memberById}
                 />
               ))}
             </div>
@@ -672,8 +674,17 @@ function SprintBoardView({
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <PriorityChip priority={activeTask.priority} />
-                    <AssigneeChip assigneeId={activeTask.assignedUserId} />
+                    {memberById.get(activeTask.assignedUserId)?.userName && (
+                      <span className="text-xs text-base-content/70">
+                        {memberById.get(activeTask.assignedUserId)?.userName}
+                      </span>
+                    )}
                   </div>
+                  {activeTask.completedAt && (
+                    <div className="mt-1 text-[10px] text-base-content/50">
+                      {new Date(activeTask.completedAt).toLocaleDateString()}
+                    </div>
+                  )}
                 </div>
               ) : null}
             </DragOverlay>
@@ -716,6 +727,7 @@ interface KanbanColumnProps {
   hint: string
   tasks: TaskItem[]
   onSelectTask: (task: TaskItem) => void
+  memberById: Map<string, ProjectMemberDto>
 }
 
 function KanbanColumn({
@@ -726,6 +738,7 @@ function KanbanColumn({
   hint,
   tasks,
   onSelectTask,
+  memberById,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: columnId })
   return (
@@ -746,7 +759,7 @@ function KanbanColumn({
             No tasks
           </div>
         ) : (
-          tasks.map((task) => <TaskCard key={task.id} task={task} onSelect={onSelectTask} />)
+          tasks.map((task) => <TaskCard key={task.id} task={task} onSelect={onSelectTask} memberById={memberById} />)
         )}
       </div>
     </div>
@@ -756,10 +769,12 @@ function KanbanColumn({
 interface TaskCardProps {
   task: TaskItem
   onSelect: (task: TaskItem) => void
+  memberById: Map<string, ProjectMemberDto>
 }
 
-function TaskCard({ task, onSelect }: TaskCardProps) {
+function TaskCard({ task, onSelect, memberById }: TaskCardProps) {
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: task.id })
+  const assigneeName = memberById.get(task.assignedUserId)?.userName
   return (
     <button
       ref={setNodeRef}
@@ -774,8 +789,15 @@ function TaskCard({ task, onSelect }: TaskCardProps) {
       <p className="line-clamp-2 text-sm font-semibold text-base-content">{task.title}</p>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <PriorityChip priority={task.priority} />
-        <AssigneeChip assigneeId={task.assignedUserId} />
+        {assigneeName && (
+          <span className="text-xs text-base-content/70">{assigneeName}</span>
+        )}
       </div>
+      {task.completedAt && (
+        <div className="mt-1 text-[10px] text-base-content/50">
+          {new Date(task.completedAt).toLocaleDateString()}
+        </div>
+      )}
     </button>
   )
 }
@@ -796,17 +818,6 @@ function PriorityChip({ priority }: { priority: TaskItem['priority'] }) {
   )
 }
 
-function AssigneeChip({ assigneeId }: { assigneeId: string }) {
-  const initials = assigneeId.slice(0, 2).toUpperCase()
-  return (
-    <span
-      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary"
-      title={`Assignee: ${assigneeId}`}
-    >
-      {initials}
-    </span>
-  )
-}
 
 interface TaskDrawerProps {
   task: TaskItem
@@ -874,6 +885,7 @@ function TaskDrawer({
               <PriorityChip priority={task.priority} />
             </Field>
             <Field label="Assignee">{memberName ?? task.assignedUserId}</Field>
+            <Field label="Start date">{formatDate(task.startAt)}</Field>
             <Field label="Due date">{formatDate(task.completedAt)}</Field>
           </section>
 
