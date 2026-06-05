@@ -41,7 +41,9 @@ export function TaskFormModal({
     error: projectMembersError,
   } = useProjectMembersQuery(resolvedProjectId)
   const currentUserMemberRole = getMemberRoleForUser(projectMembers, user?.userId)
-  const canCreate = isEditing || canCreateTask({ memberRole: currentUserMemberRole, projectStatus: project?.status })
+  const canCreate =
+    isEditing ||
+    canCreateTask({ memberRole: currentUserMemberRole, projectStatus: project?.status })
   const taskSchema = useMemo(
     () =>
       isEditing
@@ -130,7 +132,11 @@ export function TaskFormModal({
         : completedAt
           ? new Date(`${completedAt}T00:00:00.000Z`).toISOString()
           : undefined
-      const nextSprintId = clearSprint ? null : sprintId && sprintId.length > 0 ? sprintId : undefined
+      const nextSprintId = clearSprint
+        ? null
+        : sprintId && sprintId.length > 0
+          ? sprintId
+          : undefined
 
       updateMutation.mutate(
         {
@@ -285,14 +291,26 @@ export function TaskFormModal({
               label="Start At"
               type="date"
               min={projectStartDate}
-              max={projectEndDate && completedAtValue ? (completedAtValue < projectEndDate ? completedAtValue : projectEndDate) : projectEndDate}
+              max={
+                projectEndDate && completedAtValue
+                  ? completedAtValue < projectEndDate
+                    ? completedAtValue
+                    : projectEndDate
+                  : projectEndDate
+              }
               {...register('startAt')}
               error={errors.startAt?.message}
             />
             <Input
               label="Completed At"
               type="date"
-              min={projectStartDate && startAtValue ? (startAtValue > projectStartDate ? startAtValue : projectStartDate) : projectStartDate}
+              min={
+                projectStartDate && startAtValue
+                  ? startAtValue > projectStartDate
+                    ? startAtValue
+                    : projectStartDate
+                  : projectStartDate
+              }
               max={projectEndDate}
               {...register('completedAt')}
               error={errors.completedAt?.message}

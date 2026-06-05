@@ -88,10 +88,7 @@ export function FloatingSponsorPanel() {
           <LinkedInIcon className="h-[18px] w-[18px]" />
         </SocialLink>
 
-        <span
-          aria-hidden="true"
-          className="mx-1 h-5 w-px bg-base-300/70 sm:mx-1.5"
-        />
+        <span aria-hidden="true" className="mx-1 h-5 w-px bg-base-300/70 sm:mx-1.5" />
 
         <span className="select-none rounded-full bg-primary/10 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-wide text-primary">
           {APP_VERSION}

@@ -89,7 +89,9 @@ export function ProjectFormModal({ isOpen, onClose, project }: ProjectFormModalP
 
         {isLocked && (
           <div className="alert alert-warning mb-4">
-            <span>You have reached your free plan limit. Upgrade to Pro to create more projects.</span>
+            <span>
+              You have reached your free plan limit. Upgrade to Pro to create more projects.
+            </span>
           </div>
         )}
 

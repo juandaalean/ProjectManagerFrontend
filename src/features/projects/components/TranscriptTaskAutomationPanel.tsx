@@ -134,10 +134,7 @@ export function TranscriptTaskAutomationPanel({
   if (!enabled) return null
 
   const pushLog = (kind: LogKind, message: string) => {
-    setLogEntries((current) => [
-      ...current,
-      { id: nextLogId.current++, kind, message },
-    ])
+    setLogEntries((current) => [...current, { id: nextLogId.current++, kind, message }])
   }
 
   const resetFlowState = () => {
@@ -260,9 +257,7 @@ export function TranscriptTaskAutomationPanel({
     value: TaskDraftForCreation[K],
   ) => {
     setDrafts((current) =>
-      current.map((draft, rowIndex) =>
-        rowIndex === index ? { ...draft, [key]: value } : draft,
-      ),
+      current.map((draft, rowIndex) => (rowIndex === index ? { ...draft, [key]: value } : draft)),
     )
   }
 
@@ -366,7 +361,10 @@ export function TranscriptTaskAutomationPanel({
           drafts: draftsExtracted,
           durationMs: Math.round(performance.now() - startedAt),
         })
-        pushLog('success', `Suite: ${demo.filename} → ${draftsExtracted.length} drafts in ${Math.round(performance.now() - startedAt)}ms`)
+        pushLog(
+          'success',
+          `Suite: ${demo.filename} → ${draftsExtracted.length} drafts in ${Math.round(performance.now() - startedAt)}ms`,
+        )
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
         results.push({
@@ -518,11 +516,7 @@ export function TranscriptTaskAutomationPanel({
                         model versions or prompt changes.
                       </p>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => void runTestSuite()}
-                      disabled={isRunningSuite}
-                    >
+                    <Button size="sm" onClick={() => void runTestSuite()} disabled={isRunningSuite}>
                       {isRunningSuite ? 'Running...' : 'Run on all demos'}
                     </Button>
                   </div>
@@ -548,9 +542,7 @@ export function TranscriptTaskAutomationPanel({
                               <tr key={r.filename}>
                                 <td>
                                   <div className="font-medium">{r.label}</div>
-                                  <div className="text-xs text-base-content/50">
-                                    {r.filename}
-                                  </div>
+                                  <div className="text-xs text-base-content/50">{r.filename}</div>
                                 </td>
                                 <td>
                                   <div className="badge badge-ghost badge-sm">
@@ -731,7 +723,11 @@ export function TranscriptTaskAutomationPanel({
                               <span className="label-text font-semibold">Language</span>
                             </label>
                             <div className="input input-bordered flex items-center bg-base-200/40 text-sm">
-                              {draft.language === 'en' ? 'English' : draft.language === 'es' ? 'Español' : '—'}
+                              {draft.language === 'en'
+                                ? 'English'
+                                : draft.language === 'es'
+                                  ? 'Español'
+                                  : '—'}
                             </div>
                           </div>
 
@@ -758,11 +754,7 @@ export function TranscriptTaskAutomationPanel({
                               className="input input-bordered w-full"
                               value={draft.completedAt ?? ''}
                               onChange={(event) =>
-                                updateDraft(
-                                  index,
-                                  'completedAt',
-                                  event.target.value || undefined,
-                                )
+                                updateDraft(index, 'completedAt', event.target.value || undefined)
                               }
                             />
                           </div>

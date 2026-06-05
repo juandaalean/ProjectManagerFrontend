@@ -495,7 +495,11 @@ function SprintBoardView({
     }
 
     updateTaskMutation.mutate(
-      { projectId, taskItemId: taskId, task: { state: newState, completedAt: newCompletedAt, clearCompletedAt } },
+      {
+        projectId,
+        taskItemId: taskId,
+        task: { state: newState, completedAt: newCompletedAt, clearCompletedAt },
+      },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['sprint-with-tasks', projectId, sprintId] })
@@ -789,14 +793,18 @@ function KanbanColumn({
         <h6 className="text-xs font-semibold uppercase tracking-wider">{title}</h6>
         <span className="badge badge-ghost badge-sm">{tasks.length}</span>
       </div>
-      <p className="grow-0 px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">{hint}</p>
+      <p className="grow-0 px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">
+        {hint}
+      </p>
       <div className="flex flex-1 flex-col justify-start space-y-2">
         {tasks.length === 0 ? (
           <div className="rounded-lg border border-dashed border-base-300/60 bg-base-100/50 p-4 text-center text-xs text-base-content/40">
             No tasks
           </div>
         ) : (
-          tasks.map((task) => <TaskCard key={task.id} task={task} onSelect={onSelectTask} memberById={memberById} />)
+          tasks.map((task) => (
+            <TaskCard key={task.id} task={task} onSelect={onSelectTask} memberById={memberById} />
+          ))
         )}
       </div>
     </div>
@@ -826,9 +834,7 @@ function TaskCard({ task, onSelect, memberById }: TaskCardProps) {
       <p className="line-clamp-2 text-sm font-semibold text-base-content">{task.title}</p>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <PriorityChip priority={task.priority} />
-        {assigneeName && (
-          <span className="text-xs text-base-content/70">{assigneeName}</span>
-        )}
+        {assigneeName && <span className="text-xs text-base-content/70">{assigneeName}</span>}
       </div>
       {task.completedAt && (
         <div className="mt-1 text-[10px] text-base-content/50">
@@ -854,7 +860,6 @@ function PriorityChip({ priority }: { priority: TaskItem['priority'] }) {
     </span>
   )
 }
-
 
 interface TaskDrawerProps {
   task: TaskItem
@@ -1184,8 +1189,8 @@ function DueDateModal({ task, isPending, maxDate, onClose, onConfirm }: DueDateM
 
         <div className="space-y-3 px-5 py-4">
           <p className="text-sm text-base-content/70">
-            The task <span className="font-semibold text-base-content">"{task.title}"</span> has
-            no due date. Pick a date manually to move it to <strong>In progress</strong>.
+            The task <span className="font-semibold text-base-content">"{task.title}"</span> has no
+            due date. Pick a date manually to move it to <strong>In progress</strong>.
           </p>
           <Input
             label="Due date"
@@ -1201,12 +1206,7 @@ function DueDateModal({ task, isPending, maxDate, onClose, onConfirm }: DueDateM
           <Button variant="secondary" size="sm" onClick={onClose} disabled={isPending}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleConfirm}
-            disabled={!date || isPending}
-          >
+          <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!date || isPending}>
             {isPending ? 'Saving…' : 'Move to In progress'}
           </Button>
         </div>

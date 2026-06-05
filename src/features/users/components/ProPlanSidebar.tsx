@@ -22,9 +22,7 @@ export function ProPlanSidebar() {
     )
   }
 
-  const percentage = projectLimit > 0
-    ? Math.min((projectCount / projectLimit) * 100, 100)
-    : 0
+  const percentage = projectLimit > 0 ? Math.min((projectCount / projectLimit) * 100, 100) : 0
 
   const isPro = plan === 'pro'
   const isLocked = !isPro && projectCount >= projectLimit
@@ -46,9 +44,7 @@ export function ProPlanSidebar() {
 
           <div className="mb-2">
             <div className="flex justify-between text-xs mb-1">
-              <span className="text-base-content/70">
-                Projects
-              </span>
+              <span className="text-base-content/70">Projects</span>
               <span className="font-medium">
                 {isPro ? (
                   <span className="flex items-center gap-1">

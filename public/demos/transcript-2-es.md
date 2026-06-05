@@ -28,11 +28,11 @@
 
 **María:** Los requisitos son:
 
-* Añadir una opción "¿Olvidaste tu contraseña?" en la pantalla de acceso.
-* Enviar un correo electrónico con enlace de recuperación.
-* Generar tokens seguros con expiración de 30 minutos.
-* Permitir establecer una nueva contraseña.
-* Registrar los intentos de recuperación en el sistema de auditoría.
+- Añadir una opción "¿Olvidaste tu contraseña?" en la pantalla de acceso.
+- Enviar un correo electrónico con enlace de recuperación.
+- Generar tokens seguros con expiración de 30 minutos.
+- Permitir establecer una nueva contraseña.
+- Registrar los intentos de recuperación en el sistema de auditoría.
 
 **María:** Esta tarea queda asignada a **Juanda**.
 
@@ -56,11 +56,11 @@
 
 **María:** Especificaciones:
 
-* Analizar consultas lentas en la base de datos.
-* Revisar índices y optimizar consultas SQL.
-* Reducir el tiempo medio de generación por debajo de 20 segundos.
-* Realizar pruebas de carga.
-* Documentar las mejoras implementadas.
+- Analizar consultas lentas en la base de datos.
+- Revisar índices y optimizar consultas SQL.
+- Reducir el tiempo medio de generación por debajo de 20 segundos.
+- Realizar pruebas de carga.
+- Documentar las mejoras implementadas.
 
 **María:** Responsable: **Carlos**.
 
@@ -82,11 +82,11 @@
 
 **María:** Requisitos:
 
-* Permitir segmentar notificaciones por tipo de usuario.
-* Configurar envíos programados.
-* Mostrar historial de notificaciones enviadas.
-* Añadir métricas básicas de apertura.
-* Garantizar compatibilidad con Android e iOS.
+- Permitir segmentar notificaciones por tipo de usuario.
+- Configurar envíos programados.
+- Mostrar historial de notificaciones enviadas.
+- Añadir métricas básicas de apertura.
+- Garantizar compatibilidad con Android e iOS.
 
 **María:** Esta tarea será para **Laura**.
 
@@ -108,11 +108,11 @@
 
 **María:** Debe incluir:
 
-* Diagramas actualizados de arquitectura.
-* Descripción de servicios y dependencias.
-* Guías de despliegue.
-* Ejemplos de configuración.
-* Procedimientos de recuperación ante fallos.
+- Diagramas actualizados de arquitectura.
+- Descripción de servicios y dependencias.
+- Guías de despliegue.
+- Ejemplos de configuración.
+- Procedimientos de recuperación ante fallos.
 
 **María:** Responsable: **Sergio**.
 
@@ -134,11 +134,11 @@
 
 **María:** Especificaciones:
 
-* Mostrar ventas diarias, semanales y mensuales.
-* Incluir filtros por región y producto.
-* Actualizar datos cada minuto.
-* Permitir exportación a Excel y PDF.
-* Implementar gráficos interactivos para tendencias.
+- Mostrar ventas diarias, semanales y mensuales.
+- Incluir filtros por región y producto.
+- Actualizar datos cada minuto.
+- Permitir exportación a Excel y PDF.
+- Implementar gráficos interactivos para tendencias.
 
 **María:** Responsable: **Juanda**.
 
@@ -158,10 +158,10 @@
 
 **María:** Resumen final:
 
-* Recuperación de contraseña → Prioridad Alta → Juanda.
-* Optimización de informes financieros → Prioridad Crítica → Carlos.
-* Notificaciones push → Prioridad Media → Laura.
-* Documentación de integraciones → Prioridad Baja → Sergio.
-* Panel de analítica en tiempo real → Prioridad Alta → Juanda.
+- Recuperación de contraseña → Prioridad Alta → Juanda.
+- Optimización de informes financieros → Prioridad Crítica → Carlos.
+- Notificaciones push → Prioridad Media → Laura.
+- Documentación de integraciones → Prioridad Baja → Sergio.
+- Panel de analítica en tiempo real → Prioridad Alta → Juanda.
 
 **Todos:** De acuerdo.

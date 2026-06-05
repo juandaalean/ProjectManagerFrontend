@@ -54,9 +54,7 @@ export function AppNavbar({ theme, onToggleTheme }: Props) {
       </div>
 
       <div className="navbar-center hidden lg:flex">
-        {project && (
-          <span className="text-lg font-semibold">{project.name}</span>
-        )}
+        {project && <span className="text-lg font-semibold">{project.name}</span>}
       </div>
 
       <div className="navbar-end gap-2">

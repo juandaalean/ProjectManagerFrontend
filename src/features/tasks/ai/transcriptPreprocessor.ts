@@ -3,25 +3,155 @@ import type { ProjectMemberDto } from '../../projects/types/project.types'
 export type SupportedLanguage = 'es' | 'en'
 
 const SPANISH_STOPWORDS = new Set([
-  'el', 'la', 'de', 'que', 'y', 'a', 'en', 'un', 'ser', 'se', 'no', 'haber',
-  'por', 'con', 'su', 'para', 'como', 'estar', 'tener', 'le', 'lo', 'todo',
-  'pero', 'más', 'hacer', 'o', 'poder', 'decir', 'este', 'ir', 'otro', 'ese',
-  'si', 'me', 'ya', 'ver', 'porque', 'dar', 'cuando', 'él', 'muy', 'sin',
-  'vez', 'mucho', 'saber', 'qué', 'sobre', 'mi', 'alguno', 'mismo', 'yo',
-  'también', 'hasta', 'año', 'dos', 'querer', 'entre', 'así', 'primera',
-  'desde', 'nos', 'tarea', 'tareas', 'fecha', 'inicio', 'fin', 'urgencia',
-  'responsable', 'requisitos', 'especificaciones',
+  'el',
+  'la',
+  'de',
+  'que',
+  'y',
+  'a',
+  'en',
+  'un',
+  'ser',
+  'se',
+  'no',
+  'haber',
+  'por',
+  'con',
+  'su',
+  'para',
+  'como',
+  'estar',
+  'tener',
+  'le',
+  'lo',
+  'todo',
+  'pero',
+  'más',
+  'hacer',
+  'o',
+  'poder',
+  'decir',
+  'este',
+  'ir',
+  'otro',
+  'ese',
+  'si',
+  'me',
+  'ya',
+  'ver',
+  'porque',
+  'dar',
+  'cuando',
+  'él',
+  'muy',
+  'sin',
+  'vez',
+  'mucho',
+  'saber',
+  'qué',
+  'sobre',
+  'mi',
+  'alguno',
+  'mismo',
+  'yo',
+  'también',
+  'hasta',
+  'año',
+  'dos',
+  'querer',
+  'entre',
+  'así',
+  'primera',
+  'desde',
+  'nos',
+  'tarea',
+  'tareas',
+  'fecha',
+  'inicio',
+  'fin',
+  'urgencia',
+  'responsable',
+  'requisitos',
+  'especificaciones',
 ])
 
 const ENGLISH_STOPWORDS = new Set([
-  'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for',
-  'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his',
-  'by', 'from', 'they', 'we', 'say', 'her', 'she', 'or', 'an', 'will', 'my',
-  'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if',
-  'about', 'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like',
-  'time', 'no', 'just', 'him', 'know', 'take', 'people', 'into', 'year',
-  'your', 'good', 'some', 'task', 'tasks', 'date', 'start', 'end', 'due',
-  'priority', 'assignee', 'requirements', 'specifications',
+  'the',
+  'be',
+  'to',
+  'of',
+  'and',
+  'a',
+  'in',
+  'that',
+  'have',
+  'i',
+  'it',
+  'for',
+  'not',
+  'on',
+  'with',
+  'he',
+  'as',
+  'you',
+  'do',
+  'at',
+  'this',
+  'but',
+  'his',
+  'by',
+  'from',
+  'they',
+  'we',
+  'say',
+  'her',
+  'she',
+  'or',
+  'an',
+  'will',
+  'my',
+  'one',
+  'all',
+  'would',
+  'there',
+  'their',
+  'what',
+  'so',
+  'up',
+  'out',
+  'if',
+  'about',
+  'who',
+  'get',
+  'which',
+  'go',
+  'me',
+  'when',
+  'make',
+  'can',
+  'like',
+  'time',
+  'no',
+  'just',
+  'him',
+  'know',
+  'take',
+  'people',
+  'into',
+  'year',
+  'your',
+  'good',
+  'some',
+  'task',
+  'tasks',
+  'date',
+  'start',
+  'end',
+  'due',
+  'priority',
+  'assignee',
+  'requirements',
+  'specifications',
 ])
 
 const MONTHS_ES: Record<string, number> = {
@@ -68,34 +198,73 @@ const MONTHS_EN: Record<string, number> = {
 }
 
 const WEEKDAYS_EN: Record<string, number> = {
-  sunday: 0, sun: 0,
-  monday: 1, mon: 1,
-  tuesday: 2, tue: 2, tues: 2,
-  wednesday: 3, wed: 3,
-  thursday: 4, thu: 4, thurs: 4,
-  friday: 5, fri: 5,
-  saturday: 6, sat: 6,
+  sunday: 0,
+  sun: 0,
+  monday: 1,
+  mon: 1,
+  tuesday: 2,
+  tue: 2,
+  tues: 2,
+  wednesday: 3,
+  wed: 3,
+  thursday: 4,
+  thu: 4,
+  thurs: 4,
+  friday: 5,
+  fri: 5,
+  saturday: 6,
+  sat: 6,
 }
 
 const WEEKDAYS_ES: Record<string, number> = {
-  domingo: 0, dom: 0,
-  lunes: 1, lun: 1,
-  martes: 2, mar: 2,
-  miércoles: 3, miercoles: 3, mié: 3, mie: 3,
-  jueves: 4, jue: 4,
-  viernes: 5, vie: 5,
-  sábado: 6, sabado: 6, sáb: 6, sab: 6,
+  domingo: 0,
+  dom: 0,
+  lunes: 1,
+  lun: 1,
+  martes: 2,
+  mar: 2,
+  miércoles: 3,
+  miercoles: 3,
+  mié: 3,
+  mie: 3,
+  jueves: 4,
+  jue: 4,
+  viernes: 5,
+  vie: 5,
+  sábado: 6,
+  sabado: 6,
+  sáb: 6,
+  sab: 6,
 }
 
 const TASK_HEADER_KEYWORDS_ES = [
-  'tarea', 'tarea:', 'primera tarea', 'segunda tarea', 'tercera tarea',
-  'cuarta tarea', 'quinta tarea', 'sexta tarea', 'siguiente tarea',
-  'nueva tarea', 'próxima tarea', 'ultima tarea', 'última tarea',
+  'tarea',
+  'tarea:',
+  'primera tarea',
+  'segunda tarea',
+  'tercera tarea',
+  'cuarta tarea',
+  'quinta tarea',
+  'sexta tarea',
+  'siguiente tarea',
+  'nueva tarea',
+  'próxima tarea',
+  'ultima tarea',
+  'última tarea',
 ]
 
 const TASK_HEADER_KEYWORDS_EN = [
-  'task', 'task:', 'first task', 'second task', 'third task', 'fourth task',
-  'fifth task', 'next task', 'new task', 'last task', 'final task',
+  'task',
+  'task:',
+  'first task',
+  'second task',
+  'third task',
+  'fourth task',
+  'fifth task',
+  'next task',
+  'new task',
+  'last task',
+  'final task',
 ]
 
 export type PreprocessedTranscript = {
@@ -138,13 +307,19 @@ const toIso = (date: Date): string =>
   `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`
 
 const parseMonthName = (token: string, language: SupportedLanguage): number | undefined => {
-  const normalized = token.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  const normalized = token
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
   if (language === 'es') return MONTHS_ES[normalized]
   return MONTHS_EN[normalized] ?? MONTHS_ES[normalized]
 }
 
 const parseWeekdayOffset = (token: string, language: SupportedLanguage): number | undefined => {
-  const normalized = token.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  const normalized = token
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
   if (language === 'es') return WEEKDAYS_ES[normalized]
   return WEEKDAYS_EN[normalized]
 }
@@ -154,11 +329,7 @@ const buildDate = (year: number, month: number, day: number): Date | undefined =
     return undefined
   }
   const date = new Date(Date.UTC(year, month, day))
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month ||
-    date.getUTCDate() !== day
-  ) {
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day) {
     return undefined
   }
   return date
@@ -184,9 +355,7 @@ const tryParseAbsoluteDate = (
   language: SupportedLanguage,
   referenceYear: number,
 ): ParsedDate | undefined => {
-  const esPattern = text.match(
-    /\b(\d{1,2})\s+de\s+([a-záéíóúñ]+)(?:\s+de\s+(\d{2,4}))?\b/i,
-  )
+  const esPattern = text.match(/\b(\d{1,2})\s+de\s+([a-záéíóúñ]+)(?:\s+de\s+(\d{2,4}))?\b/i)
   if (esPattern && language === 'es') {
     const day = Number(esPattern[1])
     const month = parseMonthName(esPattern[2], 'es')
@@ -199,17 +368,12 @@ const tryParseAbsoluteDate = (
     }
   }
 
-  const enMonthFirst = text.match(
-    /\b([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{2,4}))?\b/,
-  )
+  const enMonthFirst = text.match(/\b([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{2,4}))?\b/)
   if (enMonthFirst) {
     const month = parseMonthName(enMonthFirst[1], 'en')
     if (month !== undefined) {
       const day = Number(enMonthFirst[2])
-      const year = resolveYear(
-        enMonthFirst[3] ? Number(enMonthFirst[3]) : undefined,
-        referenceYear,
-      )
+      const year = resolveYear(enMonthFirst[3] ? Number(enMonthFirst[3]) : undefined, referenceYear)
       const date = buildDate(year, month, day)
       if (date) {
         return { date, matched: enMonthFirst[0], label: 'absolute' }
@@ -224,10 +388,7 @@ const tryParseAbsoluteDate = (
     const day = Number(enDayFirst[1])
     const month = parseMonthName(enDayFirst[2], 'en')
     if (month !== undefined) {
-      const year = resolveYear(
-        enDayFirst[3] ? Number(enDayFirst[3]) : undefined,
-        referenceYear,
-      )
+      const year = resolveYear(enDayFirst[3] ? Number(enDayFirst[3]) : undefined, referenceYear)
       const date = buildDate(year, month, day)
       if (date) {
         return { date, matched: enDayFirst[0], label: 'absolute' }
@@ -256,19 +417,26 @@ const tryParseRelativeDate = (
   language: SupportedLanguage,
   reference: Date,
 ): ParsedDate | undefined => {
-  const normalized = text.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  const normalized = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
 
   if (language === 'es') {
     if (/\bpasado\s+ma[ñn]ana\b/.test(normalized)) {
       return {
-        date: new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 2)),
+        date: new Date(
+          Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 2),
+        ),
         matched: 'pasado mañana',
         label: 'relative',
       }
     }
     if (/\bma[ñn]ana\b/.test(normalized)) {
       return {
-        date: new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 1)),
+        date: new Date(
+          Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 1),
+        ),
         matched: 'mañana',
         label: 'relative',
       }
@@ -279,14 +447,18 @@ const tryParseRelativeDate = (
   } else {
     if (/\bday\s+after\s+tomorrow\b/.test(normalized)) {
       return {
-        date: new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 2)),
+        date: new Date(
+          Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 2),
+        ),
         matched: 'day after tomorrow',
         label: 'relative',
       }
     }
     if (/\btomorrow\b/.test(normalized)) {
       return {
-        date: new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 1)),
+        date: new Date(
+          Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate() + 1),
+        ),
         matched: 'tomorrow',
         label: 'relative',
       }
@@ -475,9 +647,7 @@ export const preprocessTranscript = (
 
   const speakerList = extractSpeakers(transcript)
   const speakerHint =
-    speakerList.length > 0
-      ? `[HABLANTES DETECTADOS: ${speakerList.join(', ')}]`
-      : ''
+    speakerList.length > 0 ? `[HABLANTES DETECTADOS: ${speakerList.join(', ')}]` : ''
 
   const preprocessed = [languageHeader, meetingHeader, speakerHint, withBoundaries]
     .filter(Boolean)

@@ -101,9 +101,7 @@ const resolveAssigneeId = (
 ) => {
   if (!assigneeHint) return ownerId
   const normalizedHint = normalizeText(assigneeHint)
-  const emailMatch = members.find(
-    (member) => normalizeText(member.userEmail) === normalizedHint,
-  )
+  const emailMatch = members.find((member) => normalizeText(member.userEmail) === normalizedHint)
   if (emailMatch) return emailMatch.userId
   const nameMatch = members.find((member) => {
     const normalizedName = normalizeText(member.userName)
@@ -245,85 +243,86 @@ const buildUserPrompt = (
     .map((member) => `- ${member.userName} <${member.userEmail}>`)
     .join('\n')
 
-  const rules = language === 'es'
-    ? [
-        '- Extraes UN objeto JSON por transcripción. NO decides cuántas tareas crear (otra capa las divide si ves `>>> TASK START >>>`).',
-        '- Tu salida SIEMPRE en español, mismo idioma que la transcripción.',
-        '- Detecta "Fecha inicio" (start) y "Fecha fin" / "Fecha límite" (end) por separado cuando aparezcan.',
-        '- taskStartDate: solo si hay fecha explícita de inicio. Si no, cadena vacía.',
-        '- taskDueDate: solo la fecha final / deadline. NO fechas intermedias.',
-        '- taskTitle: empieza con verbo en infinitivo (Desarrollar, Implementar, Crear, Migrar, Configurar, etc.). Sin nombre de persona, sin fecha.',
-        '- taskAssigneeHint: solo quien aceptó explícitamente ("me encargo", "yo lo hago", "lo haré", "asignada a X"). Vacío si no está claro.',
-        '- taskPriority: "High" si hay deadline duro, "Medium" por defecto, "Low" si es nice-to-have, "Critical" solo si bloquea / ASAP.',
-        '- kinds de items:',
-        '  - "requirement" = requisito funcional',
-        '  - "spec" = detalle técnico (endpoint, frecuencia, framework)',
-        '  - "decision" = decisión de diseño',
-        '  - "date" = fecha con etiqueta, pon la etiqueta en text y la ISO en date',
-        '  - "start_date" = fecha de inicio explícita separada de la fecha fin',
-        '  - "assignee" = asignación explícita',
-        '  - "context" = contexto de fondo',
-        '  - "block_start" = inicio de una nueva tarea (cuando hay `>>> TASK START >>>`)',
-        '- Si la transcripción tiene varias tareas delimitadas por `>>> TASK START >>>`, emite un `block_start` por cada una con su `taskTitle`, `assigneeHint`, `date`, `priority`.',
-        '- Un item por pieza de información. NO fusiones, NO resumas.',
-        '- Salta saludos, small talk y recapitulaciones finales que repiten info.',
-        '- assigneeHint en un item: solo si ese item tiene un dueño distinto al de la tarea principal.',
-        '- startDate en un item: solo para fechas de inicio separadas. date en un item: para deadlines intermedios / hitos.',
-        '- Si hay pistas tipo [DATE#N=YYYY-MM-DD] en la transcripción preprocesada, USA ESA ISO directamente.',
-        '- project members abajo; usa esos nombres exactos para assigneeHint.',
-        '',
-        'FORMATO (no copies literalmente, solo respeta la forma):',
-        '{',
-        '  "taskTitle": "Desarrollar el módulo X",',
-        '  "taskAssigneeHint": "Juanda",',
-        '  "taskStartDate": "2026-07-15",',
-        '  "taskDueDate": "2026-07-25",',
-        '  "taskPriority": "High",',
-        '  "language": "es",',
-        '  "items": [',
-        '    { "kind": "requirement", "text": "Filtros por región", "confidence": 0.9 }',
-        '  ]',
-        '}',
-      ]
-    : [
-        '- Extract ONE JSON object per transcript. Do NOT decide how many tasks to create (another layer splits on `>>> TASK START >>>`).',
-        '- Output ALWAYS in English, same language as the transcript.',
-        '- Detect "Start date" and "End date" / "Due date" / "Deadline" separately when both appear.',
-        '- taskStartDate: only if an explicit start date is mentioned. Empty string otherwise.',
-        '- taskDueDate: only the final deadline. NOT intermediate dates.',
-        '- taskTitle: start with a base verb (Develop, Implement, Create, Migrate, Configure, etc.). No person name, no date.',
-        '- taskAssigneeHint: only the person who explicitly accepted ("I will do it", "I take it", "assigned to X"). Empty if unclear.',
-        '- taskPriority: "High" if there is a hard deadline, "Medium" by default, "Low" for nice-to-have, "Critical" only if blocked/ASAP.',
-        '- item kinds:',
-        '  - "requirement" = functional requirement',
-        '  - "spec" = technical detail (endpoint, frequency, framework)',
-        '  - "decision" = design decision',
-        '  - "date" = date with label, put label in text and ISO in date',
-        '  - "start_date" = explicit start date separated from end date',
-        '  - "assignee" = explicit assignment statement',
-        '  - "context" = background context',
-        '  - "block_start" = start of a new task (when `>>> TASK START >>>` appears)',
-        '- If the transcript has multiple tasks delimited by `>>> TASK START >>>`, emit a `block_start` per task with its own `taskTitle`, `assigneeHint`, `date`, `priority`.',
-        '- One item per piece of information. Do NOT merge, do NOT summarize across items.',
-        '- Skip greetings, small talk and final recaps that repeat information.',
-        '- assigneeHint on an item: only if that item has a different owner than the main task.',
-        '- startDate on an item: only for separated start dates. date on an item: for intermediate deadlines / milestones.',
-        '- If you see [DATE#N=YYYY-MM-DD] hints in the preprocessed transcript, USE THAT ISO directly.',
-        '- Project members below; use those exact names for assigneeHint.',
-        '',
-        'FORMAT (do not copy literally, just respect the shape):',
-        '{',
-        '  "taskTitle": "Develop the X module",',
-        '  "taskAssigneeHint": "John",',
-        '  "taskStartDate": "2026-07-15",',
-        '  "taskDueDate": "2026-07-25",',
-        '  "taskPriority": "High",',
-        '  "language": "en",',
-        '  "items": [',
-        '    { "kind": "requirement", "text": "Region filters", "confidence": 0.9 }',
-        '  ]',
-        '}',
-      ]
+  const rules =
+    language === 'es'
+      ? [
+          '- Extraes UN objeto JSON por transcripción. NO decides cuántas tareas crear (otra capa las divide si ves `>>> TASK START >>>`).',
+          '- Tu salida SIEMPRE en español, mismo idioma que la transcripción.',
+          '- Detecta "Fecha inicio" (start) y "Fecha fin" / "Fecha límite" (end) por separado cuando aparezcan.',
+          '- taskStartDate: solo si hay fecha explícita de inicio. Si no, cadena vacía.',
+          '- taskDueDate: solo la fecha final / deadline. NO fechas intermedias.',
+          '- taskTitle: empieza con verbo en infinitivo (Desarrollar, Implementar, Crear, Migrar, Configurar, etc.). Sin nombre de persona, sin fecha.',
+          '- taskAssigneeHint: solo quien aceptó explícitamente ("me encargo", "yo lo hago", "lo haré", "asignada a X"). Vacío si no está claro.',
+          '- taskPriority: "High" si hay deadline duro, "Medium" por defecto, "Low" si es nice-to-have, "Critical" solo si bloquea / ASAP.',
+          '- kinds de items:',
+          '  - "requirement" = requisito funcional',
+          '  - "spec" = detalle técnico (endpoint, frecuencia, framework)',
+          '  - "decision" = decisión de diseño',
+          '  - "date" = fecha con etiqueta, pon la etiqueta en text y la ISO en date',
+          '  - "start_date" = fecha de inicio explícita separada de la fecha fin',
+          '  - "assignee" = asignación explícita',
+          '  - "context" = contexto de fondo',
+          '  - "block_start" = inicio de una nueva tarea (cuando hay `>>> TASK START >>>`)',
+          '- Si la transcripción tiene varias tareas delimitadas por `>>> TASK START >>>`, emite un `block_start` por cada una con su `taskTitle`, `assigneeHint`, `date`, `priority`.',
+          '- Un item por pieza de información. NO fusiones, NO resumas.',
+          '- Salta saludos, small talk y recapitulaciones finales que repiten info.',
+          '- assigneeHint en un item: solo si ese item tiene un dueño distinto al de la tarea principal.',
+          '- startDate en un item: solo para fechas de inicio separadas. date en un item: para deadlines intermedios / hitos.',
+          '- Si hay pistas tipo [DATE#N=YYYY-MM-DD] en la transcripción preprocesada, USA ESA ISO directamente.',
+          '- project members abajo; usa esos nombres exactos para assigneeHint.',
+          '',
+          'FORMATO (no copies literalmente, solo respeta la forma):',
+          '{',
+          '  "taskTitle": "Desarrollar el módulo X",',
+          '  "taskAssigneeHint": "Juanda",',
+          '  "taskStartDate": "2026-07-15",',
+          '  "taskDueDate": "2026-07-25",',
+          '  "taskPriority": "High",',
+          '  "language": "es",',
+          '  "items": [',
+          '    { "kind": "requirement", "text": "Filtros por región", "confidence": 0.9 }',
+          '  ]',
+          '}',
+        ]
+      : [
+          '- Extract ONE JSON object per transcript. Do NOT decide how many tasks to create (another layer splits on `>>> TASK START >>>`).',
+          '- Output ALWAYS in English, same language as the transcript.',
+          '- Detect "Start date" and "End date" / "Due date" / "Deadline" separately when both appear.',
+          '- taskStartDate: only if an explicit start date is mentioned. Empty string otherwise.',
+          '- taskDueDate: only the final deadline. NOT intermediate dates.',
+          '- taskTitle: start with a base verb (Develop, Implement, Create, Migrate, Configure, etc.). No person name, no date.',
+          '- taskAssigneeHint: only the person who explicitly accepted ("I will do it", "I take it", "assigned to X"). Empty if unclear.',
+          '- taskPriority: "High" if there is a hard deadline, "Medium" by default, "Low" for nice-to-have, "Critical" only if blocked/ASAP.',
+          '- item kinds:',
+          '  - "requirement" = functional requirement',
+          '  - "spec" = technical detail (endpoint, frequency, framework)',
+          '  - "decision" = design decision',
+          '  - "date" = date with label, put label in text and ISO in date',
+          '  - "start_date" = explicit start date separated from end date',
+          '  - "assignee" = explicit assignment statement',
+          '  - "context" = background context',
+          '  - "block_start" = start of a new task (when `>>> TASK START >>>` appears)',
+          '- If the transcript has multiple tasks delimited by `>>> TASK START >>>`, emit a `block_start` per task with its own `taskTitle`, `assigneeHint`, `date`, `priority`.',
+          '- One item per piece of information. Do NOT merge, do NOT summarize across items.',
+          '- Skip greetings, small talk and final recaps that repeat information.',
+          '- assigneeHint on an item: only if that item has a different owner than the main task.',
+          '- startDate on an item: only for separated start dates. date on an item: for intermediate deadlines / milestones.',
+          '- If you see [DATE#N=YYYY-MM-DD] hints in the preprocessed transcript, USE THAT ISO directly.',
+          '- Project members below; use those exact names for assigneeHint.',
+          '',
+          'FORMAT (do not copy literally, just respect the shape):',
+          '{',
+          '  "taskTitle": "Develop the X module",',
+          '  "taskAssigneeHint": "John",',
+          '  "taskStartDate": "2026-07-15",',
+          '  "taskDueDate": "2026-07-25",',
+          '  "taskPriority": "High",',
+          '  "language": "en",',
+          '  "items": [',
+          '    { "kind": "requirement", "text": "Region filters", "confidence": 0.9 }',
+          '  ]',
+          '}',
+        ]
 
   return [
     rules.join('\n'),
@@ -377,16 +376,46 @@ const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, timeoutMes
 }
 
 const MONTHS_ES: Record<string, number> = {
-  enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5,
-  julio: 6, agosto: 7, septiembre: 8, setiembre: 8, octubre: 9,
-  noviembre: 10, diciembre: 11,
+  enero: 0,
+  febrero: 1,
+  marzo: 2,
+  abril: 3,
+  mayo: 4,
+  junio: 5,
+  julio: 6,
+  agosto: 7,
+  septiembre: 8,
+  setiembre: 8,
+  octubre: 9,
+  noviembre: 10,
+  diciembre: 11,
 }
 
 const MONTHS_EN: Record<string, number> = {
-  january: 0, jan: 0, february: 1, feb: 1, march: 2, mar: 2,
-  april: 3, apr: 3, may: 4, june: 5, jun: 5, july: 6, jul: 6,
-  august: 7, aug: 7, september: 8, sept: 8, sep: 8,
-  october: 9, oct: 9, november: 10, nov: 10, december: 11, dec: 11,
+  january: 0,
+  jan: 0,
+  february: 1,
+  feb: 1,
+  march: 2,
+  mar: 2,
+  april: 3,
+  apr: 3,
+  may: 4,
+  june: 5,
+  jun: 5,
+  july: 6,
+  jul: 6,
+  august: 7,
+  aug: 7,
+  september: 8,
+  sept: 8,
+  sep: 8,
+  october: 9,
+  oct: 9,
+  november: 10,
+  nov: 10,
+  december: 11,
+  dec: 11,
 }
 
 const looksLikeDate = (value: string): boolean =>
@@ -414,7 +443,9 @@ const parseEnglishDate = (value: string, referenceYear?: number): string | undef
     const month = MONTHS_EN[monthFirst[1].toLowerCase()]
     const day = Number(monthFirst[2])
     if (month !== undefined && Number.isFinite(day)) {
-      const year = monthFirst[3] ? Number(monthFirst[3]) : referenceYear ?? new Date().getUTCFullYear()
+      const year = monthFirst[3]
+        ? Number(monthFirst[3])
+        : (referenceYear ?? new Date().getUTCFullYear())
       const fullYear = year < 100 ? year + 2000 : year
       const date = new Date(Date.UTC(fullYear, month, day))
       if (!Number.isNaN(date.getTime())) {
@@ -422,12 +453,16 @@ const parseEnglishDate = (value: string, referenceYear?: number): string | undef
       }
     }
   }
-  const dayFirst = value.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?([A-Za-z]+)(?:,?\s+(\d{2,4}))?\b/)
+  const dayFirst = value.match(
+    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?([A-Za-z]+)(?:,?\s+(\d{2,4}))?\b/,
+  )
   if (dayFirst) {
     const day = Number(dayFirst[1])
     const month = MONTHS_EN[dayFirst[2].toLowerCase()]
     if (month !== undefined && Number.isFinite(day)) {
-      const year = dayFirst[3] ? Number(dayFirst[3]) : referenceYear ?? new Date().getUTCFullYear()
+      const year = dayFirst[3]
+        ? Number(dayFirst[3])
+        : (referenceYear ?? new Date().getUTCFullYear())
       const fullYear = year < 100 ? year + 2000 : year
       const date = new Date(Date.UTC(fullYear, month, day))
       if (!Number.isNaN(date.getTime())) {
@@ -453,7 +488,7 @@ const parseAnyDateInText = (
   if (numeric) {
     const a = Number(numeric[1])
     const b = Number(numeric[2])
-    const yearRaw = numeric[3] ? Number(numeric[3]) : referenceYear ?? new Date().getUTCFullYear()
+    const yearRaw = numeric[3] ? Number(numeric[3]) : (referenceYear ?? new Date().getUTCFullYear())
     const year = yearRaw < 100 ? yearRaw + 2000 : yearRaw
     const dayFirst = a > 12 ? a : b > 12 ? b : a
     const month = a > 12 ? b : b > 12 ? a : a
@@ -483,12 +518,16 @@ const findMemberInText = (value: string, members: ProjectMemberDto[]): string | 
   return nameMatch?.userName
 }
 
-const extractTaskTitleFromLine = (line: string, language: SupportedLanguage): string | undefined => {
+const extractTaskTitleFromLine = (
+  line: string,
+  language: SupportedLanguage,
+): string | undefined => {
   const headerPattern = language === 'es' ? /\bTarea\s*:/i : /\bTask\s*:/i
   if (!headerPattern.test(line)) return undefined
-  const excludePattern = language === 'es'
-    ? /\b(prioridad|asignad[oa]|responsable|fecha\s+l[ií]mite|requisitos?|especificaciones?|urgencia|fecha\s+inicio|fecha\s+fin)\b/i
-    : /\b(priority|assignee|responsible|deadline|due\s+date|requirements?|specifications?|start\s+date|end\s+date)\b/i
+  const excludePattern =
+    language === 'es'
+      ? /\b(prioridad|asignad[oa]|responsable|fecha\s+l[ií]mite|requisitos?|especificaciones?|urgencia|fecha\s+inicio|fecha\s+fin)\b/i
+      : /\b(priority|assignee|responsible|deadline|due\s+date|requirements?|specifications?|start\s+date|end\s+date)\b/i
   if (excludePattern.test(line)) return undefined
 
   const boldMatch = line.match(/(?:Tarea|Task)\s*:\s*\*+([^*\n]+?)\*+\.?/i)
@@ -526,18 +565,20 @@ const extractAssigneeFromAssigneeLine = (
   members: ProjectMemberDto[],
   language: SupportedLanguage,
 ): string | undefined => {
-  const boldPattern = language === 'es'
-    ? /(?:asignad[oa]s?\s+a|responsable\s*:?|esta\s+tarea\s+(?:ser[áa]|queda)\s+(?:para|asignad[oa]\s+a))\s*\*+([^*\n,.]+?)\*+/i
-    : /(?:assigned\s+to|assignee\s*:?|responsible\s*:?|this\s+task\s+(?:will\s+be|goes\s+to))\s*\*+([^*\n,.]+?)\*+/i
+  const boldPattern =
+    language === 'es'
+      ? /(?:asignad[oa]s?\s+a|responsable\s*:?|esta\s+tarea\s+(?:ser[áa]|queda)\s+(?:para|asignad[oa]\s+a))\s*\*+([^*\n,.]+?)\*+/i
+      : /(?:assigned\s+to|assignee\s*:?|responsible\s*:?|this\s+task\s+(?:will\s+be|goes\s+to))\s*\*+([^*\n,.]+?)\*+/i
   const boldMatch = line.match(boldPattern)
   if (boldMatch) {
     const candidate = findMemberInText(boldMatch[1], members)
     if (candidate) return candidate
   }
 
-  const plainPattern = language === 'es'
-    ? /(?:asignad[oa]s?\s+a|responsable\s*:?|esta\s+tarea\s+(?:ser[áa]|queda)\s+(?:para|asignad[oa]\s+a))\s*:?\s*([A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ'.-]*)/i
-    : /(?:assigned\s+to|assignee\s*:?|responsible\s*:?|this\s+task\s+(?:will\s+be|goes\s+to))\s*:?\s*([A-Za-z][A-Za-z'.-]*)/i
+  const plainPattern =
+    language === 'es'
+      ? /(?:asignad[oa]s?\s+a|responsable\s*:?|esta\s+tarea\s+(?:ser[áa]|queda)\s+(?:para|asignad[oa]\s+a))\s*:?\s*([A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ'.-]*)/i
+      : /(?:assigned\s+to|assignee\s*:?|responsible\s*:?|this\s+task\s+(?:will\s+be|goes\s+to))\s*:?\s*([A-Za-z][A-Za-z'.-]*)/i
   const plainMatch = line.match(plainPattern)
   if (plainMatch) {
     const candidate = findMemberInText(plainMatch[1].trim(), members)
@@ -554,12 +595,14 @@ const extractDatesFromLine = (
 ): { start?: string; end?: string } => {
   if (!looksLikeDate(line)) return {}
 
-  const startLabelPattern = language === 'es'
-    ? /\b(?:fecha\s+de?\s*inicio|inicio|empieza(?:r)?|arranca(?:r)?|start)\b/i
-    : /\b(?:start\s+date|start|begin(?:s)?)\b/i
-  const endLabelPattern = language === 'es'
-    ? /\b(?:fecha\s+(?:l[ií]mite|fin|de\s+entrega|final)|entrega\s+final|deadline|fin|termina(?:r)?)\b/i
-    : /\b(?:end\s+date|due\s+date|deadline|delivery|finish(?:es)?)\b/i
+  const startLabelPattern =
+    language === 'es'
+      ? /\b(?:fecha\s+de?\s*inicio|inicio|empieza(?:r)?|arranca(?:r)?|start)\b/i
+      : /\b(?:start\s+date|start|begin(?:s)?)\b/i
+  const endLabelPattern =
+    language === 'es'
+      ? /\b(?:fecha\s+(?:l[ií]mite|fin|de\s+entrega|final)|entrega\s+final|deadline|fin|termina(?:r)?)\b/i
+      : /\b(?:end\s+date|due\s+date|deadline|delivery|finish(?:es)?)\b/i
 
   const iso = parseAnyDateInText(line, language, referenceYear)
   if (!iso) return {}
@@ -701,23 +744,23 @@ const sliceTranscriptIntoTaskBlocks = (
     }
     if (dates.start || dates.end) continue
 
-    const sectionHeaderPattern = language === 'es'
-      ? /^\s*(Requisitos?|Especificaciones?|Debe incluir:?|Specifications?):?\s*$/i
-      : /^\s*(Requirements?|Specifications?|Must include:?|Details?):?\s*$/i
+    const sectionHeaderPattern =
+      language === 'es'
+        ? /^\s*(Requisitos?|Especificaciones?|Debe incluir:?|Specifications?):?\s*$/i
+        : /^\s*(Requirements?|Specifications?|Must include:?|Details?):?\s*$/i
     if (sectionHeaderPattern.test(cleaned)) continue
 
-    if (
-      /^\s*\*\s+/.test(cleaned) ||
-      /^\s*-\s+/.test(cleaned) ||
-      /^\s*\d+\.\s+/.test(cleaned)
-    ) {
+    if (/^\s*\*\s+/.test(cleaned) || /^\s*-\s+/.test(cleaned) || /^\s*\d+\.\s+/.test(cleaned)) {
       const bulletText = cleaned
         .replace(/^\s*[*\-–—]\s+/, '')
         .replace(/^\s*\d+\.\s+/, '')
         .replace(/\*+/g, '')
         .trim()
       if (!bulletText) continue
-      if (/→/.test(bulletText) && /\b(prioridad|responsable|asignad[oa]|priority|assignee)\b/i.test(bulletText)) {
+      if (
+        /→/.test(bulletText) &&
+        /\b(prioridad|responsable|asignad[oa]|priority|assignee)\b/i.test(bulletText)
+      ) {
         continue
       }
       if (/^\s*(?:resumen\s+final|final\s+summary)\b/i.test(bulletText)) continue
@@ -764,9 +807,10 @@ const scanNaturalTranscript = (
     }
   }
 
-  const ordinalPattern = language === 'es'
-    ? /^\s*(?:Primera|Segunda|Tercera|Cuarta|Quinta|Sexta|S[eé]ptima|Octava|Novena|D[eé]cima|[\d]+(?:ª|a|º)?)\s+tarea\.?\s*$/i
-    : /^\s*(?:First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth|[\d]+(?:st|nd|rd|th)?)\s+task\.?\s*$/i
+  const ordinalPattern =
+    language === 'es'
+      ? /^\s*(?:Primera|Segunda|Tercera|Cuarta|Quinta|Sexta|S[eé]ptima|Octava|Novena|D[eé]cima|[\d]+(?:ª|a|º)?)\s+tarea\.?\s*$/i
+      : /^\s*(?:First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth|[\d]+(?:st|nd|rd|th)?)\s+task\.?\s*$/i
 
   const isSpeakerLine = (text: string): boolean =>
     /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?:\s/.test(text) ||
@@ -786,22 +830,34 @@ const scanNaturalTranscript = (
       continue
     }
 
-    const namedMatch = language === 'es'
-      ? cleaned.match(/(?:funcionalidad|m[oó]dulo|sistema|p[aá]gina)\s+(?:llamad[oa]|denominad[oa]|nombrad[oa])\s+["""]?([A-Za-zÁÉÍÓÚÜÑáéíóúüñ][^.,!\n]*?)["""]?(?:\.|$)/i)
-      : cleaned.match(/(?:feature|module|system|page)\s+(?:called|named)\s+["""]?([A-Za-z][^.,!\n]*?)["""]?(?:\.|$)/i)
+    const namedMatch =
+      language === 'es'
+        ? cleaned.match(
+            /(?:funcionalidad|m[oó]dulo|sistema|p[aá]gina)\s+(?:llamad[oa]|denominad[oa]|nombrad[oa])\s+["""]?([A-Za-zÁÉÍÓÚÜÑáéíóúüñ][^.,!\n]*?)["""]?(?:\.|$)/i,
+          )
+        : cleaned.match(
+            /(?:feature|module|system|page)\s+(?:called|named)\s+["""]?([A-Za-z][^.,!\n]*?)["""]?(?:\.|$)/i,
+          )
     if (namedMatch) {
       if (current) {
         current.preamble = preambleBuffer.slice(-3)
         pushBlock(current)
       }
-      current = { title: namedMatch[1].trim(), requirements: [], context: [], spec: [], preamble: [] }
+      current = {
+        title: namedMatch[1].trim(),
+        requirements: [],
+        context: [],
+        spec: [],
+        preamble: [],
+      }
       preambleBuffer = []
       continue
     }
 
-    const verbs = language === 'es'
-      ? '(?:Desarrollar|Actualizar|Mejorar|Crear|Revisar|Implementar|Construir|Optimizar|Migrar|Dise[ñn]ar|Configurar)'
-      : '(?:Develop|Update|Improve|Create|Review|Implement|Build|Optimize|Migrate|Design|Configure)'
+    const verbs =
+      language === 'es'
+        ? '(?:Desarrollar|Actualizar|Mejorar|Crear|Revisar|Implementar|Construir|Optimizar|Migrar|Dise[ñn]ar|Configurar)'
+        : '(?:Develop|Update|Improve|Create|Review|Implement|Build|Optimize|Migrate|Design|Configure)'
     const imperativeTitleMatch = cleaned.match(
       new RegExp(`^\\s*${verbs}\\s+([A-Za-zÁÉÍÓÚÜÑáéíóúüñ].{4,})$`, 'i'),
     )
@@ -823,18 +879,20 @@ const scanNaturalTranscript = (
       continue
     }
 
-    const taskConsistMatch = language === 'es'
-      ? cleaned.match(/[Ll]a\s+tarea\s+consiste\s+en\s+(.+)/i)
-      : cleaned.match(/[Tt]he\s+task\s+(?:is\s+to|consists?\s+of)\s+(.+)/i)
+    const taskConsistMatch =
+      language === 'es'
+        ? cleaned.match(/[Ll]a\s+tarea\s+consiste\s+en\s+(.+)/i)
+        : cleaned.match(/[Tt]he\s+task\s+(?:is\s+to|consists?\s+of)\s+(.+)/i)
     if (taskConsistMatch && current) {
       current.requirements.push(taskConsistMatch[1].trim())
       continue
     }
 
     if (!current) {
-      const triggerPattern = language === 'es'
-        ? /\b(mejora|optimizar|desarrollar|crear|implementar|m[oó]dulo|funcionalidad|sistema)\b/i
-        : /\b(improve|optimize|develop|create|implement|module|feature|system)\b/i
+      const triggerPattern =
+        language === 'es'
+          ? /\b(mejora|optimizar|desarrollar|crear|implementar|m[oó]dulo|funcionalidad|sistema)\b/i
+          : /\b(improve|optimize|develop|create|implement|module|feature|system)\b/i
       if (triggerPattern.test(cleaned)) {
         current = { title: '', requirements: [], context: [], spec: [], preamble: [] }
       } else {
@@ -845,18 +903,20 @@ const scanNaturalTranscript = (
       }
     }
 
-    const assigneePattern = language === 'es'
-      ? /(?:voy a asignar|asigno|asigna[rmos]?|esta\s+tarea\s+(?:queda\s+)?asignad[oa]\s+a|ser[áa]\s+para|responsable\s*:?)\s*([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)/i
-      : /(?:i(?:'ll|\s+will)\s+assign|assigning|this\s+task\s+(?:is\s+)?assigned\s+to|will\s+be\s+for|responsible\s*:?)\s*([A-Za-z]+)/i
+    const assigneePattern =
+      language === 'es'
+        ? /(?:voy a asignar|asigno|asigna[rmos]?|esta\s+tarea\s+(?:queda\s+)?asignad[oa]\s+a|ser[áa]\s+para|responsable\s*:?)\s*([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)/i
+        : /(?:i(?:'ll|\s+will)\s+assign|assigning|this\s+task\s+(?:is\s+)?assigned\s+to|will\s+be\s+for|responsible\s*:?)\s*([A-Za-z]+)/i
     const assigneeMatch = cleaned.match(assigneePattern)
     if (assigneeMatch) {
       const assigned = findMemberInText(assigneeMatch[1], members)
       if (assigned) current.assigneeHint = assigned
       continue
     }
-    const takesPattern = language === 'es'
-      ? /(me\s+encargo|de\s+acuerdo,\s*me\s+encargo)/i
-      : /(i(?:'ll|\s+will)\s+(?:do|take|handle)\s+it|i\s+take\s+it|sure,?\s+i(?:'ll|\s+will))/i
+    const takesPattern =
+      language === 'es'
+        ? /(me\s+encargo|de\s+acuerdo,\s*me\s+encargo)/i
+        : /(i(?:'ll|\s+will)\s+(?:do|take|handle)\s+it|i\s+take\s+it|sure,?\s+i(?:'ll|\s+will))/i
     const takesMatch = cleaned.match(takesPattern)
     if (takesMatch && !current.assigneeHint && members.length > 0) {
       const speaker = line.match(/^([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+):/)?.[1]
@@ -870,17 +930,19 @@ const scanNaturalTranscript = (
     if (dates.start && !current.startDate) current.startDate = dates.start
     if (dates.end && !current.dueDate) current.dueDate = dates.end
 
-    const specPattern = language === 'es'
-      ? /\b(endpoint|api|actualice|cada\s+\d+\s+minutos?|autom[aá]ticamente)\b/i
-      : /\b(endpoint|api|update|every\s+\d+\s+minutes?|automatically)\b/i
+    const specPattern =
+      language === 'es'
+        ? /\b(endpoint|api|actualice|cada\s+\d+\s+minutos?|autom[aá]ticamente)\b/i
+        : /\b(endpoint|api|update|every\s+\d+\s+minutes?|automatically)\b/i
     if (specPattern.test(cleaned)) {
       current.spec.push(cleaned)
       continue
     }
 
-    const requirementStartVerbs = language === 'es'
-      ? '(?:Crear|Mostrar|Permitir|A[ñn]adir|Implementar|Garantizar|Identificar|Actualizar|Ejecutar|Verificar|Generar|Incorporar|Registrar|Adaptar|Informar)'
-      : '(?:Create|Show|Allow|Add|Implement|Ensure|Identify|Update|Execute|Verify|Generate|Incorporate|Record|Adapt|Report)'
+    const requirementStartVerbs =
+      language === 'es'
+        ? '(?:Crear|Mostrar|Permitir|A[ñn]adir|Implementar|Garantizar|Identificar|Actualizar|Ejecutar|Verificar|Generar|Incorporar|Registrar|Adaptar|Informar)'
+        : '(?:Create|Show|Allow|Add|Implement|Ensure|Identify|Update|Execute|Verify|Generate|Incorporate|Record|Adapt|Report)'
     const requirementStartPattern = new RegExp(
       `^\\s*\\d+\\.\\s|^\\s*[*\\-–—]\\s+|^(?:${requirementStartVerbs})`,
       'i',
@@ -892,7 +954,10 @@ const scanNaturalTranscript = (
         .replace(/\*+/g, '')
         .trim()
       if (!bulletText) continue
-      if (/→/.test(bulletText) && /\b(prioridad|responsable|asignad[oa]|priority|assignee)\b/i.test(bulletText)) {
+      if (
+        /→/.test(bulletText) &&
+        /\b(prioridad|responsable|asignad[oa]|priority|assignee)\b/i.test(bulletText)
+      ) {
         continue
       }
       if (/^\s*(?:resumen\s+final|final\s+summary)\b/i.test(bulletText)) continue
@@ -1065,9 +1130,7 @@ const buildDraftForBlock = ({
   language: SupportedLanguage
 }): TaskDraftForCreation | null => {
   const context = items.filter((i) => i.kind === 'context')
-  const requirements = items.filter(
-    (i) => i.kind === 'requirement' || i.kind === 'decision',
-  )
+  const requirements = items.filter((i) => i.kind === 'requirement' || i.kind === 'decision')
   const specs = items.filter((i) => i.kind === 'spec')
 
   const sections: string[] = []
@@ -1094,7 +1157,8 @@ const buildDraftForBlock = ({
   }
 
   const titleBase =
-    headerItem.taskTitle?.trim() || headerItem.text.trim() ||
+    headerItem.taskTitle?.trim() ||
+    headerItem.text.trim() ||
     (language === 'es' ? 'Tarea extraída de la reunión' : 'Task extracted from meeting')
   const title = finalizeText(titleBase)
 
@@ -1158,9 +1222,7 @@ const consolidateAsSingleTask = (
     if (items.length === 0) return null
 
     const context = items.filter((i) => i.kind === 'context')
-    const requirements = items.filter(
-      (i) => i.kind === 'requirement' || i.kind === 'decision',
-    )
+    const requirements = items.filter((i) => i.kind === 'requirement' || i.kind === 'decision')
     const specs = items.filter((i) => i.kind === 'spec')
     const dates = items.filter((i) => i.kind === 'date' && i.date)
     const startDates = items.filter((i) => i.kind === 'start_date' && i.startDate)
@@ -1168,9 +1230,7 @@ const consolidateAsSingleTask = (
 
     const sections: string[] = []
     if (isMain) {
-      const contextSentence = context
-        .map((i) => finalizeText(i.text).replace(/\.$/, ''))
-        .join(' ')
+      const contextSentence = context.map((i) => finalizeText(i.text).replace(/\.$/, '')).join(' ')
       if (contextSentence) sections.push(`${contextSentence}.`)
       else {
         sections.push(
@@ -1199,9 +1259,7 @@ const consolidateAsSingleTask = (
       sections.push(`${label}:\n${bullets}`)
     }
     if (specs.length > 0) {
-      const bullets = specs
-        .map((i) => `- ${finalizeText(i.text).replace(/\.$/, '')}`)
-        .join('\n')
+      const bullets = specs.map((i) => `- ${finalizeText(i.text).replace(/\.$/, '')}`).join('\n')
       const label = language === 'es' ? 'Detalles técnicos' : 'Technical details'
       sections.push(`${label}:\n${bullets}`)
     }
@@ -1235,7 +1293,8 @@ const consolidateAsSingleTask = (
     let titleBase = isMain ? extraction.taskTitle?.trim() || '' : ''
     if (isMain && !titleBase) {
       const decisionItem = items.find(
-        (i) => i.kind === 'decision' &&
+        (i) =>
+          i.kind === 'decision' &&
           (language === 'es'
             ? /\b(m[oó]dulo|funcionalidad|p[aá]gina)\b/i.test(i.text)
             : /\b(module|feature|page)\b/i.test(i.text)),
@@ -1279,11 +1338,7 @@ const consolidateAsSingleTask = (
     }
   }
 
-  const mainDraft = buildDraftForGroup(
-    extraction.taskAssigneeHint?.trim() ?? '',
-    mainDeduped,
-    true,
-  )
+  const mainDraft = buildDraftForGroup(extraction.taskAssigneeHint?.trim() ?? '', mainDeduped, true)
   if (mainDraft) drafts.push(mainDraft)
 
   for (const [ownerHint, groupItems] of sideGroups) {
@@ -1374,9 +1429,7 @@ async function getEngine(model: string, onProgress?: (message: string) => void) 
   return engineInstance
 }
 
-const parseLlmResponse = (
-  rawContent: string | null | undefined,
-): LlmItemExtraction => {
+const parseLlmResponse = (rawContent: string | null | undefined): LlmItemExtraction => {
   if (!rawContent) {
     throw new Error('The model returned an empty response.')
   }
@@ -1485,12 +1538,7 @@ export async function extractTasksFromTranscript(input: ExtractTasksFromTranscri
 
   if (input.forceFallback) {
     input.onProgress?.('Skipping LLM (forceFallback). Using local parser...')
-    extraction = buildFallbackItemExtraction(
-      rawTranscript,
-      input.members,
-      language,
-      referenceYear,
-    )
+    extraction = buildFallbackItemExtraction(rawTranscript, input.members, language, referenceYear)
     usedFallback = true
     input.onProgress?.(`Fallback parser produced ${extraction.items.length} raw items.`)
   } else {
@@ -1522,12 +1570,7 @@ export async function extractTasksFromTranscript(input: ExtractTasksFromTranscri
   }
 
   if (!extraction) {
-    extraction = buildFallbackItemExtraction(
-      rawTranscript,
-      input.members,
-      language,
-      referenceYear,
-    )
+    extraction = buildFallbackItemExtraction(rawTranscript, input.members, language, referenceYear)
     usedFallback = true
   }
 

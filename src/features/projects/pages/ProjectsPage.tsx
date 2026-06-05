@@ -63,7 +63,7 @@ export function ProjectsPage() {
               <Button
                 variant={viewMode === 'all' ? 'primary' : 'secondary'}
                 onClick={() => setViewMode('all')}
-                title="All projects" 
+                title="All projects"
               >
                 <GalleryHorizontalEnd className="h-5 w-5" />
               </Button>

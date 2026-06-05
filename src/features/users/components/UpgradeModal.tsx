@@ -60,8 +60,8 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             <h2 className="text-xl font-semibold mb-2">Free plan limit reached</h2>
 
             <p className="text-sm text-base-content/70 mb-6">
-              You have reached the maximum number of projects allowed in your free plan.
-              Upgrade to <strong>Pro</strong> for unlimited projects and premium features.
+              You have reached the maximum number of projects allowed in your free plan. Upgrade to{' '}
+              <strong>Pro</strong> for unlimited projects and premium features.
             </p>
 
             <div className="flex gap-3 justify-center">

@@ -15,7 +15,11 @@ import { useTasksByProjectsQuery } from '../hooks/useTasksQuery'
 import type { ListTaskItemsQuery } from '../types/task.types'
 import { useAuth } from '../../auth/context/AuthContext'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
-import { canCreateTask, getMemberRoleForUser, isProjectManagerRole } from '../../projects/utils/projectPermissions'
+import {
+  canCreateTask,
+  getMemberRoleForUser,
+  isProjectManagerRole,
+} from '../../projects/utils/projectPermissions'
 
 import { Calendar } from 'lucide-react'
 
@@ -112,7 +116,8 @@ export function TasksPage() {
 
     const visibleGroups = filteredGroups
     const hasActiveFilters = !!(filters.searchTerm || filters.taskState || filters.taskPriority)
-    const showInitialLoading = (projectsLoading && !projects) || (groupedTasksLoading && !tasksByProjects)
+    const showInitialLoading =
+      (projectsLoading && !projects) || (groupedTasksLoading && !tasksByProjects)
 
     return (
       <div className="space-y-6">
@@ -122,7 +127,9 @@ export function TasksPage() {
               <div className="badge badge-primary text-primary-content mb-3">Tasks</div>
               <h1 className="text-3xl font-bold tracking-tight">All tasks</h1>
               <p className="max-w-2xl text-base-content/70">
-                Review the tasks available across all projects you can access, if you are admin or coordinator you can see all tasks, if you are a contributor you will see only the tasks assigned to you or unassigned.
+                Review the tasks available across all projects you can access, if you are admin or
+                coordinator you can see all tasks, if you are a contributor you will see only the
+                tasks assigned to you or unassigned.
               </p>
             </div>
             <Button variant="secondary" onClick={() => navigate('/projects')}>

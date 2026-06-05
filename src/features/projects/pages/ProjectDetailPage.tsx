@@ -43,7 +43,10 @@ export function ProjectDetailPage() {
       ownerId: project.ownerId,
       memberRole: getMemberRoleForUser(members, user?.userId),
     })
-  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(members, user?.userId), projectStatus: project?.status })
+  const canCreate = canCreateTask({
+    memberRole: getMemberRoleForUser(members, user?.userId),
+    projectStatus: project?.status,
+  })
   const canManageSprints = canManage && project?.status === 'Active'
   const viewMode =
     searchParams.get('view') === 'calendar'
