@@ -114,7 +114,7 @@ export function ProjectsPage() {
                     onChange={(event) => setStartDateFrom(event.target.value)}
                   />
                   <Input
-                    label="Start to"
+                    label="End to"
                     type="date"
                     value={startDateTo}
                     onChange={(event) => setStartDateTo(event.target.value)}

@@ -1,0 +1,94 @@
+TRANSCRIPCIÓN MICROSOFT TEAMS
+
+Fecha reunión: 14 de julio de 2026
+Participantes: Juanda, Laura, María, Carlos, Sergio
+
+María: Buenos días. Vamos a revisar las tareas pendientes para el próximo sprint.
+
+Laura: El equipo comercial necesita una mejora en los reportes de ventas.
+
+María: Perfecto. Primera tarea.
+
+Tarea: Crear un panel avanzado de reportes de ventas.
+
+Urgencia: Alta.
+
+Responsable: Juanda.
+
+Fecha inicio: 15 de julio de 2026.
+
+Fecha fin: 25 de julio de 2026.
+
+Especificaciones:
+
+* Filtros por región.
+* Filtros por producto.
+* Exportación a Excel.
+* Exportación a PDF.
+* Gráficos interactivos.
+
+Juanda: De acuerdo.
+
+Carlos: También necesitamos resolver algunos problemas de seguridad.
+
+María: Correcto.
+
+Tarea: Corregir vulnerabilidades detectadas en la auditoría de seguridad.
+
+Urgencia: Crítica.
+
+Responsable: Carlos.
+
+Fecha inicio: 14 de julio de 2026.
+
+Fecha fin: 18 de julio de 2026.
+
+Especificaciones:
+
+* Actualizar dependencias.
+* Revisar permisos.
+* Validar autenticación.
+* Ejecutar pruebas de penetración.
+
+Sergio: Hay otra petición relacionada con monitorización.
+
+María: Adelante.
+
+Tarea: Implementar nuevas alertas de infraestructura.
+
+Urgencia: Media.
+
+Responsable: Sergio.
+
+Fecha inicio: 20 de julio de 2026.
+
+Fecha fin: 30 de julio de 2026.
+
+Especificaciones:
+
+* Alertas de CPU.
+* Alertas de memoria.
+* Alertas de base de datos.
+* Notificaciones por Teams.
+
+Laura: También debemos revisar la documentación interna.
+
+María: Sí, pero no es urgente.
+
+Tarea: Actualizar manuales operativos.
+
+Urgencia: Baja.
+
+Responsable: Laura.
+
+Fecha inicio: 1 de agosto de 2026.
+
+Especificaciones:
+
+* Actualizar procedimientos.
+* Revisar capturas de pantalla.
+* Corregir enlaces rotos.
+
+María: La fecha de finalización la definiremos más adelante.
+
+Todos: De acuerdo.

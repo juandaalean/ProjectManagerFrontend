@@ -306,7 +306,7 @@ function SprintsFilters({
             onChange={(event) => onStartFromChange(event.target.value)}
           />
           <Input
-            label="Start to"
+            label="End to"
             type="date"
             value={startTo}
             onChange={(event) => onStartToChange(event.target.value)}
