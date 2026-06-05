@@ -108,6 +108,7 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   const isOwner = !!project && !!user && project.ownerId === user.userId
   const canCreate = canCreateTask({
     memberRole: getMemberRoleForUser(projectMembers, user?.userId),
+    projectStatus: project?.status,
   })
   const projectStartDate = project?.startDate ? toDateOnlyKey(project.startDate) : null
   const projectEndDate = project?.endDate ? toDateOnlyKey(project.endDate) : null
@@ -131,9 +132,9 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
             {isOwner && <div className="badge badge-accent text-accent-content mb-2">Owner</div>}
           </div>
           <h2 className="text-2xl font-bold tracking-tight">{formatMonth(selectedMonth)}</h2>
-          <p className="text-sm text-base-content/70">
+          {/* <p className="text-sm text-base-content/70">
             Tasks are placed on the completion day when available.
-          </p>
+          </p> */}
           {projectStartDate && projectEndDate && (
             <p className="mt-1 text-sm text-base-content/60">
               Project span: {new Date(projectStartDate).toLocaleDateString()} -{' '}
@@ -253,6 +254,7 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
       {createTaskDate && canCreate && (
         <TaskFormModal
           projectId={projectId}
+          initialStartAt={createTaskDate}
           initialCompletedAt={createTaskDate}
           onClose={closeCreateTaskModal}
         />

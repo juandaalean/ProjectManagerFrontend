@@ -43,7 +43,11 @@ export function ProjectDetailPage() {
       ownerId: project.ownerId,
       memberRole: getMemberRoleForUser(members, user?.userId),
     })
-  const canCreate = canCreateTask({ memberRole: getMemberRoleForUser(members, user?.userId) })
+  const canCreate = canCreateTask({
+    memberRole: getMemberRoleForUser(members, user?.userId),
+    projectStatus: project?.status,
+  })
+  const canManageSprints = canManage && project?.status === 'Active'
   const viewMode =
     searchParams.get('view') === 'calendar'
       ? 'calendar'
@@ -55,6 +59,7 @@ export function ProjectDetailPage() {
             ? 'tasks'
             : 'overview'
   const projectStatus = project ? getProjectStatus(project) : 'Active'
+  const demoFile = searchParams.get('demo') ?? undefined
 
   const updateProjectStatus = (status: ProjectStatus) => {
     if (!projectId) {
@@ -77,88 +82,89 @@ export function ProjectDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-box bg-base-100 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="badge badge-primary text-primary-content mb-3">Project detail</div>
-              {canManage && (
-                <div className="badge badge-accent text-accent-content mb-3">Manager</div>
-              )}
-              <div className={`badge mb-3 ${getProjectStatusBadgeClassName(projectStatus)}`}>
-                {getProjectStatusLabel(projectStatus)}
+      {viewMode === 'overview' && (
+        <div className="rounded-box bg-base-100 p-6 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="badge badge-primary text-primary-content mb-3">Project detail</div>
+                {canManage && (
+                  <div className="badge badge-accent text-accent-content mb-3">Manager</div>
+                )}
+                <div className={`badge mb-3 ${getProjectStatusBadgeClassName(projectStatus)}`}>
+                  {getProjectStatusLabel(projectStatus)}
+                </div>
               </div>
+              <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+              {project.description && (
+                <p className="mt-2 max-w-2xl text-base-content/70">{project.description}</p>
+              )}
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-            {project.description && (
-              <p className="mt-2 max-w-2xl text-base-content/70">{project.description}</p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            {canManage && !isProjectArchived(project) && projectStatus !== 'Finished' && (
-              <Button
-                variant="secondary"
-                title="Finish project"
-                onClick={() => updateProjectStatus('Finished')}
-                disabled={updateProjectMutation.isPending}
-              >
-                <SquareCheckBig className="h-5 w-5" />
-                {/* Mark Finished */}
-              </Button>
-            )}
-            {canManage && !isProjectArchived(project) && (
-              <Button
-                variant="secondary"
-                title="Archive project"
-                onClick={() => updateProjectStatus('Archived')}
-                disabled={updateProjectMutation.isPending}
-              >
-                <ArchiveRestore className="h-5 w-5" />
-                {/* Archive */}
-              </Button>
-            )}
-            {canManage && isProjectArchived(project) && (
-              <Button
-                variant="secondary"
-                title="Restore project"
-                onClick={() => updateProjectStatus('Active')}
-                disabled={updateProjectMutation.isPending}
-              >
-                <RotateCcw className="h-5 w-5" />
-                {/* Restore */}
-              </Button>
-            )}
-            {canCreate && (
-              <Button onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}>
-                Add Task
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {canManage && !isProjectArchived(project) && projectStatus !== 'Finished' && (
+                <Button
+                  variant="secondary"
+                  title="Finish project"
+                  onClick={() => updateProjectStatus('Finished')}
+                  disabled={updateProjectMutation.isPending}
+                >
+                  <SquareCheckBig className="h-5 w-5" />
+                  {/* Mark Finished */}
+                </Button>
+              )}
+              {canManage && !isProjectArchived(project) && (
+                <Button
+                  variant="secondary"
+                  title="Archive project"
+                  onClick={() => updateProjectStatus('Archived')}
+                  disabled={updateProjectMutation.isPending}
+                >
+                  <ArchiveRestore className="h-5 w-5" />
+                  {/* Archive */}
+                </Button>
+              )}
+              {canManage && isProjectArchived(project) && (
+                <Button
+                  variant="secondary"
+                  title="Restore project"
+                  onClick={() => updateProjectStatus('Active')}
+                  disabled={updateProjectMutation.isPending}
+                >
+                  <RotateCcw className="h-5 w-5" />
+                  {/* Restore */}
+                </Button>
+              )}
+              {canCreate && (
+                <Button onClick={() => navigate(`/projects/${project.projectId}/tasks?create=1`)}>
+                  Add Task
+                </Button>
+              )}
+            </div>
           </div>
         </div>
+      )}
 
-        {viewMode !== 'overview' && viewMode !== 'sprints' && (
-          <div className="mt-6">
-            <TasksFilterBar projectId={project.projectId} filters={filters} onChange={setFilters} />
-          </div>
-        )}
+      {viewMode !== 'overview' && viewMode !== 'sprints' && (
+        <TasksFilterBar projectId={project.projectId} filters={filters} onChange={setFilters} />
+      )}
 
-        <TranscriptTaskAutomationPanel
-          projectId={project.projectId}
-          projectName={project.name}
-          ownerId={project.ownerId}
-          projectStartDate={project.startDate}
-          projectEndDate={project.endDate}
-          members={members ?? []}
-          enabled={canCreate}
-          autoOpen={viewMode === 'ai'}
-          hideTriggerButton
-          onClose={() => {
-            const newParams = new URLSearchParams(searchParams)
-            newParams.set('view', 'tasks')
-            setSearchParams(newParams)
-          }}
-        />
-      </div>
+      <TranscriptTaskAutomationPanel
+        projectId={project.projectId}
+        projectName={project.name}
+        ownerId={project.ownerId}
+        projectStartDate={project.startDate}
+        projectEndDate={project.endDate}
+        members={members ?? []}
+        enabled={canCreate}
+        autoOpen={viewMode === 'ai'}
+        hideTriggerButton
+        demoFile={demoFile}
+        onClose={() => {
+          const newParams = new URLSearchParams(searchParams)
+          newParams.set('view', 'tasks')
+          setSearchParams(newParams)
+        }}
+      />
 
       {viewMode === 'overview' ? (
         <div className="space-y-6">
@@ -192,7 +198,7 @@ export function ProjectDetailPage() {
           projectId={project.projectId}
           projectStartDate={project.startDate}
           projectEndDate={project.endDate}
-          canManage={canManage}
+          canManage={canManageSprints}
         />
       ) : (
         <ProjectTaskCalendar projectId={project.projectId} tasks={tasks} />

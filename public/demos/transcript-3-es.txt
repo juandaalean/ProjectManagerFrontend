@@ -1,0 +1,91 @@
+TRANSCRIPCIÓN MICROSOFT TEAMS
+
+Fecha reunión: 2 de agosto de 2026
+Participantes: Juanda, Laura, María, Carlos, Sergio
+
+María: Comencemos la reunión.
+
+Carlos: Tenemos varias solicitudes provenientes de clientes empresariales.
+
+María: Perfecto.
+
+Tarea: Implementar autenticación mediante Single Sign-On (SSO).
+
+Urgencia: Crítica.
+
+Responsable: Juanda.
+
+Fecha inicio: 5 de agosto de 2026.
+
+Fecha fin: 20 de agosto de 2026.
+
+Especificaciones:
+
+* Compatibilidad con Azure AD.
+* Compatibilidad con Google Workspace.
+* Registro de auditoría.
+* Gestión de sesiones.
+
+Juanda: Entendido.
+
+Laura: Marketing ha solicitado una mejora para las campañas.
+
+María: Anotado.
+
+Tarea: Crear un sistema de segmentación avanzada de usuarios.
+
+Urgencia: Alta.
+
+Responsable: Laura.
+
+Fecha inicio: 8 de agosto de 2026.
+
+Fecha fin: 28 de agosto de 2026.
+
+Especificaciones:
+
+* Segmentación por país.
+* Segmentación por actividad.
+* Segmentación por plan contratado.
+* Exportación de segmentos.
+
+Sergio: También tenemos pendiente una mejora técnica.
+
+María: Continúa.
+
+Tarea: Migrar el almacenamiento de logs a una nueva infraestructura.
+
+Urgencia: Media.
+
+Responsable: Sergio.
+
+Fecha inicio: 10 de agosto de 2026.
+
+Fecha fin: 31 de agosto de 2026.
+
+Especificaciones:
+
+* Migración sin interrupciones.
+* Retención de 12 meses.
+* Cifrado de datos.
+* Backups automáticos.
+
+Carlos: Hay una tarea menor relacionada con soporte.
+
+María: Adelante.
+
+Tarea: Revisar plantillas automáticas de correo para soporte técnico.
+
+Urgencia: Baja.
+
+Responsable: Carlos.
+
+Especificaciones:
+
+* Corregir textos.
+* Unificar formato.
+* Revisar traducciones.
+
+María: Todavía no tenemos fechas definidas para esta tarea.
+
+Todos: Correcto.

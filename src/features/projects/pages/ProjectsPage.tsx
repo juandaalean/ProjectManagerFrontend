@@ -2,19 +2,36 @@ import { useState } from 'react'
 import { Input } from '../../../shared/ui/Input'
 import { ProjectList } from '../components/ProjectList'
 import { ProjectFormModal } from '../components/ProjectFormModal'
+import { UpgradeModal } from '../../users/components/UpgradeModal'
 import { Button } from '../../../shared/ui/Button'
+import { useAuth } from '../../auth/hooks/useAuth'
+import { useUserStats } from '../../users/hooks/useUserStats'
 import type { Project, ProjectStatus } from '../types/project.types'
 
-import { GalleryHorizontalEnd, CircleAlert, CircleCheck, Archive } from 'lucide-react'
+import { GalleryHorizontalEnd, CircleAlert, CircleCheck, Archive, Lock } from 'lucide-react'
 export function ProjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [viewMode, setViewMode] = useState<'all' | ProjectStatus>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [startDateFrom, setStartDateFrom] = useState('')
   const [startDateTo, setStartDateTo] = useState('')
 
+  const { user } = useAuth()
+  const { data: stats } = useUserStats()
+
+  const plan = user?.plan ?? stats?.plan ?? 'free'
+  const projectLimit = user?.projectLimit ?? stats?.projectLimit ?? 3
+  const projectCount = stats?.projectCount ?? 0
+
+  const isLocked = plan !== 'pro' && projectCount >= projectLimit
+
   const handleCreate = () => {
+    if (isLocked) {
+      setIsUpgradeModalOpen(true)
+      return
+    }
     setEditingProject(null)
     setIsModalOpen(true)
   }
@@ -37,16 +54,16 @@ export function ProjectsPage() {
             <div>
               <div className="badge badge-primary badge-outline mb-3">Projects</div>
               <h1 className="text-3xl font-bold tracking-tight">Project board</h1>
-              <p className="max-w-2xl text-base-content/70">
+              {/* <p className="max-w-2xl text-base-content/70">
                 Create, edit and manage projects from a dashboard layout.
-              </p>
+              </p> */}
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <Button
                 variant={viewMode === 'all' ? 'primary' : 'secondary'}
                 onClick={() => setViewMode('all')}
-                title="All projects" // <--- Esto muestra el texto al pasar el cursor
+                title="All projects"
               >
                 <GalleryHorizontalEnd className="h-5 w-5" />
               </Button>
@@ -71,7 +88,10 @@ export function ProjectsPage() {
               >
                 <Archive className="h-5 w-5" />
               </Button>
-              <Button onClick={handleCreate}>Create Project</Button>
+              <Button onClick={handleCreate} className="gap-2">
+                {isLocked && <Lock className="w-4 h-4" />}
+                Create Project
+              </Button>
             </div>
           </div>
 
@@ -94,7 +114,7 @@ export function ProjectsPage() {
                     onChange={(event) => setStartDateFrom(event.target.value)}
                   />
                   <Input
-                    label="Start to"
+                    label="End to"
                     type="date"
                     value={startDateTo}
                     onChange={(event) => setStartDateTo(event.target.value)}
@@ -121,6 +141,7 @@ export function ProjectsPage() {
       <ProjectList
         onEdit={handleEdit}
         onCreate={handleCreate}
+        isLocked={isLocked}
         filters={{
           searchTerm: searchTerm.trim() || undefined,
           startDateFrom: startDateFrom || undefined,
@@ -130,6 +151,7 @@ export function ProjectsPage() {
       />
 
       <ProjectFormModal isOpen={isModalOpen} onClose={handleCloseModal} project={editingProject} />
+      <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
     </div>
   )
 }

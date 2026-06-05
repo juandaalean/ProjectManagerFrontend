@@ -9,7 +9,7 @@ import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge'
 import { useAuth } from '../../auth/context/AuthContext'
-import { EllipsisVertical } from 'lucide-react'
+import { EllipsisVertical, CalendarRange } from 'lucide-react'
 import {
   canManageProject,
   canToggleTaskState,
@@ -120,6 +120,35 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
                 </div>
                 {task.description && (
                   <p className="mt-2 text-sm text-base-content/70">{task.description}</p>
+                )}
+                {(task.startAt || task.completedAt) && (
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/60">
+                    <span className="inline-flex items-center gap-1.5 font-medium text-base-content/70">
+                      <CalendarRange className="h-3.5 w-3.5" />
+                      Schedule:
+                    </span>
+                    {task.startAt && (
+                      <span>
+                        Start:{' '}
+                        <span className="font-medium text-base-content">
+                          {new Date(task.startAt).toLocaleDateString()}
+                        </span>
+                      </span>
+                    )}
+                    {task.startAt && task.completedAt && (
+                      <span aria-hidden="true" className="text-base-content/30">
+                        ·
+                      </span>
+                    )}
+                    {task.completedAt && (
+                      <span>
+                        End:{' '}
+                        <span className="font-medium text-base-content">
+                          {new Date(task.completedAt).toLocaleDateString()}
+                        </span>
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
               <div className="flex flex-wrap gap-2 lg:justify-end">

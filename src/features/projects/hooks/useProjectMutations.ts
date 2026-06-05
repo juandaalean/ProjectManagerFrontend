@@ -9,6 +9,7 @@ export function useCreateProjectMutation() {
     mutationFn: (project: CreateProjectRequest) => projectsApi.createProject(project),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ['users', 'me', 'stats'] })
     },
   })
 }
@@ -32,6 +33,7 @@ export function useDeleteProjectMutation() {
     mutationFn: (id: string) => projectsApi.deleteProject(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ['users', 'me', 'stats'] })
     },
   })
 }

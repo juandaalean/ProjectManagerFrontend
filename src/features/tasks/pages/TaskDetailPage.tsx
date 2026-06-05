@@ -138,9 +138,29 @@ export function TaskDetailPage() {
               Assigned to: <span className="font-semibold text-base-content">{assigneeName}</span>
             </div>
             <div className="text-sm text-base-content/60">
-              Created: {new Date(task.createdAt).toLocaleDateString()}
+              <span>
+                Created:{' '}
+                <span className="font-medium text-base-content">
+                  {new Date(task.createdAt).toLocaleDateString()}
+                </span>
+              </span>
+              {task.startAt && (
+                <span>
+                  {' '}
+                  · Start:{' '}
+                  <span className="font-medium text-base-content">
+                    {new Date(task.startAt).toLocaleDateString()}
+                  </span>
+                </span>
+              )}
               {task.completedAt && (
-                <> | Deadline: {new Date(task.completedAt).toLocaleDateString()}</>
+                <span>
+                  {' '}
+                  · Deadline:{' '}
+                  <span className="font-medium text-base-content">
+                    {new Date(task.completedAt).toLocaleDateString()}
+                  </span>
+                </span>
               )}
             </div>
           </div>
