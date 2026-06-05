@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext,
+  DragOverlay,
+  useDraggable,
+  useDroppable,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
 import { ErrorState } from '../../../shared/ui/ErrorState'
@@ -13,6 +21,7 @@ import {
 } from '../hooks/useSprintMutations'
 import { useSprintWithTasksQuery } from '../hooks/useSprintsQuery'
 import { useTasksQuery } from '../../tasks/hooks/useTasksQuery'
+import { useUpdateTaskMutation } from '../../tasks/hooks/useTaskMutations'
 import { SprintFormModal } from './SprintFormModal'
 import type { ListSprintsQuery, Sprint, SprintState } from '../types/sprint.types'
 import { SprintStateValues } from '../types/sprint.types'
@@ -22,7 +31,7 @@ import {
   ArrowLeft,
   CalendarRange,
   ChevronRight,
-  Pencil,
+  EllipsisVertical,
   Plus,
   Search,
   Target,
@@ -31,6 +40,8 @@ import {
   X,
 } from 'lucide-react'
 import type { TaskItem } from '../../tasks/types/task.types'
+import type { TaskState } from '../../tasks/types/task.types'
+import type { ProjectMemberDto } from '../../projects/types/project.types'
 
 interface SprintsSectionProps {
   projectId: string
@@ -83,7 +94,7 @@ const formatDateRange = (start?: string, end?: string) => {
 const getKanbanColumn = (task: TaskItem): KanbanColumnId => {
   if (task.state === 'Finished') return 'done'
   if (task.state === 'Canceled') return 'canceled'
-  if (task.completedAt) return 'in-progress'
+  if (task.startAt || task.completedAt) return 'in-progress'
   return 'todo'
 }
 
@@ -196,7 +207,7 @@ export function SprintsSection({
           <ErrorState message={error.message} />
         ) : sprints.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-base-300 bg-base-200/30 p-12 text-center text-sm text-base-content/70">
-            No sprints match the current filters.
+            No sprints found.
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -295,7 +306,7 @@ function SprintsFilters({
             onChange={(event) => onStartFromChange(event.target.value)}
           />
           <Input
-            label="Start to"
+            label="End to"
             type="date"
             value={startTo}
             onChange={(event) => onStartToChange(event.target.value)}
@@ -376,6 +387,8 @@ function SprintBoardView({
   onEditSprint,
 }: SprintBoardViewProps) {
   const [isAssignOpen, setIsAssignOpen] = useState(false)
+  const [activeTask, setActiveTask] = useState<TaskItem | null>(null)
+  const [pendingInProgress, setPendingInProgress] = useState<{ taskId: string } | null>(null)
   const queryClient = useQueryClient()
   const { data: sprintDetail, isLoading } = useSprintWithTasksQuery(projectId, sprintId)
   const { data: members = [] } = useProjectMembersQuery(projectId)
@@ -388,6 +401,7 @@ function SprintBoardView({
   const deleteMutation = useDeleteSprintMutation(projectId)
   const removeMutation = useRemoveTaskFromSprintMutation(projectId)
   const assignMutation = useAssignTaskToSprintMutation(projectId)
+  const updateTaskMutation = useUpdateTaskMutation()
 
   const tasks = useMemo(() => sprintDetail?.tasks ?? [], [sprintDetail?.tasks])
   const tasksByColumn = useMemo(() => {
@@ -422,6 +436,76 @@ function SprintBoardView({
     if (window.confirm(`Delete sprint "${sprint.name}"? This action cannot be undone.`)) {
       deleteMutation.mutate(sprint.sprintId, { onSuccess: onBack })
     }
+  }
+
+  const handleRefreshBoard = () => {
+    queryClient.invalidateQueries({ queryKey: ['sprint-with-tasks', projectId, sprintId] })
+  }
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const task = tasks.find((t) => t.id === event.active.id)
+    if (task) setActiveTask(task)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveTask(null)
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const taskId = active.id as string
+    const targetColumnId = over.id as KanbanColumnId
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    const sourceColumnId = getKanbanColumn(task)
+    if (sourceColumnId === targetColumnId) return
+
+    if (targetColumnId === 'in-progress' && !task.completedAt) {
+      setPendingInProgress({ taskId })
+      return
+    }
+
+    const now = new Date().toISOString()
+
+    let newState: TaskState
+    let newCompletedAt: string | null | undefined
+    let clearCompletedAt: boolean | undefined
+
+    switch (targetColumnId) {
+      case 'todo':
+        newState = 'Active'
+        newCompletedAt = undefined
+        clearCompletedAt = true
+        break
+      case 'in-progress':
+        newState = 'Active'
+        newCompletedAt = now
+        clearCompletedAt = undefined
+        break
+      case 'done':
+        newState = 'Finished'
+        newCompletedAt = now
+        clearCompletedAt = undefined
+        break
+      case 'canceled':
+        newState = 'Canceled'
+        newCompletedAt = undefined
+        clearCompletedAt = true
+        break
+    }
+
+    updateTaskMutation.mutate(
+      {
+        projectId,
+        taskItemId: taskId,
+        task: { state: newState, completedAt: newCompletedAt, clearCompletedAt },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['sprint-with-tasks', projectId, sprintId] })
+        },
+      },
+    )
   }
 
   const handleRemoveTask = (task: TaskItem) => {
@@ -487,24 +571,10 @@ function SprintBoardView({
             <div className="flex flex-wrap items-center gap-2">
               {canManage && (
                 <>
-                  <Button variant="secondary" size="sm" onClick={() => onEditSprint(sprint)}>
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </Button>
                   {sprint.state !== 'Completed' && sprint.state !== 'Canceled' && (
                     <Button variant="primary" size="sm" onClick={() => setIsAssignOpen(true)}>
                       <Plus className="h-4 w-4" />
                       Add tasks
-                    </Button>
-                  )}
-                  {sprint.state !== 'Completed' && sprint.state !== 'Canceled' && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleCloseSprint(sprint)}
-                      disabled={updateMutation.isPending}
-                    >
-                      Close
                     </Button>
                   )}
                   <Button
@@ -516,6 +586,46 @@ function SprintBoardView({
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </Button>
+                  <div className="dropdown dropdown-end">
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-circle btn-sm"
+                      aria-label="Sprint actions"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                      }}
+                    >
+                      <EllipsisVertical className="h-5 w-5" />
+                    </button>
+                    <ul
+                      className="menu dropdown-content menu-sm z-[1] mt-3 w-44 rounded-box bg-base-100 p-2 shadow"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                      }}
+                    >
+                      <li>
+                        <button type="button" onClick={handleRefreshBoard}>
+                          Refresh
+                        </button>
+                      </li>
+                      <li>
+                        <button type="button" onClick={() => onEditSprint(sprint)}>
+                          Edit
+                        </button>
+                      </li>
+                      {sprint.state !== 'Completed' && sprint.state !== 'Canceled' && (
+                        <li>
+                          <button
+                            type="button"
+                            onClick={() => handleCloseSprint(sprint)}
+                            disabled={updateMutation.isPending}
+                          >
+                            End sprint
+                          </button>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
                 </>
               )}
             </div>
@@ -550,19 +660,45 @@ function SprintBoardView({
             </div>
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-4">
-            {KANBAN_COLUMNS.map((col) => (
-              <KanbanColumn
-                key={col.id}
-                title={col.title}
-                accent={col.accent}
-                bg={col.bg}
-                hint={KANBAN_HINT[col.id]}
-                tasks={tasksByColumn[col.id]}
-                onSelectTask={onOpenTask}
-              />
-            ))}
-          </div>
+          <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <div className="grid gap-3 lg:grid-cols-4">
+              {KANBAN_COLUMNS.map((col) => (
+                <KanbanColumn
+                  key={col.id}
+                  columnId={col.id}
+                  title={col.title}
+                  accent={col.accent}
+                  bg={col.bg}
+                  hint={KANBAN_HINT[col.id]}
+                  tasks={tasksByColumn[col.id]}
+                  onSelectTask={onOpenTask}
+                  memberById={memberById}
+                />
+              ))}
+            </div>
+            <DragOverlay>
+              {activeTask ? (
+                <div className="w-72 rounded-lg border border-base-300 bg-base-100 p-2.5 shadow-xl">
+                  <p className="line-clamp-2 text-sm font-semibold text-base-content">
+                    {activeTask.title}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <PriorityChip priority={activeTask.priority} />
+                    {memberById.get(activeTask.assignedUserId)?.userName && (
+                      <span className="text-xs text-base-content/70">
+                        {memberById.get(activeTask.assignedUserId)?.userName}
+                      </span>
+                    )}
+                  </div>
+                  {activeTask.completedAt && (
+                    <div className="mt-1 text-[10px] text-base-content/50">
+                      {new Date(activeTask.completedAt).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         </div>
       </Card>
 
@@ -589,34 +725,86 @@ function SprintBoardView({
         }}
         isAssigning={assignMutation.isPending}
       />
+
+      {pendingInProgress &&
+        (() => {
+          const pendingTask = tasks.find((t) => t.id === pendingInProgress.taskId)
+          if (!pendingTask) return null
+          return (
+            <DueDateModal
+              task={pendingTask}
+              isPending={updateTaskMutation.isPending}
+              maxDate={sprint.endDate}
+              onClose={() => setPendingInProgress(null)}
+              onConfirm={(date) => {
+                updateTaskMutation.mutate(
+                  {
+                    projectId,
+                    taskItemId: pendingInProgress.taskId,
+                    task: { state: 'Active', completedAt: date },
+                  },
+                  {
+                    onSuccess: () => {
+                      queryClient.invalidateQueries({
+                        queryKey: ['sprint-with-tasks', projectId, sprintId],
+                      })
+                      setPendingInProgress(null)
+                    },
+                  },
+                )
+              }}
+            />
+          )
+        })()}
     </>
   )
 }
 
 interface KanbanColumnProps {
+  columnId: KanbanColumnId
   title: string
   accent: string
   bg: string
   hint: string
   tasks: TaskItem[]
   onSelectTask: (task: TaskItem) => void
+  memberById: Map<string, ProjectMemberDto>
 }
 
-function KanbanColumn({ title, accent, bg, hint, tasks, onSelectTask }: KanbanColumnProps) {
+function KanbanColumn({
+  columnId,
+  title,
+  accent,
+  bg,
+  hint,
+  tasks,
+  onSelectTask,
+  memberById,
+}: KanbanColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: columnId })
   return (
-    <div className={`flex min-h-[280px] flex-col rounded-2xl border-t-4 ${accent} ${bg} p-3`}>
+    <div
+      ref={setNodeRef}
+      className={`flex min-h-[280px] flex-col justify-start rounded-2xl border-t-4 p-3 transition-colors ${
+        isOver ? 'border-primary/80 bg-primary/5' : accent + ' ' + bg
+      }`}
+    >
       <div className="mb-1 flex items-center justify-between px-1">
         <h6 className="text-xs font-semibold uppercase tracking-wider">{title}</h6>
         <span className="badge badge-ghost badge-sm">{tasks.length}</span>
       </div>
-      <p className="px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">{hint}</p>
-      <div className="flex-1 space-y-2">
+      <p className="grow-0 px-1 pb-3 text-[10px] uppercase tracking-wide text-base-content/40">
+        {hint}
+      </p>
+      <div className="flex flex-1 flex-col justify-start space-y-2">
         {tasks.length === 0 ? (
           <div className="rounded-lg border border-dashed border-base-300/60 bg-base-100/50 p-4 text-center text-xs text-base-content/40">
             No tasks
           </div>
         ) : (
-          tasks.map((task) => <TaskCard key={task.id} task={task} onSelect={onSelectTask} />)
+          tasks.map((task) => (
+            <TaskCard key={task.id} task={task} onSelect={onSelectTask} memberById={memberById} />
+          ))
         )}
       </div>
     </div>
@@ -626,20 +814,33 @@ function KanbanColumn({ title, accent, bg, hint, tasks, onSelectTask }: KanbanCo
 interface TaskCardProps {
   task: TaskItem
   onSelect: (task: TaskItem) => void
+  memberById: Map<string, ProjectMemberDto>
 }
 
-function TaskCard({ task, onSelect }: TaskCardProps) {
+function TaskCard({ task, onSelect, memberById }: TaskCardProps) {
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: task.id })
+  const assigneeName = memberById.get(task.assignedUserId)?.userName
   return (
     <button
+      ref={setNodeRef}
       type="button"
+      {...listeners}
+      {...attributes}
       onClick={() => onSelect(task)}
-      className="block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-left text-sm transition hover:border-primary/40 hover:shadow-sm"
+      className={`block w-full rounded-lg border border-base-300 bg-base-100 p-2.5 text-left text-sm transition hover:border-primary/40 hover:shadow-sm ${
+        isDragging ? 'opacity-30' : ''
+      }`}
     >
       <p className="line-clamp-2 text-sm font-semibold text-base-content">{task.title}</p>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <PriorityChip priority={task.priority} />
-        <AssigneeChip assigneeId={task.assignedUserId} />
+        {assigneeName && <span className="text-xs text-base-content/70">{assigneeName}</span>}
       </div>
+      {task.completedAt && (
+        <div className="mt-1 text-[10px] text-base-content/50">
+          {new Date(task.completedAt).toLocaleDateString()}
+        </div>
+      )}
     </button>
   )
 }
@@ -656,18 +857,6 @@ function PriorityChip({ priority }: { priority: TaskItem['priority'] }) {
   return (
     <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${className}`}>
       {priority}
-    </span>
-  )
-}
-
-function AssigneeChip({ assigneeId }: { assigneeId: string }) {
-  const initials = assigneeId.slice(0, 2).toUpperCase()
-  return (
-    <span
-      className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary"
-      title={`Assignee: ${assigneeId}`}
-    >
-      {initials}
     </span>
   )
 }
@@ -738,6 +927,7 @@ function TaskDrawer({
               <PriorityChip priority={task.priority} />
             </Field>
             <Field label="Assignee">{memberName ?? task.assignedUserId}</Field>
+            <Field label="Start date">{formatDate(task.startAt)}</Field>
             <Field label="Due date">{formatDate(task.completedAt)}</Field>
           </section>
 
@@ -950,6 +1140,75 @@ function AddTasksModal({
                 : `Add ${selectedIds.size || ''} task${selectedIds.size === 1 ? '' : 's'}`}
             </Button>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface DueDateModalProps {
+  task: TaskItem
+  isPending: boolean
+  maxDate?: string
+  onClose: () => void
+  onConfirm: (dateIso: string) => void
+}
+
+function DueDateModal({ task, isPending, maxDate, onClose, onConfirm }: DueDateModalProps) {
+  const today = new Date().toISOString().slice(0, 10)
+  const sprintEnd = maxDate ? new Date(maxDate).toISOString().slice(0, 10) : ''
+  const [date, setDate] = useState(today)
+
+  function handleConfirm() {
+    if (!date) return
+    onConfirm(new Date(`${date}T00:00:00`).toISOString())
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={isPending ? undefined : onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="flex w-full max-w-md flex-col rounded-2xl bg-base-100 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-base-300 px-5 py-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+              In progress
+            </p>
+            <h3 className="text-lg font-semibold">Set a due date</h3>
+          </div>
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={isPending}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="space-y-3 px-5 py-4">
+          <p className="text-sm text-base-content/70">
+            The task <span className="font-semibold text-base-content">"{task.title}"</span> has no
+            due date. Pick a date manually to move it to <strong>In progress</strong>.
+          </p>
+          <Input
+            label="Due date"
+            type="date"
+            value={date}
+            max={sprintEnd}
+            onChange={(event) => setDate(event.target.value)}
+            icon={<CalendarRange className="h-4 w-4" />}
+          />
+        </div>
+
+        <div className="flex items-center justify-end gap-2 border-t border-base-300 px-5 py-4">
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={isPending}>
+            Cancel
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleConfirm} disabled={!date || isPending}>
+            {isPending ? 'Saving…' : 'Move to In progress'}
+          </Button>
         </div>
       </div>
     </div>

@@ -28,7 +28,9 @@ type ApiTaskItem = {
   projectId: string
   assignedUserId: string
   createdAt?: string
+  startAt?: string | null
   completedAt?: string | null
+  sprintId?: string | null
 }
 
 type ApiSprintTasksResponse = ApiTaskItem[] | { tasks?: ApiTaskItem[]; taskItems?: ApiTaskItem[] }
@@ -81,7 +83,9 @@ const mapTask = (task: ApiTaskItem): TaskItem => {
     projectId: task.projectId,
     assignedUserId: task.assignedUserId,
     createdAt: task.createdAt ?? '',
+    startAt: task.startAt ?? null,
     completedAt: task.completedAt ?? null,
+    sprintId: task.sprintId ?? null,
   }
 }
 

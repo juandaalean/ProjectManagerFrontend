@@ -1,0 +1,44 @@
+MICROSOFT TEAMS TRANSCRIPT
+
+Meeting Date: August 2, 2026
+Participants: Juanda, Laura, Maria, Carlos, Sergio
+
+Task: Implement Single Sign-On (SSO) authentication.
+
+Urgency: Critical.
+
+Assigned To: Juanda.
+
+Start Date: August 5, 2026.
+
+Due Date: August 20, 2026.
+
+Task: Create an advanced user segmentation system.
+
+Urgency: High.
+
+Assigned To: Laura.
+
+Start Date: August 8, 2026.
+
+Due Date: August 28, 2026.
+
+Task: Migrate log storage to a new infrastructure.
+
+Urgency: Medium.
+
+Assigned To: Sergio.
+
+Start Date: August 10, 2026.
+
+Due Date: August 31, 2026.
+
+Task: Review automated support email templates.
+
+Urgency: Low.
+
+Assigned To: Carlos.
+
+Start Date: Not defined.
+
+Due Date: Not defined.

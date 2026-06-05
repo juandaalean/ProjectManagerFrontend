@@ -42,6 +42,7 @@ export function canToggleTaskState(params: {
   )
 }
 
-export function canCreateTask(params: { memberRole?: number }) {
+export function canCreateTask(params: { memberRole?: number; projectStatus?: string | null }) {
+  if (params.projectStatus && params.projectStatus !== 'Active') return false
   return isProjectManagerRole(params.memberRole)
 }

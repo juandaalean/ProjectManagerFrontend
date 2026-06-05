@@ -18,6 +18,7 @@ interface TaskFormModalProps {
   task?: TaskItem
   projectId?: string
   initialCompletedAt?: string
+  initialStartAt?: string
   onClose: () => void
 }
 
@@ -25,6 +26,7 @@ export function TaskFormModal({
   task,
   projectId,
   initialCompletedAt,
+  initialStartAt,
   onClose,
 }: TaskFormModalProps) {
   const isEditing = !!task
@@ -39,7 +41,9 @@ export function TaskFormModal({
     error: projectMembersError,
   } = useProjectMembersQuery(resolvedProjectId)
   const currentUserMemberRole = getMemberRoleForUser(projectMembers, user?.userId)
-  const canCreate = isEditing || canCreateTask({ memberRole: currentUserMemberRole })
+  const canCreate =
+    isEditing ||
+    canCreateTask({ memberRole: currentUserMemberRole, projectStatus: project?.status })
   const taskSchema = useMemo(
     () =>
       isEditing
@@ -73,11 +77,13 @@ export function TaskFormModal({
           priority: task.priority,
           state: task.state,
           assignedUserId: task.assignedUserId,
+          startAt: task.startAt ? task.startAt.split('T')[0] : '',
           completedAt: task.completedAt ? task.completedAt.split('T')[0] : '',
         }
       : {
           priority: 'Medium',
           assignedUserId: '',
+          startAt: initialStartAt ?? '',
           completedAt: initialCompletedAt ?? '',
         },
   })
@@ -108,19 +114,42 @@ export function TaskFormModal({
   }, [getValues, isEditing, isMembersLoading, projectMembers, setValue, user?.userId])
 
   const assignedUserId = watch('assignedUserId')
+  const startAtValue = watch('startAt')
+  const completedAtValue = watch('completedAt')
 
   const onSubmit = (data: CreateTaskFormData | UpdateTaskFormData) => {
     if (isEditing && task) {
       const updateData = data as UpdateTaskFormData
+      const { startAt, completedAt, sprintId, clearStartAt, clearCompletedAt, clearSprint } =
+        updateData
+      const nextStartAt = clearStartAt
+        ? null
+        : startAt
+          ? new Date(`${startAt}T00:00:00.000Z`).toISOString()
+          : undefined
+      const nextCompletedAt = clearCompletedAt
+        ? null
+        : completedAt
+          ? new Date(`${completedAt}T00:00:00.000Z`).toISOString()
+          : undefined
+      const nextSprintId = clearSprint
+        ? null
+        : sprintId && sprintId.length > 0
+          ? sprintId
+          : undefined
+
       updateMutation.mutate(
         {
           projectId: task.projectId,
           taskItemId: task.id,
           task: {
             ...updateData,
-            completedAt: updateData.completedAt
-              ? new Date(`${updateData.completedAt}T00:00:00.000Z`).toISOString()
-              : undefined,
+            startAt: nextStartAt,
+            completedAt: nextCompletedAt,
+            sprintId: nextSprintId,
+            clearStartAt: clearStartAt || undefined,
+            clearCompletedAt: clearCompletedAt || undefined,
+            clearSprint: clearSprint || undefined,
           } as UpdateTaskRequest,
         },
         {
@@ -138,15 +167,22 @@ export function TaskFormModal({
         return
       }
       const createData = data as CreateTaskFormData
+      const startAtIso = createData.startAt
+        ? new Date(`${createData.startAt}T00:00:00.000Z`).toISOString()
+        : undefined
       const completedAt = createData.completedAt
         ? new Date(`${createData.completedAt}T00:00:00.000Z`).toISOString()
         : undefined
+      const sprintId =
+        createData.sprintId && createData.sprintId.length > 0 ? createData.sprintId : undefined
       createMutation.mutate(
         {
           projectId: resolvedProjectId,
           task: {
             ...createData,
+            startAt: startAtIso,
             completedAt,
+            sprintId,
           } as CreateTaskRequest,
         },
         {
@@ -252,9 +288,29 @@ export function TaskFormModal({
               ) : null}
             </div>
             <Input
-              label="Completed At"
+              label="Start At"
               type="date"
               min={projectStartDate}
+              max={
+                projectEndDate && completedAtValue
+                  ? completedAtValue < projectEndDate
+                    ? completedAtValue
+                    : projectEndDate
+                  : projectEndDate
+              }
+              {...register('startAt')}
+              error={errors.startAt?.message}
+            />
+            <Input
+              label="Completed At"
+              type="date"
+              min={
+                projectStartDate && startAtValue
+                  ? startAtValue > projectStartDate
+                    ? startAtValue
+                    : projectStartDate
+                  : projectStartDate
+              }
               max={projectEndDate}
               {...register('completedAt')}
               error={errors.completedAt?.message}

@@ -16,6 +16,7 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
   const { data: members = [] } = useProjectMembersQuery(projectId)
   const { data: sprints = [] } = useSprintsQuery(projectId)
   const [searchInput, setSearchInput] = useState(filters.searchTerm ?? '')
+  const [prevSearchTerm, setPrevSearchTerm] = useState(filters.searchTerm ?? '')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const filtersRef = useRef(filters)
   const onChangeRef = useRef(onChange)
@@ -38,13 +39,9 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
 
   const collapseOpen = userCollapseOverride ?? hasActiveFilters
 
-  // Keep the local search input in sync when the parent resets the search
-  // (e.g. via "Clear filters"). Doing it during render avoids the
-  // setState-in-effect cascading render warning.
-  if (filters.searchTerm !== undefined && filters.searchTerm !== searchInput) {
-    setSearchInput(filters.searchTerm)
-  } else if (filters.searchTerm === undefined && searchInput !== '') {
-    setSearchInput('')
+  if (filters.searchTerm !== prevSearchTerm) {
+    setPrevSearchTerm(filters.searchTerm ?? '')
+    setSearchInput(filters.searchTerm ?? '')
   }
 
   useEffect(() => {

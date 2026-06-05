@@ -17,7 +17,9 @@ type ApiTask = {
   projectId: string
   assignedUserId: string
   createdAt?: string
+  startAt?: string | null
   completedAt?: string | null
+  sprintId?: string | null
 }
 
 type ApiProjectTaskItemsGroup = {
@@ -39,7 +41,9 @@ const mapTask = (task: ApiTask): TaskItem => ({
   projectId: task.projectId,
   assignedUserId: task.assignedUserId,
   createdAt: task.createdAt ?? '',
+  startAt: task.startAt ?? null,
   completedAt: task.completedAt ?? null,
+  sprintId: task.sprintId ?? null,
 })
 
 const mapProjectTaskItemsGroup = (group: ApiProjectTaskItemsGroup): ProjectTaskItemsGroup => ({
@@ -55,7 +59,9 @@ const mapCreateTaskRequest = (task: CreateTaskRequest) => ({
   taskPriority: taskPriorityMap.indexOf(task.priority),
   taskState:
     task.state !== undefined ? taskStateMap.indexOf(task.state) : taskStateMap.indexOf('Active'),
+  startAt: task.startAt ?? null,
   completedAt: task.completedAt ?? null,
+  sprintId: task.sprintId ?? null,
 })
 
 const mapUpdateTaskRequest = (task: UpdateTaskRequest) => ({
@@ -64,7 +70,12 @@ const mapUpdateTaskRequest = (task: UpdateTaskRequest) => ({
   ...(task.state !== undefined && { taskState: taskStateMap.indexOf(task.state) }),
   ...(task.priority !== undefined && { taskPriority: taskPriorityMap.indexOf(task.priority) }),
   ...(task.createdAt !== undefined && { createdAt: task.createdAt }),
+  ...(task.startAt !== undefined && { startAt: task.startAt }),
   ...(task.completedAt !== undefined && { completedAt: task.completedAt }),
+  ...(task.sprintId !== undefined && { sprintId: task.sprintId }),
+  ...(task.clearStartAt !== undefined && { clearStartAt: task.clearStartAt }),
+  ...(task.clearCompletedAt !== undefined && { clearCompletedAt: task.clearCompletedAt }),
+  ...(task.clearSprint !== undefined && { clearSprint: task.clearSprint }),
 })
 
 const mapAssignTaskItemRequest = (payload: AssignTaskItemRequest) => ({
