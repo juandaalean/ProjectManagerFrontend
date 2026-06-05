@@ -16,6 +16,7 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
   const { data: members = [] } = useProjectMembersQuery(projectId)
   const { data: sprints = [] } = useSprintsQuery(projectId)
   const [searchInput, setSearchInput] = useState(filters.searchTerm ?? '')
+  const [prevSearchTerm, setPrevSearchTerm] = useState(filters.searchTerm ?? '')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const filtersRef = useRef(filters)
   const onChangeRef = useRef(onChange)
@@ -38,9 +39,10 @@ export function TasksFilterBar({ projectId, filters, onChange }: TasksFilterBarP
 
   const collapseOpen = userCollapseOverride ?? hasActiveFilters
 
-  useEffect(() => {
+  if (filters.searchTerm !== prevSearchTerm) {
+    setPrevSearchTerm(filters.searchTerm ?? '')
     setSearchInput(filters.searchTerm ?? '')
-  }, [filters.searchTerm])
+  }
 
   useEffect(() => {
     if (debounceRef.current) {
