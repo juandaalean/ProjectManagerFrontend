@@ -1,53 +1,167 @@
-# Microsoft Teams Transcript
+# **Meeting Transcript**
 
-**Meeting Date:** September 10, 2026
+**Date:** June 2, 2026
 
-**Participants:** Juanda, Laura, Maria, Carlos, Sergio
+**Participants:** Juanda, Laura, María, Carlos, Sergio
 
-## Task 1
+**María:** Good morning, everyone. Let's review the objectives for the coming weeks and assign the remaining tasks.
 
-**Title:** Subscription Management Module
+**Carlos:** Before we start, I wanted to mention that last week's deployment was quite stable. We barely had any incidents.
 
-**Urgency:** High
+**Sergio:** Yes, except for a few latency spikes we observed for a couple of hours on Friday.
 
-**Assigned To:** Juanda
+**María:** Great. Let's begin with the pending items.
 
-**Start Date:** September 15, 2026
+---
 
-**Due Date:** October 5, 2026
+**Laura:** The first one is related to the customer portal. We've received several requests for users to be able to reset their passwords without having to contact support.
 
-## Task 2
+**María:** That's an important feature.
 
-**Title:** Database Query Optimization
+**Carlos:** It will also significantly reduce the workload for the customer support team.
 
-**Urgency:** Critical
+**María:** Agreed. Let's create a new task.
 
-**Assigned To:** Carlos
+**María:** Task: **Develop a password recovery system for registered users.**
 
-**Start Date:** September 11, 2026
+**María:** The priority for this task will be **High**.
 
-**Due Date:** September 20, 2026
+**María:** The requirements are:
 
-## Task 3
+* Add a "Forgot your password?" option to the login screen.
+* Send a recovery email containing a reset link.
+* Generate secure tokens with a 30-minute expiration time.
+* Allow users to set a new password.
+* Log recovery attempts in the audit system.
 
-**Title:** Customer Help Center Redesign
+**María:** This task is assigned to **Juanda**.
 
-**Urgency:** Medium
+**Juanda:** Perfect, I'll take care of it.
 
-**Assigned To:** Laura
+**María:** The deadline will be **June 10, 2026**.
 
-**Start Date:** September 18, 2026
+---
 
-**Due Date:** October 10, 2026
+**Sergio:** The next topic is more urgent. We've detected that some financial reports take too long to generate when they contain large volumes of data.
 
-## Task 4
+**Carlos:** In some cases, the execution time exceeds two minutes.
 
-**Title:** Backup Policy Review
+**Laura:** That's causing complaints from several customers.
 
-**Urgency:** Low
+**María:** Then we need to act as soon as possible.
 
-**Assigned To:** Sergio
+**María:** Task: **Optimize the performance of the financial reporting module.**
 
-**Start Date:** To be defined
+**María:** The priority will be **Critical**.
 
-**Due Date:** To be defined
+**María:** Specifications:
+
+* Analyze slow database queries.
+* Review indexes and optimize SQL queries.
+* Reduce the average generation time to under 20 seconds.
+* Perform load testing.
+* Document the implemented improvements.
+
+**María:** Assignee: **Carlos**.
+
+**Carlos:** Understood.
+
+**María:** Deadline: **June 6, 2026, at 6:00 PM**.
+
+---
+
+**Laura:** Another pending item concerns the mobile application.
+
+**Sergio:** Yes, we've been discussing improvements to push notifications for quite some time.
+
+**María:** Correct.
+
+**María:** Task: **Implement an advanced push notification system in the mobile application.**
+
+**María:** The priority will be **Medium**.
+
+**María:** Requirements:
+
+* Allow notifications to be segmented by user type.
+* Configure scheduled deliveries.
+* Display a history of sent notifications.
+* Add basic open-rate metrics.
+* Ensure compatibility with both Android and iOS.
+
+**María:** This task will be assigned to **Laura**.
+
+**Laura:** Sounds good.
+
+**María:** Deadline: **June 24, 2026**.
+
+---
+
+**Carlos:** We also still need to work on the documentation for the integrations project.
+
+**Juanda:** That's true. Some of the new team members are having difficulties understanding the current architecture.
+
+**María:** Let's add another task.
+
+**María:** Task: **Update the technical documentation for the external integrations system.**
+
+**María:** Priority: **Low**.
+
+**María:** It should include:
+
+* Updated architecture diagrams.
+* Descriptions of services and dependencies.
+* Deployment guides.
+* Configuration examples.
+* Disaster recovery procedures.
+
+**María:** Assignee: **Sergio**.
+
+**Sergio:** No problem.
+
+**María:** Deadline: **June 30, 2026**.
+
+---
+
+**Laura:** There's one final topic related to analytics.
+
+**Carlos:** The sales department wants access to real-time metrics.
+
+**María:** Then let's create a new task.
+
+**María:** Task: **Develop a real-time analytics dashboard for the sales department.**
+
+**María:** The priority will be **High**.
+
+**María:** Specifications:
+
+* Display daily, weekly, and monthly sales figures.
+* Include filters by region and product.
+* Refresh data every minute.
+* Support export to Excel and PDF.
+* Implement interactive trend charts.
+
+**María:** Assignee: **Juanda**.
+
+**Juanda:** Perfect.
+
+**María:** Deadline: **June 20, 2026**.
+
+---
+
+**Sergio:** Are there any dependencies between the analytics dashboard and the notifications project?
+
+**Juanda:** Not directly, although both will consume part of the same API.
+
+**Carlos:** We'll keep that in mind during testing.
+
+**María:** Great. Then we'll wrap up the meeting.
+
+**María:** Final summary:
+
+* Password recovery → High Priority → Juanda.
+* Financial report optimization → Critical Priority → Carlos.
+* Push notifications → Medium Priority → Laura.
+* Integrations documentation → Low Priority → Sergio.
+* Real-time analytics dashboard → High Priority → Juanda.
+
+**Everyone:** Agreed.

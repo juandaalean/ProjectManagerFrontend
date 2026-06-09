@@ -9,7 +9,7 @@ import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge'
 import { useAuth } from '../../auth/context/AuthContext'
-import { EllipsisVertical, CalendarRange } from 'lucide-react'
+import { EllipsisVertical, CalendarRange, Check, RotateCcw, Ban } from 'lucide-react'
 import {
   canManageProject,
   canToggleTaskState,
@@ -71,6 +71,16 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
       projectId: taskProjectId,
       taskItemId: task.id,
       task: { state: newState },
+    })
+  }
+
+  const handleCancelTask = (task: TaskItem) => {
+    const taskProjectId = task.projectId || projectId
+    if (!taskProjectId || !canManage || task.state === 'Canceled') return
+    updateMutation.mutate({
+      projectId: taskProjectId,
+      taskItemId: task.id,
+      task: { state: 'Canceled', clearCompletedAt: true },
     })
   }
 
@@ -159,14 +169,34 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
                   memberRole: getMemberRoleForUser(projectMembers, user?.userId),
                 }) && (
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     size="sm"
+                    aria-label={task.state === 'Active' ? 'Mark as finished' : 'Mark as active'}
+                    title={task.state === 'Active' ? 'Mark as finished' : 'Mark as active'}
                     onClick={(event) => {
                       event.stopPropagation()
                       handleToggleState(task)
                     }}
                   >
-                    {task.state === 'Active' ? 'Mark Finished' : 'Mark Active'}
+                    {task.state === 'Active' ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <RotateCcw className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+                {canManage && task.state !== 'Canceled' && (
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    aria-label="Cancel task"
+                    title="Cancel task"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      handleCancelTask(task)
+                    }}
+                  >
+                    <Ban className="h-4 w-4" />
                   </Button>
                 )}
                 {canManage && (
