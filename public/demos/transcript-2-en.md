@@ -28,11 +28,11 @@
 
 **María:** The requirements are:
 
-* Add a "Forgot your password?" option to the login screen.
-* Send a recovery email containing a reset link.
-* Generate secure tokens with a 30-minute expiration time.
-* Allow users to set a new password.
-* Log recovery attempts in the audit system.
+- Add a "Forgot your password?" option to the login screen.
+- Send a recovery email containing a reset link.
+- Generate secure tokens with a 30-minute expiration time.
+- Allow users to set a new password.
+- Log recovery attempts in the audit system.
 
 **María:** This task is assigned to **Juanda**.
 
@@ -56,11 +56,11 @@
 
 **María:** Specifications:
 
-* Analyze slow database queries.
-* Review indexes and optimize SQL queries.
-* Reduce the average generation time to under 20 seconds.
-* Perform load testing.
-* Document the implemented improvements.
+- Analyze slow database queries.
+- Review indexes and optimize SQL queries.
+- Reduce the average generation time to under 20 seconds.
+- Perform load testing.
+- Document the implemented improvements.
 
 **María:** Assignee: **Carlos**.
 
@@ -82,11 +82,11 @@
 
 **María:** Requirements:
 
-* Allow notifications to be segmented by user type.
-* Configure scheduled deliveries.
-* Display a history of sent notifications.
-* Add basic open-rate metrics.
-* Ensure compatibility with both Android and iOS.
+- Allow notifications to be segmented by user type.
+- Configure scheduled deliveries.
+- Display a history of sent notifications.
+- Add basic open-rate metrics.
+- Ensure compatibility with both Android and iOS.
 
 **María:** This task will be assigned to **Laura**.
 
@@ -108,11 +108,11 @@
 
 **María:** It should include:
 
-* Updated architecture diagrams.
-* Descriptions of services and dependencies.
-* Deployment guides.
-* Configuration examples.
-* Disaster recovery procedures.
+- Updated architecture diagrams.
+- Descriptions of services and dependencies.
+- Deployment guides.
+- Configuration examples.
+- Disaster recovery procedures.
 
 **María:** Assignee: **Sergio**.
 
@@ -134,11 +134,11 @@
 
 **María:** Specifications:
 
-* Display daily, weekly, and monthly sales figures.
-* Include filters by region and product.
-* Refresh data every minute.
-* Support export to Excel and PDF.
-* Implement interactive trend charts.
+- Display daily, weekly, and monthly sales figures.
+- Include filters by region and product.
+- Refresh data every minute.
+- Support export to Excel and PDF.
+- Implement interactive trend charts.
 
 **María:** Assignee: **Juanda**.
 
@@ -158,10 +158,10 @@
 
 **María:** Final summary:
 
-* Password recovery → High Priority → Juanda.
-* Financial report optimization → Critical Priority → Carlos.
-* Push notifications → Medium Priority → Laura.
-* Integrations documentation → Low Priority → Sergio.
-* Real-time analytics dashboard → High Priority → Juanda.
+- Password recovery → High Priority → Juanda.
+- Financial report optimization → Critical Priority → Carlos.
+- Push notifications → Medium Priority → Laura.
+- Integrations documentation → Low Priority → Sergio.
+- Real-time analytics dashboard → High Priority → Juanda.
 
 **Everyone:** Agreed.
