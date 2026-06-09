@@ -1,44 +1,103 @@
 MICROSOFT TEAMS TRANSCRIPT
 
 Meeting Date: August 2, 2026
-Participants: Juanda, Laura, Maria, Carlos, Sergio
+Participants: Juanda, Laura, María, Carlos, Sergio
 
-Task: Implement Single Sign-On (SSO) authentication.
+María: Let's begin the meeting.
+
+Carlos: We have several requests from enterprise clients.
+
+María: Perfect.
+
+Task: Implement authentication using Single Sign-On (SSO).
 
 Urgency: Critical.
 
-Assigned To: Juanda.
+Responsible: Juanda.
 
 Start Date: August 5, 2026.
 
-Due Date: August 20, 2026.
+End Date: August 20, 2026.
+
+Specifications:
+
+* Azure AD compatibility.
+
+* Google Workspace compatibility.
+
+* Audit logging.
+
+* Session management.
+
+Juanda: Understood.
+
+Laura: Marketing has requested an improvement for campaigns.
+
+María: Noted.
 
 Task: Create an advanced user segmentation system.
 
 Urgency: High.
 
-Assigned To: Laura.
+Responsible: Laura
 
-Start Date: August 8, 2026.
+Start Date: August 8, 2026
 
-Due Date: August 28, 2026.
+End Date: August 28, 2026
 
-Task: Migrate log storage to a new infrastructure.
+Specifications:
 
-Urgency: Medium.
+* Segmentation by country
 
-Assigned To: Sergio.
+* Segmentation by activity
 
-Start Date: August 10, 2026.
+* Segmentation by contracted plan
 
-Due Date: August 31, 2026.
+* Export of segments
 
-Task: Review automated support email templates.
+Sergio: We also have a pending technical improvement.
+
+María: Continue.
+
+Task: Migrate log storage to a new infrastructure
+
+Urgency: Medium
+
+Responsible: Sergio
+
+Start Date: August 10, 2026
+
+End Date: August 31, 2026
+
+Specifications:
+
+* Seamless migration
+
+* 12-month retention
+
+* Data encryption
+
+* Automatic backups
+
+Carlos: There's a minor support-related task.
+
+María: Go ahead.
+
+
+Task: Review automated email templates for technical support.
 
 Urgency: Low.
 
-Assigned To: Carlos.
+Responsible: Carlos.
 
-Start Date: Not defined.
+Specifications:
 
-Due Date: Not defined.
+* Proofread texts.
+
+* Standardize formatting.
+
+* Review translations.
+
+Maria: We don't have any dates set for this task yet.
+
+All: Correct.

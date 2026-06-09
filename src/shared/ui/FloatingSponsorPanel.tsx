@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-const GITHUB_URL = 'https://github.com'
-const LINKEDIN_URL = 'https://linkedin.com'
+const GITHUB_URL = 'https://github.com/juandaalean'
+const LINKEDIN_URL = 'https://www.linkedin.com/in/juanda-alean-medina'
 const APP_VERSION = 'v1.1.2'
 
 function GitHubIcon({ className }: { className?: string }) {
