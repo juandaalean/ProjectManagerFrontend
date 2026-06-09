@@ -1,59 +1,106 @@
 MICROSOFT TEAMS TRANSCRIPT
 
 Meeting Date: July 14, 2026
-Participants: Juanda, Laura, Maria, Carlos, Sergio
+Participants: Juanda, Laura, María, Carlos, Sergio
+
+María: Good morning. Let's review the pending tasks for the next sprint.
+
+Laura: The sales team needs an improvement to their sales reports.
+
+María: Perfect. First task.
 
 Task: Create an advanced sales reporting dashboard.
 
 Urgency: High.
 
-Assigned To: Juanda.
+Responsible: Juanda.
 
 Start Date: July 15, 2026.
 
-Due Date: July 25, 2026.
+End Date: July 25, 2026.
 
-Requirements:
+Specifications:
 
-* Region filters.
-* Product filters.
-* Excel export.
-* PDF export.
+* Filters by region.
+
+* Filters by product.
+
+* Export to Excel.
+
+* Export to PDF.
+
 * Interactive charts.
 
-Task: Fix security vulnerabilities detected during the security audit.
+Juanda: Okay.
+
+Carlos: We also need to resolve some security issues.
+
+María: Correct.
+
+Task: Fix vulnerabilities identified in the security audit.
 
 Urgency: Critical.
 
-Assigned To: Carlos.
+Responsible: Carlos.
 
 Start Date: July 14, 2026.
 
-Due Date: July 18, 2026.
+End Date: July 18, 2026.
 
-Requirements:
+Specifications:
 
 * Update dependencies.
-* Review permissions.
-* Validate authentication.
-* Execute penetration tests.
 
-Task: Implement new infrastructure monitoring alerts.
+* Review permissions.
+
+* Validate authentication.
+
+* Run penetration tests.
+
+Sergio: There's another request related to monitoring.
+
+María: Go ahead.
+
+Task: Implement new infrastructure alerts.
 
 Urgency: Medium.
 
-Assigned To: Sergio.
+Responsible: Sergio.
 
 Start Date: July 20, 2026.
 
-Due Date: July 30, 2026.
+End Date: July 30, 2026.
 
-Task: Update operational manuals.
+Specifications:
+
+* CPU alerts.
+
+* Memory alerts.
+
+* Database alerts.
+
+* Notifications via Teams.
+
+Laura: We also need to review the internal documentation.
+
+Maria: Yes, but it's not urgent.
+
+Task: Update operating manuals.
 
 Urgency: Low.
 
-Assigned To: Laura.
+Responsible: Laura.
 
-Start Date: August 1, 2026.
+Start date: August 1, 2026.
 
-Due Date: To be defined.
+Specifications:
+
+* Update procedures.
+
+* Review screenshots.
+
+* Fix broken links.
+
+Maria: We'll define the end date later.
+
+All: Agreed.
