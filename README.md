@@ -19,20 +19,20 @@ Url: https://project-manager-frontend-virid.vercel.app/
 
 ## Tech Stack
 
-| Layer            | Technology                                                          |
-| ---------------- | ------------------------------------------------------------------- |
-| Framework        | React 19 + TypeScript (strict)                                      |
-| Build tool       | Vite                                                                |
-| Routing          | React Router v7                                                     |
-| Server state     | TanStack Query v5                                                   |
-| HTTP client      | Axios (centralized interceptors)                                    |
-| Forms & schema   | React Hook Form + Zod (`@hookform/resolvers`)                       |
-| Styling          | Tailwind CSS v4 + DaisyUI                                           |
-| Drag and drop    | `@dnd-kit/core`                                                     |
-| On-device LLM    | `@mlc-ai/web-llm` (default: `Phi-3.5-mini-instruct-q4f16_1-MLC` via WebGPU) |
-| Icons / FX       | `lucide-react`, `canvas-confetti`                                   |
-| Testing          | Vitest                                                              |
-| Quality          | ESLint + Prettier + `tsc -b`                                        |
+| Layer          | Technology                                                                  |
+| -------------- | --------------------------------------------------------------------------- |
+| Framework      | React 19 + TypeScript (strict)                                              |
+| Build tool     | Vite                                                                        |
+| Routing        | React Router v7                                                             |
+| Server state   | TanStack Query v5                                                           |
+| HTTP client    | Axios (centralized interceptors)                                            |
+| Forms & schema | React Hook Form + Zod (`@hookform/resolvers`)                               |
+| Styling        | Tailwind CSS v4 + DaisyUI                                                   |
+| Drag and drop  | `@dnd-kit/core`                                                             |
+| On-device LLM  | `@mlc-ai/web-llm` (default: `Phi-3.5-mini-instruct-q4f16_1-MLC` via WebGPU) |
+| Icons / FX     | `lucide-react`, `canvas-confetti`                                           |
+| Testing        | Vitest                                                                      |
+| Quality        | ESLint + Prettier + `tsc -b`                                                |
 
 ## Architecture
 
@@ -167,11 +167,11 @@ TaskDraftForCreation[] -> review modal -> user confirms -> backend
 
 **Models.** The user picks one of four WebLLM models from an in-app selector. All run locally through WebGPU; no transcript ever leaves the browser.
 
-| Tier   | Model                                  | Approx. size |
-| ------ | -------------------------------------- | ------------ |
-| small  | `Qwen2.5-1.5B-Instruct-q4f16_1-MLC`    | ~1.0 GB      |
-| small  | `Llama-3.2-1B-Instruct-q4f16_1-MLC`    | ~0.8 GB      |
-| small  | `gemma-2-2b-it-q4f16_1-MLC`            | ~1.6 GB      |
+| Tier   | Model                                         | Approx. size |
+| ------ | --------------------------------------------- | ------------ |
+| small  | `Qwen2.5-1.5B-Instruct-q4f16_1-MLC`           | ~1.0 GB      |
+| small  | `Llama-3.2-1B-Instruct-q4f16_1-MLC`           | ~0.8 GB      |
+| small  | `gemma-2-2b-it-q4f16_1-MLC`                   | ~1.6 GB      |
 | medium | `Phi-3.5-mini-instruct-q4f16_1-MLC` (default) | ~2.3 GB      |
 
 **Safeguards baked into the pipeline.**
@@ -187,10 +187,12 @@ TaskDraftForCreation[] -> review modal -> user confirms -> backend
 **Stage 1 — LLM extraction.** The model is prompted to output **tagged fragments**, not finished tasks. It returns a flat list of `LlmItemExtraction` items with a `kind` taxonomy (`requirement`, `spec`, `decision`, `date`, `assignee`, `context`), plus the header attributes (`taskTitle`, `taskAssigneeHint`, `taskDueDate`, `taskPriority`). This is deliberate: a 1B–3B parameter quantized model is much more reliable when it just classifies and lifts pieces of information than when it has to decide on its own how many tasks to create.
 
 **Stage 1b — Fallback parser.** When the LLM is unavailable, a deterministic parser produces the same `LlmItemExtraction` shape, so the rest of the pipeline does not care which path produced the items. It has two scanning modes:
+
 - **Structured mode** — handles transcripts with `**Speaker:** Tarea: **<title>**` markers, bold formatting, and bullet lists.
 - **Natural mode** — handles free-form transcripts: detects titles from imperative verbs (`Desarrollar`, `Implementar`, `Migrar`, ...), block boundaries from ordinal markers (`Primera tarea`, `Segunda tarea`, ...), assignees from phrases like `voy a asignar esta tarea a X` or `me encargo`, dates from lines mentioning `fecha límite` / `deadline`, and specs from lines containing `endpoint` / `api` / `cada N minutos`.
 
 **Stage 2 — Consolidator.** Receives the `LlmItemExtraction` and produces `TaskDraftForCreation[]` ready for the review modal:
+
 1. **Cleanup** — strips transcript artifacts (`we need to`, `hay que`, `please`, `action item`, etc.).
 2. **Deduplication** — drops items with the same `(kind, normalized text)` pair.
 3. **Block splitting** — if `block_start` items are present, the list is sliced at each marker; the header attributes come from the `block_start` item.
@@ -199,6 +201,7 @@ TaskDraftForCreation[] -> review modal -> user confirms -> backend
 6. **Truncation** — description is hard-capped at 8000 characters to stay within the backend's description limit.
 
 **Assignment logic.** Resolved in this order:
+
 1. Match `assigneeHint` (or `block_start.assigneeHint`) against project members by **email first**, then by **display name**.
 2. If no match is found, assign to the **project owner**.
 3. If the transcript does not mention any person, use the same owner fallback.
@@ -206,6 +209,7 @@ TaskDraftForCreation[] -> review modal -> user confirms -> backend
 This keeps the workflow deterministic even when the transcript is ambiguous.
 
 **Dates and priorities.**
+
 - Dates are normalized to `YYYY-MM-DD`. The fallback parser uses a Spanish natural date parser and infers the year from the meeting date in the header.
 - Only the **official final deadline** becomes `dueDate`; intermediate dates (`primera versión el 13 de junio`, etc.) go into the `Hitos:` section of the description.
 - Priorities are normalized into the existing task enum: `Low`, `Medium`, `High`, `Critical`. If priority is not clear, the consolidator defaults to `Medium`.
@@ -214,11 +218,13 @@ This keeps the workflow deterministic even when the transcript is ambiguous.
 **Confidence score.** A quality indicator on each draft. LLM-produced drafts get a higher confidence than fallback-produced ones. It does not block creation, but it helps the reviewer understand how certain the extraction was.
 
 **Review and cleanup.**
+
 - The modal keeps draft tasks available while the user performs consecutive extractions, so new transcript results are appended to the current review set.
 - When the modal is closed, the transcript, logs, and draft state are cleared.
 - The process log can be expanded or collapsed and shows model loading, parsing, fallback, and creation events.
 
 **Debug logs.** Two `console.log` entries are emitted:
+
 - `[AI DEBUG] Raw LLM extraction` — the exact JSON the model returned.
 - `[AI DEBUG] Consolidated drafts` — the list of `TaskDraftForCreation` produced by the consolidator.
 
@@ -231,17 +237,17 @@ When the LLM is unavailable and the fallback parser is used, only the second log
 
 ## Scripts
 
-| Command              | What it does                              |
-| -------------------- | ----------------------------------------- |
-| `npm run dev`        | Start the Vite dev server                 |
-| `npm run build`      | Type-check (`tsc -b`) and build           |
-| `npm run preview`    | Serve the local production build          |
-| `npm run test`       | Run the Vitest suite                      |
-| `npm run lint`       | Run ESLint                                |
-| `npm run lint:fix`   | Auto-fix lint issues                      |
-| `npm run typecheck`  | TypeScript-only check                     |
-| `npm run format`     | Format with Prettier                      |
-| `npm run format:check` | Verify Prettier formatting             |
+| Command                | What it does                     |
+| ---------------------- | -------------------------------- |
+| `npm run dev`          | Start the Vite dev server        |
+| `npm run build`        | Type-check (`tsc -b`) and build  |
+| `npm run preview`      | Serve the local production build |
+| `npm run test`         | Run the Vitest suite             |
+| `npm run lint`         | Run ESLint                       |
+| `npm run lint:fix`     | Auto-fix lint issues             |
+| `npm run typecheck`    | TypeScript-only check            |
+| `npm run format`       | Format with Prettier             |
+| `npm run format:check` | Verify Prettier formatting       |
 
 ## Deployment (Vercel)
 
