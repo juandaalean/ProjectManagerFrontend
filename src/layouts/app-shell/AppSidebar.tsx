@@ -95,7 +95,13 @@ export function AppSidebar() {
         className="flex min-h-full w-80 flex-col bg-base-100 p-2 shadow-xl lg:p-4"
         title="Project Manager"
       >
-        <div className="rounded-box bg-base-200 p-3 w-full flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => navigate('/projects')}
+          className="cursor-pointer rounded-box bg-base-200 p-3 w-full flex items-start gap-3 text-left transition-colors hover:bg-base-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          title="Go to projects"
+          aria-label="Go to projects"
+        >
           <div
             className="w-10 h-10 rounded-md bg-primary text-primary-content grid place-items-center font-semibold"
             title="Project Manager"
@@ -112,7 +118,7 @@ export function AppSidebar() {
               Navigation prepared for projects, tasks and future sections.
             </p> */}
           </div>
-        </div>
+        </button>
 
         {/* Main navigation */}
         <ul className="menu mt-4 rounded-box bg-base-100 p-1 w-full">

@@ -42,20 +42,20 @@ export function AppNavbar({ theme, onToggleTheme }: Props) {
           </svg>
         </label>
 
-        <button
-          type="button"
-          className="btn btn-ghost text-xl normal-case"
-          onClick={() => navigate('/projects')}
-        >
-          Project Manager
-        </button>
+        {/* Project title moved here from the previous brand button */}
+        {project && (
+          <span
+            className="truncate text-lg font-semibold text-base-content"
+            title={project.name}
+          >
+            {project.name}
+          </span>
+        )}
 
         {/* Collapse control moved into the sidebar for better UX */}
       </div>
 
-      <div className="navbar-center hidden lg:flex">
-        {project && <span className="text-lg font-semibold">{project.name}</span>}
-      </div>
+      <div className="navbar-center hidden lg:flex" aria-hidden="true" />
 
       <div className="navbar-end gap-2">
         <div className="flex items-center gap-2">

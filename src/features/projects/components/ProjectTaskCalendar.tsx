@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProjectQuery } from '../hooks/useProjectsQuery'
 import { useAuth } from '../../auth/context/AuthContext'
@@ -6,13 +6,30 @@ import type { TaskItem } from '../../tasks/types/task.types'
 import { useProjectMembersQuery } from '../hooks/useProjectMembersQuery'
 import { TaskFormModal } from '../../tasks/components/TaskFormModal'
 import { canCreateTask, getMemberRoleForUser } from '../utils/projectPermissions'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 
 interface ProjectTaskCalendarProps {
   projectId: string
   tasks: TaskItem[]
 }
 
+const monthLabels = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
+const currentYear = new Date().getFullYear()
+const yearOptions = Array.from({ length: 21 }, (_, index) => currentYear - 10 + index)
 const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const toLocalDate = (value: string) => new Date(value)
@@ -45,6 +62,9 @@ const addDays = (date: Date, days: number) => {
 const addMonths = (date: Date, months: number) =>
   new Date(date.getFullYear(), date.getMonth() + months, 1)
 
+const daysInMonth = (year: number, monthIndex: number) =>
+  new Date(year, monthIndex + 1, 0).getDate()
+
 const normalizeEventDate = (task: TaskItem) => {
   const rawDate = task.completedAt ?? task.createdAt
   const date = toLocalDate(rawDate)
@@ -59,6 +79,9 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   const navigate = useNavigate()
   const [viewDate, setViewDate] = useState(() => new Date())
   const [createTaskDate, setCreateTaskDate] = useState<string | null>(null)
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false)
+  const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear())
+  const monthPickerRef = useRef<HTMLDivElement | null>(null)
   const { data: projectMembers = [] } = useProjectMembersQuery(projectId)
 
   const calendarDays = useMemo(() => {
@@ -100,8 +123,52 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
   )
   const previousMonth = () => setViewDate((current) => addMonths(current, -1))
   const nextMonth = () => setViewDate((current) => addMonths(current, 1))
-  const goToToday = () => setViewDate(new Date())
   const closeCreateTaskModal = () => setCreateTaskDate(null)
+
+  const toggleMonthPicker = () => {
+    setIsMonthPickerOpen((open) => {
+      if (!open) {
+        setPickerYear(viewDate.getFullYear())
+      }
+      return !open
+    })
+  }
+
+  const selectMonth = (monthIndex: number) => {
+    const safeDay = Math.min(viewDate.getDate(), daysInMonth(pickerYear, monthIndex))
+    setViewDate(new Date(pickerYear, monthIndex, safeDay))
+    setIsMonthPickerOpen(false)
+  }
+
+  useEffect(() => {
+    if (!isMonthPickerOpen) {
+      return
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (monthPickerRef.current && !monthPickerRef.current.contains(event.target as Node)) {
+        setIsMonthPickerOpen(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMonthPickerOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isMonthPickerOpen])
+
+  const isCurrentMonth = useMemo(() => {
+    const today = new Date()
+    return viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() === today.getMonth()
+  }, [viewDate])
 
   const { data: project } = useProjectQuery(projectId)
   const { user } = useAuth()
@@ -143,14 +210,110 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <button className="btn btn-ghost btn-sm" onClick={previousMonth} type="button">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={previousMonth}
+            type="button"
+            aria-label="Previous month"
+          >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={goToToday} type="button">
-            Today
-          </button>
-          <button className="btn btn-ghost btn-sm" onClick={nextMonth} type="button">
+
+          <div ref={monthPickerRef} className="relative">
+            <button
+              className={`btn btn-sm gap-2 normal-case font-medium ${isCurrentMonth ? 'btn-primary text-primary-content' : 'btn-outline'}`}
+              onClick={toggleMonthPicker}
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={isMonthPickerOpen}
+            >
+              <CalendarDays className="w-4 h-4" />
+              <span>{formatMonth(selectedMonth)}</span>
+            </button>
+
+            {isMonthPickerOpen && (
+              <div
+                role="dialog"
+                aria-label="Jump to month"
+                className="absolute right-0 z-30 mt-2 w-72 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-xl"
+              >
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-xs"
+                    onClick={() => setPickerYear((year) => year - 1)}
+                    aria-label="Previous year"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-base-content/60" />
+                    <select
+                      className="select select-bordered select-sm w-28"
+                      value={pickerYear}
+                      onChange={(event) => setPickerYear(Number(event.target.value))}
+                      aria-label="Select year"
+                    >
+                      {yearOptions.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-xs"
+                    onClick={() => setPickerYear((year) => year + 1)}
+                    aria-label="Next year"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {monthLabels.map((label, monthIndex) => {
+                    const isActive =
+                      viewDate.getFullYear() === pickerYear && viewDate.getMonth() === monthIndex
+                    return (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => selectMonth(monthIndex)}
+                        className={`btn btn-sm normal-case ${isActive ? 'btn-primary text-primary-content' : 'btn-ghost'}`}
+                      >
+                        {label.slice(0, 3)}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-3 flex items-center justify-between border-t border-base-300 pt-3">
+                  <span className="text-xs text-base-content/60">Quick jump</span>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-xs"
+                    onClick={() => {
+                      const today = new Date()
+                      setPickerYear(today.getFullYear())
+                      setViewDate(today)
+                      setIsMonthPickerOpen(false)
+                    }}
+                  >
+                    Go to today
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={nextMonth}
+            type="button"
+            aria-label="Next month"
+          >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
