@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { useParams } from 'react-router-dom'
+import { ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
 import { useTaskQuery } from '../hooks/useTasksQuery'
@@ -100,18 +101,29 @@ export function TaskDetailPage() {
           <div className="badge badge-secondary badge-outline mb-3">Task detail</div>
           <h1 className="text-3xl font-bold tracking-tight">{task.title}</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {canToggle && (
             <Button
               variant="secondary"
               onClick={handleToggleState}
               disabled={updateMutation.isPending}
+              aria-label={task.state === 'Active' ? 'Mark as finished' : 'Mark as active'}
+              title={task.state === 'Active' ? 'Mark as finished' : 'Mark as active'}
             >
-              {task.state === 'Active' ? 'Mark Finished' : 'Mark Active'}
+              {task.state === 'Active' ? (
+                <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+              ) : (
+                <RotateCcw className="h-5 w-5" aria-hidden="true" />
+              )}
             </Button>
           )}
-          <Button variant="secondary" onClick={() => window.history.back()}>
-            Back
+          <Button
+            variant="secondary"
+            onClick={() => window.history.back()}
+            aria-label="Go back"
+            title="Go back"
+          >
+            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
       </div>

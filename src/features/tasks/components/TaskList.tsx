@@ -9,7 +9,7 @@ import { useProjectQuery } from '../../projects/hooks/useProjectsQuery'
 import { useProjectMembersQuery } from '../../projects/hooks/useProjectMembersQuery'
 import { getTaskPriorityBadgeClassName, getTaskStateBadgeClassName } from '../utils/taskBadge'
 import { useAuth } from '../../auth/context/AuthContext'
-import { EllipsisVertical, CalendarRange, Check, RotateCcw, Ban } from 'lucide-react'
+import { EllipsisVertical, CalendarRange, CheckCircle2, RotateCcw, Ban } from 'lucide-react'
 import {
   canManageProject,
   canToggleTaskState,
@@ -179,7 +179,7 @@ export function TaskList({ tasks, projectId }: TaskListProps) {
                     }}
                   >
                     {task.state === 'Active' ? (
-                      <Check className="h-4 w-4" />
+                      <CheckCircle2 className="h-4 w-4" />
                     ) : (
                       <RotateCcw className="h-4 w-4" />
                     )}
