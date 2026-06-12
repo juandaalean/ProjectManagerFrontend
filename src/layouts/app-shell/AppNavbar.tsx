@@ -44,10 +44,7 @@ export function AppNavbar({ theme, onToggleTheme }: Props) {
 
         {/* Project title moved here from the previous brand button */}
         {project && (
-          <span
-            className="truncate text-lg font-semibold text-base-content"
-            title={project.name}
-          >
+          <span className="truncate text-lg font-semibold text-base-content" title={project.name}>
             {project.name}
           </span>
         )}

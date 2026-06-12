@@ -167,7 +167,9 @@ export function ProjectTaskCalendar({ projectId, tasks }: ProjectTaskCalendarPro
 
   const isCurrentMonth = useMemo(() => {
     const today = new Date()
-    return viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() === today.getMonth()
+    return (
+      viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() === today.getMonth()
+    )
   }, [viewDate])
 
   const { data: project } = useProjectQuery(projectId)
